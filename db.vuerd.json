@@ -1,0 +1,1643 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dineug/erd-editor/main/json-schema/schema.json",
+  "version": "3.0.0",
+  "settings": {
+    "width": 2000,
+    "height": 2000,
+    "scrollTop": -150.5148,
+    "scrollLeft": 0,
+    "zoomLevel": 1,
+    "show": 431,
+    "database": 4,
+    "databaseName": "boardbuddy",
+    "canvasType": "ERD",
+    "language": 1,
+    "tableNameCase": 4,
+    "columnNameCase": 2,
+    "bracketType": 1,
+    "relationshipDataTypeSync": true,
+    "relationshipOptimization": false,
+    "columnOrder": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "maxWidthComment": -1,
+    "ignoreSaveSettings": 0
+  },
+  "doc": {
+    "tableIds": [
+      "77-5zGyjQf6rUp8E5vSI6",
+      "pHZlvQnNwFguOXTbXWwMV",
+      "2xGu6p7RE0LQprncyAxs6",
+      "season-room-table",
+      "room-schedule-table",
+      "reservation-table",
+      "season-ticket-table"
+    ],
+    "relationshipIds": [
+      "bmp6b95zQJ8r6aMAEYbAL",
+      "season-room-club-rel",
+      "room-schedule-season-room-rel",
+      "reservation-member-rel",
+      "reservation-room-schedule-rel",
+      "season-ticket-club-rel"
+    ],
+    "indexIds": [],
+    "memoIds": []
+  },
+  "collections": {
+    "tableEntities": {
+      "77-5zGyjQf6rUp8E5vSI6": {
+        "id": "77-5zGyjQf6rUp8E5vSI6",
+        "name": "Member",
+        "comment": "사용자",
+        "columnIds": [
+          "lJL1FDWcK829nnW-QWguj",
+          "6wjYTwoLfelIIB-Z2Rf9m",
+          "oAtQWFGdibeNjLcUjY5yJ",
+          "b_6MAg3dWwYEgghpDZ8f5",
+          "tHIlR370aX98UemETrw-2"
+        ],
+        "seqColumnIds": [
+          "lJL1FDWcK829nnW-QWguj",
+          "TdBs5bC-XqDduoZEzOGi1",
+          "6wjYTwoLfelIIB-Z2Rf9m",
+          "oAtQWFGdibeNjLcUjY5yJ",
+          "b_6MAg3dWwYEgghpDZ8f5",
+          "tHIlR370aX98UemETrw-2"
+        ],
+        "ui": {
+          "x": 954,
+          "y": 437,
+          "zIndex": 2,
+          "widthName": 60,
+          "widthComment": 60,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1743594428110,
+          "createAt": 1743588465605
+        }
+      },
+      "pHZlvQnNwFguOXTbXWwMV": {
+        "id": "pHZlvQnNwFguOXTbXWwMV",
+        "name": "Club",
+        "comment": "대학교 동아리",
+        "columnIds": [
+          "7w_0ilX5Ne2MQdoWxw9nQ",
+          "yIFQ4aoxvNn14_QOHbqu8",
+          "xIIl0AWEVYkaaGUTfyLsQ",
+          "VVqoLAn8XpS24YE-KoOPF"
+        ],
+        "seqColumnIds": [
+          "7w_0ilX5Ne2MQdoWxw9nQ",
+          "yIFQ4aoxvNn14_QOHbqu8",
+          "xIIl0AWEVYkaaGUTfyLsQ",
+          "VVqoLAn8XpS24YE-KoOPF"
+        ],
+        "ui": {
+          "x": 510,
+          "y": 177.871,
+          "zIndex": 66,
+          "widthName": 60,
+          "widthComment": 68,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1743590016282,
+          "createAt": 1743588788741
+        }
+      },
+      "2xGu6p7RE0LQprncyAxs6": {
+        "id": "2xGu6p7RE0LQprncyAxs6",
+        "name": "Role",
+        "comment": "권한 등급",
+        "columnIds": [
+          "role-id",
+          "role-name",
+          "role-description"
+        ],
+        "seqColumnIds": [
+          "role-id",
+          "role-name",
+          "role-description"
+        ],
+        "ui": {
+          "x": 1058,
+          "y": 241,
+          "zIndex": 78,
+          "widthName": 60,
+          "widthComment": 60,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1743595011240,
+          "createAt": 1743588830987
+        }
+      },
+      "season-room-table": {
+        "id": "season-room-table",
+        "name": "SeasonRoom",
+        "comment": "시즌방",
+        "columnIds": [
+          "season-room-id",
+          "season-room-club-id",
+          "season-room-name",
+          "season-room-capacity",
+          "season-room-start-date",
+          "season-room-end-date"
+        ],
+        "seqColumnIds": [
+          "season-room-id",
+          "season-room-club-id",
+          "season-room-name",
+          "season-room-capacity",
+          "season-room-start-date",
+          "season-room-end-date"
+        ],
+        "ui": {
+          "x": 111,
+          "y": 433,
+          "zIndex": 2,
+          "widthName": 76,
+          "widthComment": 60,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1743591180678,
+          "createAt": 1743589984141
+        }
+      },
+      "room-schedule-table": {
+        "id": "room-schedule-table",
+        "name": "RoomSchedule",
+        "comment": "시즌방 스케줄",
+        "columnIds": [
+          "room-schedule-id",
+          "room-schedule-season-room-id",
+          "room-schedule-day-of-week",
+          "room-schedule-start-time",
+          "room-schedule-end-time"
+        ],
+        "seqColumnIds": [
+          "room-schedule-id",
+          "room-schedule-season-room-id",
+          "room-schedule-day-of-week",
+          "room-schedule-start-time",
+          "room-schedule-end-time"
+        ],
+        "ui": {
+          "x": 93,
+          "y": 794,
+          "zIndex": 2,
+          "widthName": 87,
+          "widthComment": 68,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1743591184142,
+          "createAt": 1743589984141
+        }
+      },
+      "reservation-table": {
+        "id": "reservation-table",
+        "name": "Reservation",
+        "comment": "예약",
+        "columnIds": [
+          "reservation-id",
+          "reservation-member-id",
+          "reservation-room-schedule-id",
+          "reservation-date",
+          "reservation-status"
+        ],
+        "seqColumnIds": [
+          "reservation-id",
+          "reservation-member-id",
+          "reservation-room-schedule-id",
+          "reservation-date",
+          "reservation-status"
+        ],
+        "ui": {
+          "x": 670,
+          "y": 793,
+          "zIndex": 2,
+          "widthName": 69,
+          "widthComment": 60,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1743592050579,
+          "createAt": 1743589984141
+        }
+      },
+      "season-ticket-table": {
+        "id": "season-ticket-table",
+        "name": "SeasonTicket",
+        "comment": "시즌 숙박권",
+        "columnIds": [
+          "season-ticket-id",
+          "season-ticket-club-id",
+          "season-ticket-name",
+          "season-ticket-nights",
+          "season-ticket-price",
+          "season-ticket-description"
+        ],
+        "seqColumnIds": [
+          "season-ticket-id",
+          "season-ticket-club-id",
+          "season-ticket-name",
+          "season-ticket-nights",
+          "season-ticket-price",
+          "season-ticket-description"
+        ],
+        "ui": {
+          "x": 510,
+          "y": 429,
+          "zIndex": 2,
+          "widthName": 77,
+          "widthComment": 60,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1743591396810,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-table": {
+        "id": "payment-table",
+        "name": "Payment",
+        "comment": "결제",
+        "columnIds": [
+          "payment-id",
+          "payment-reservation-id",
+          "payment-season-ticket-id",
+          "payment-amount",
+          "payment-status",
+          "payment-method",
+          "payment-date",
+          "payment-confirmed-by",
+          "payment-confirmed-at"
+        ],
+        "seqColumnIds": [
+          "payment-id",
+          "payment-reservation-id",
+          "payment-season-ticket-id",
+          "payment-amount",
+          "payment-status",
+          "payment-method",
+          "payment-date",
+          "payment-confirmed-by",
+          "payment-confirmed-at"
+        ],
+        "ui": {
+          "x": 1359,
+          "y": 462,
+          "zIndex": 2,
+          "widthName": 60,
+          "widthComment": 60,
+          "color": ""
+        },
+        "meta": {
+          "updateAt": 1743592126643,
+          "createAt": 1743590700000
+        }
+      }
+    },
+    "tableColumnEntities": {
+      "lJL1FDWcK829nnW-QWguj": {
+        "id": "lJL1FDWcK829nnW-QWguj",
+        "tableId": "77-5zGyjQf6rUp8E5vSI6",
+        "name": "id",
+        "comment": "아이디",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 10,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589417501,
+          "createAt": 1743588479603
+        }
+      },
+      "TdBs5bC-XqDduoZEzOGi1": {
+        "id": "TdBs5bC-XqDduoZEzOGi1",
+        "tableId": "77-5zGyjQf6rUp8E5vSI6",
+        "name": "univ_id",
+        "comment": "소속 대학",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589477226,
+          "createAt": 1743588599521
+        }
+      },
+      "6wjYTwoLfelIIB-Z2Rf9m": {
+        "id": "6wjYTwoLfelIIB-Z2Rf9m",
+        "tableId": "77-5zGyjQf6rUp8E5vSI6",
+        "name": "nickname",
+        "comment": "닉네임",
+        "dataType": "text",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743588685619,
+          "createAt": 1743588648959
+        }
+      },
+      "oAtQWFGdibeNjLcUjY5yJ": {
+        "id": "oAtQWFGdibeNjLcUjY5yJ",
+        "tableId": "77-5zGyjQf6rUp8E5vSI6",
+        "name": "name",
+        "comment": "이름",
+        "dataType": "text",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743588719894,
+          "createAt": 1743588688573
+        }
+      },
+      "b_6MAg3dWwYEgghpDZ8f5": {
+        "id": "b_6MAg3dWwYEgghpDZ8f5",
+        "tableId": "77-5zGyjQf6rUp8E5vSI6",
+        "name": "role",
+        "comment": "권한 등급",
+        "dataType": "TEXT",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743588784778,
+          "createAt": 1743588737264
+        }
+      },
+      "7w_0ilX5Ne2MQdoWxw9nQ": {
+        "id": "7w_0ilX5Ne2MQdoWxw9nQ",
+        "tableId": "pHZlvQnNwFguOXTbXWwMV",
+        "name": "id",
+        "comment": "대학교 아이디",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 10,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 68,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589427755,
+          "createAt": 1743588860741
+        }
+      },
+      "yIFQ4aoxvNn14_QOHbqu8": {
+        "id": "yIFQ4aoxvNn14_QOHbqu8",
+        "tableId": "pHZlvQnNwFguOXTbXWwMV",
+        "name": "name",
+        "comment": "학교명",
+        "dataType": "text",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743588967245,
+          "createAt": 1743588908220
+        }
+      },
+      "xIIl0AWEVYkaaGUTfyLsQ": {
+        "id": "xIIl0AWEVYkaaGUTfyLsQ",
+        "tableId": "pHZlvQnNwFguOXTbXWwMV",
+        "name": "club_name",
+        "comment": "동아리명",
+        "dataType": "text",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 64,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743588962119,
+          "createAt": 1743588927511
+        }
+      },
+      "tHIlR370aX98UemETrw-2": {
+        "id": "tHIlR370aX98UemETrw-2",
+        "tableId": "77-5zGyjQf6rUp8E5vSI6",
+        "name": "univ_id",
+        "comment": "대학교 아이디",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 2,
+          "widthName": 60,
+          "widthComment": 68,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589485739,
+          "createAt": 1743589069323
+        }
+      },
+      "role-id": {
+        "id": "role-id",
+        "tableId": "2xGu6p7RE0LQprncyAxs6",
+        "name": "id",
+        "comment": "권한 ID",
+        "dataType": "varchar(20)",
+        "default": "",
+        "options": 10,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 68,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "role-name": {
+        "id": "role-name",
+        "tableId": "2xGu6p7RE0LQprncyAxs6",
+        "name": "name",
+        "comment": "권한명",
+        "dataType": "varchar(50)",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 68,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "role-description": {
+        "id": "role-description",
+        "tableId": "2xGu6p7RE0LQprncyAxs6",
+        "name": "description",
+        "comment": "권한 설명",
+        "dataType": "text",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 65,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "VVqoLAn8XpS24YE-KoOPF": {
+        "id": "VVqoLAn8XpS24YE-KoOPF",
+        "tableId": "pHZlvQnNwFguOXTbXWwMV",
+        "name": "",
+        "comment": "",
+        "dataType": "",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589506016,
+          "createAt": 1743589506016
+        }
+      },
+      "season-room-id": {
+        "id": "season-room-id",
+        "tableId": "season-room-table",
+        "name": "id",
+        "comment": "시즌방 아이디",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 10,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 68,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "season-room-club-id": {
+        "id": "season-room-club-id",
+        "tableId": "season-room-table",
+        "name": "club_id",
+        "comment": "동아리 아이디",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 2,
+          "widthName": 60,
+          "widthComment": 68,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "season-room-name": {
+        "id": "season-room-name",
+        "tableId": "season-room-table",
+        "name": "name",
+        "comment": "시즌방 이름",
+        "dataType": "text",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "season-room-capacity": {
+        "id": "season-room-capacity",
+        "tableId": "season-room-table",
+        "name": "capacity",
+        "comment": "수용 인원",
+        "dataType": "integer",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "season-room-start-date": {
+        "id": "season-room-start-date",
+        "tableId": "season-room-table",
+        "name": "start_date",
+        "comment": "시즌 시작일",
+        "dataType": "date",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "season-room-end-date": {
+        "id": "season-room-end-date",
+        "tableId": "season-room-table",
+        "name": "end_date",
+        "comment": "시즌 종료일",
+        "dataType": "date",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "room-schedule-id": {
+        "id": "room-schedule-id",
+        "tableId": "room-schedule-table",
+        "name": "id",
+        "comment": "스케줄 아이디",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 10,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 68,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "room-schedule-season-room-id": {
+        "id": "room-schedule-season-room-id",
+        "tableId": "room-schedule-table",
+        "name": "season_room_id",
+        "comment": "시즌방 아이디",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 2,
+          "widthName": 95,
+          "widthComment": 68,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "room-schedule-day-of-week": {
+        "id": "room-schedule-day-of-week",
+        "tableId": "room-schedule-table",
+        "name": "day_of_week",
+        "comment": "요일",
+        "dataType": "integer",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 74,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "room-schedule-start-time": {
+        "id": "room-schedule-start-time",
+        "tableId": "room-schedule-table",
+        "name": "in_day",
+        "comment": "IN 날짜",
+        "dataType": "DATE",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743591538034,
+          "createAt": 1743589984141
+        }
+      },
+      "room-schedule-end-time": {
+        "id": "room-schedule-end-time",
+        "tableId": "room-schedule-table",
+        "name": "out_day",
+        "comment": "OUT 날짜",
+        "dataType": "DATE",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743591543335,
+          "createAt": 1743589984141
+        }
+      },
+      "reservation-id": {
+        "id": "reservation-id",
+        "tableId": "reservation-table",
+        "name": "id",
+        "comment": "예약 아이디",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 10,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "reservation-member-id": {
+        "id": "reservation-member-id",
+        "tableId": "reservation-table",
+        "name": "member_id",
+        "comment": "회원 아이디",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 2,
+          "widthName": 65,
+          "widthComment": 60,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "reservation-room-schedule-id": {
+        "id": "reservation-room-schedule-id",
+        "tableId": "reservation-table",
+        "name": "room_schedule_id",
+        "comment": "스케줄 아이디",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 2,
+          "widthName": 106,
+          "widthComment": 68,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "reservation-date": {
+        "id": "reservation-date",
+        "tableId": "reservation-table",
+        "name": "reservation_date",
+        "comment": "예약 날짜",
+        "dataType": "date",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 97,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "reservation-status": {
+        "id": "reservation-status",
+        "tableId": "reservation-table",
+        "name": "status",
+        "comment": "예약 상태",
+        "dataType": "varchar(20)",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 68,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "season-ticket-id": {
+        "id": "season-ticket-id",
+        "tableId": "season-ticket-table",
+        "name": "id",
+        "comment": "숙박권 ID",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 10,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "season-ticket-club-id": {
+        "id": "season-ticket-club-id",
+        "tableId": "season-ticket-table",
+        "name": "club_id",
+        "comment": "동아리 ID",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 2,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "season-ticket-name": {
+        "id": "season-ticket-name",
+        "tableId": "season-ticket-table",
+        "name": "name",
+        "comment": "숙박권 이름",
+        "dataType": "varchar(100)",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 74,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "season-ticket-nights": {
+        "id": "season-ticket-nights",
+        "tableId": "season-ticket-table",
+        "name": "nights",
+        "comment": "숙박 일수",
+        "dataType": "integer",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "season-ticket-price": {
+        "id": "season-ticket-price",
+        "tableId": "season-ticket-table",
+        "name": "price",
+        "comment": "가격",
+        "dataType": "integer",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "season-ticket-description": {
+        "id": "season-ticket-description",
+        "tableId": "season-ticket-table",
+        "name": "description",
+        "comment": "설명",
+        "dataType": "text",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 65,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-id": {
+        "id": "payment-id",
+        "tableId": "payment-table",
+        "name": "id",
+        "comment": "결제 ID",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 10,
+        "ui": {
+          "keys": 1,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-reservation-id": {
+        "id": "payment-reservation-id",
+        "tableId": "payment-table",
+        "name": "reservation_id",
+        "comment": "예약 ID",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 83,
+          "widthComment": 60,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-season-ticket-id": {
+        "id": "payment-season-ticket-id",
+        "tableId": "payment-table",
+        "name": "season_ticket_id",
+        "comment": "숙박권 ID",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 98,
+          "widthComment": 60,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-amount": {
+        "id": "payment-amount",
+        "tableId": "payment-table",
+        "name": "amount",
+        "comment": "결제 금액",
+        "dataType": "integer",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-status": {
+        "id": "payment-status",
+        "tableId": "payment-table",
+        "name": "status",
+        "comment": "결제 상태",
+        "dataType": "varchar(20)",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 68,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-method": {
+        "id": "payment-method",
+        "tableId": "payment-table",
+        "name": "method",
+        "comment": "결제 방법",
+        "dataType": "varchar(50)",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 60,
+          "widthDataType": 68,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-date": {
+        "id": "payment-date",
+        "tableId": "payment-table",
+        "name": "payment_date",
+        "comment": "결제일",
+        "dataType": "datetime",
+        "default": "",
+        "options": 8,
+        "ui": {
+          "keys": 0,
+          "widthName": 83,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-confirmed-by": {
+        "id": "payment-confirmed-by",
+        "tableId": "payment-table",
+        "name": "confirmed_by",
+        "comment": "승인자 ID",
+        "dataType": "LONGBLOB",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 80,
+          "widthComment": 60,
+          "widthDataType": 67,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-confirmed-at": {
+        "id": "payment-confirmed-at",
+        "tableId": "payment-table",
+        "name": "confirmed_at",
+        "comment": "승인일시",
+        "dataType": "datetime",
+        "default": "",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 77,
+          "widthComment": 60,
+          "widthDataType": 60,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      }
+    },
+    "relationshipEntities": {
+      "bmp6b95zQJ8r6aMAEYbAL": {
+        "id": "bmp6b95zQJ8r6aMAEYbAL",
+        "identification": false,
+        "relationshipType": 16,
+        "startRelationshipType": 2,
+        "start": {
+          "tableId": "pHZlvQnNwFguOXTbXWwMV",
+          "columnIds": [
+            "7w_0ilX5Ne2MQdoWxw9nQ"
+          ],
+          "x": 894,
+          "y": 253.871,
+          "direction": 2
+        },
+        "end": {
+          "tableId": "77-5zGyjQf6rUp8E5vSI6",
+          "columnIds": [
+            "tHIlR370aX98UemETrw-2"
+          ],
+          "x": 954,
+          "y": 525,
+          "direction": 1
+        },
+        "meta": {
+          "updateAt": 1743589069324,
+          "createAt": 1743589069324
+        }
+      },
+      "season-room-club-rel": {
+        "id": "season-room-club-rel",
+        "identification": false,
+        "relationshipType": 16,
+        "startRelationshipType": 2,
+        "start": {
+          "tableId": "pHZlvQnNwFguOXTbXWwMV",
+          "columnIds": [
+            "7w_0ilX5Ne2MQdoWxw9nQ"
+          ],
+          "x": 510,
+          "y": 253.871,
+          "direction": 1
+        },
+        "end": {
+          "tableId": "season-room-table",
+          "columnIds": [
+            "season-room-club-id"
+          ],
+          "x": 301,
+          "y": 433,
+          "direction": 4
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "room-schedule-season-room-rel": {
+        "id": "room-schedule-season-room-rel",
+        "identification": false,
+        "relationshipType": 16,
+        "startRelationshipType": 2,
+        "start": {
+          "tableId": "season-room-table",
+          "columnIds": [
+            "season-room-id"
+          ],
+          "x": 301,
+          "y": 633,
+          "direction": 8
+        },
+        "end": {
+          "tableId": "room-schedule-table",
+          "columnIds": [
+            "room-schedule-season-room-id"
+          ],
+          "x": 300.5,
+          "y": 794,
+          "direction": 4
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "reservation-member-rel": {
+        "id": "reservation-member-rel",
+        "identification": false,
+        "relationshipType": 16,
+        "startRelationshipType": 2,
+        "start": {
+          "tableId": "77-5zGyjQf6rUp8E5vSI6",
+          "columnIds": [
+            "lJL1FDWcK829nnW-QWguj"
+          ],
+          "x": 1144,
+          "y": 613,
+          "direction": 8
+        },
+        "end": {
+          "tableId": "reservation-table",
+          "columnIds": [
+            "reservation-member-id"
+          ],
+          "x": 1097,
+          "y": 881,
+          "direction": 2
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "reservation-room-schedule-rel": {
+        "id": "reservation-room-schedule-rel",
+        "identification": false,
+        "relationshipType": 16,
+        "startRelationshipType": 2,
+        "start": {
+          "tableId": "room-schedule-table",
+          "columnIds": [
+            "room-schedule-id"
+          ],
+          "x": 508,
+          "y": 882,
+          "direction": 2
+        },
+        "end": {
+          "tableId": "reservation-table",
+          "columnIds": [
+            "reservation-room-schedule-id"
+          ],
+          "x": 670,
+          "y": 881,
+          "direction": 1
+        },
+        "meta": {
+          "updateAt": 1743589984141,
+          "createAt": 1743589984141
+        }
+      },
+      "season-ticket-club-rel": {
+        "id": "season-ticket-club-rel",
+        "identification": false,
+        "relationshipType": 16,
+        "startRelationshipType": 2,
+        "start": {
+          "tableId": "pHZlvQnNwFguOXTbXWwMV",
+          "columnIds": [
+            "7w_0ilX5Ne2MQdoWxw9nQ"
+          ],
+          "x": 702,
+          "y": 329.871,
+          "direction": 8
+        },
+        "end": {
+          "tableId": "season-ticket-table",
+          "columnIds": [
+            "season-ticket-club-id"
+          ],
+          "x": 702,
+          "y": 429,
+          "direction": 4
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-reservation-rel": {
+        "id": "payment-reservation-rel",
+        "identification": false,
+        "relationshipType": 16,
+        "startRelationshipType": 2,
+        "start": {
+          "tableId": "reservation-table",
+          "columnIds": [
+            "reservation-id"
+          ],
+          "x": 1097,
+          "y": 925,
+          "direction": 2
+        },
+        "end": {
+          "tableId": "payment-table",
+          "columnIds": [
+            "payment-reservation-id"
+          ],
+          "x": 1359,
+          "y": 666,
+          "direction": 1
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-season-ticket-rel": {
+        "id": "payment-season-ticket-rel",
+        "identification": false,
+        "relationshipType": 16,
+        "startRelationshipType": 2,
+        "start": {
+          "tableId": "season-ticket-table",
+          "columnIds": [
+            "season-ticket-id"
+          ],
+          "x": 894,
+          "y": 529,
+          "direction": 2
+        },
+        "end": {
+          "tableId": "payment-table",
+          "columnIds": [
+            "payment-season-ticket-id"
+          ],
+          "x": 1359,
+          "y": 530,
+          "direction": 1
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      },
+      "payment-member-rel": {
+        "id": "payment-member-rel",
+        "identification": false,
+        "relationshipType": 16,
+        "startRelationshipType": 1,
+        "start": {
+          "tableId": "77-5zGyjQf6rUp8E5vSI6",
+          "columnIds": [
+            "lJL1FDWcK829nnW-QWguj"
+          ],
+          "x": 1450,
+          "y": 254,
+          "direction": 2
+        },
+        "end": {
+          "tableId": "payment-table",
+          "columnIds": [
+            "payment-confirmed-by"
+          ],
+          "x": 1564.5,
+          "y": 462,
+          "direction": 4
+        },
+        "meta": {
+          "updateAt": 1743590700000,
+          "createAt": 1743590700000
+        }
+      }
+    },
+    "indexEntities": {},
+    "indexColumnEntities": {},
+    "memoEntities": {}
+  },
+  "lww": {
+    "settings.databaseName": [
+      "settings",
+      -1,
+      -1,
+      {
+        "databaseName": 1743592443971
+      }
+    ],
+    "77-5zGyjQf6rUp8E5vSI6": [
+      "tableEntities",
+      1743588465603,
+      -1,
+      {
+        "name": 1743588809990,
+        "comment": 1743588529921
+      }
+    ],
+    "lJL1FDWcK829nnW-QWguj": [
+      "tableColumnEntities",
+      1743588479601,
+      -1,
+      {
+        "name": 1743589417501,
+        "dataType": 1743588588155,
+        "comment": 1743588645196,
+        "options(primaryKey)": 1743588713443
+      }
+    ],
+    "TdBs5bC-XqDduoZEzOGi1": [
+      "tableColumnEntities",
+      1743588599518,
+      1743589497485,
+      {
+        "name": 1743589477225,
+        "dataType": 1743588631467,
+        "comment": 1743588639191
+      }
+    ],
+    "6wjYTwoLfelIIB-Z2Rf9m": [
+      "tableColumnEntities",
+      1743588648957,
+      -1,
+      {
+        "name": 1743588656620,
+        "dataType": 1743588665671,
+        "comment": 1743588685618
+      }
+    ],
+    "oAtQWFGdibeNjLcUjY5yJ": [
+      "tableColumnEntities",
+      1743588688571,
+      -1,
+      {
+        "name": 1743588695632,
+        "dataType": 1743588698427,
+        "comment": 1743588706545,
+        "options(notNull)": 1743588719893
+      }
+    ],
+    "b_6MAg3dWwYEgghpDZ8f5": [
+      "tableColumnEntities",
+      1743588737261,
+      -1,
+      {
+        "name": 1743588745030,
+        "dataType": 1743588764787,
+        "options(notNull)": 1743588768371,
+        "comment": 1743588784777
+      }
+    ],
+    "pHZlvQnNwFguOXTbXWwMV": [
+      "tableEntities",
+      1743588788738,
+      -1,
+      {
+        "name": 1743589460588,
+        "comment": 1743588822028
+      }
+    ],
+    "2xGu6p7RE0LQprncyAxs6": [
+      "tableEntities",
+      1743588830982,
+      -1,
+      {
+        "name": 1743588844192,
+        "comment": 1743588847634
+      }
+    ],
+    "7w_0ilX5Ne2MQdoWxw9nQ": [
+      "tableColumnEntities",
+      1743588860738,
+      -1,
+      {
+        "name": 1743589427754,
+        "dataType": 1743588870609,
+        "options(notNull)": 1743588871808,
+        "comment": 1743588884748,
+        "options(primaryKey)": 1743588982835
+      }
+    ],
+    "yIFQ4aoxvNn14_QOHbqu8": [
+      "tableColumnEntities",
+      1743588908219,
+      -1,
+      {
+        "name": 1743588913766,
+        "dataType": 1743588915747,
+        "options(notNull)": 1743588918098,
+        "comment": 1743588967244
+      }
+    ],
+    "xIIl0AWEVYkaaGUTfyLsQ": [
+      "tableColumnEntities",
+      1743588927510,
+      -1,
+      {
+        "name": 1743588933094,
+        "dataType": 1743588947877,
+        "options(notNull)": 1743588954266,
+        "comment": 1743588962118
+      }
+    ],
+    "tHIlR370aX98UemETrw-2": [
+      "tableColumnEntities",
+      1743589069321,
+      -1,
+      {
+        "options(notNull)": 1743589069321,
+        "name": 1743589485739,
+        "dataType": 1743589069321,
+        "default": 1743589069321,
+        "comment": 1743589069321
+      }
+    ],
+    "bmp6b95zQJ8r6aMAEYbAL": [
+      "relationshipEntities",
+      1743589069321,
+      -1,
+      {}
+    ],
+    "VVqoLAn8XpS24YE-KoOPF": [
+      "tableColumnEntities",
+      1743589506015,
+      -1,
+      {}
+    ],
+    "room-schedule-start-time": [
+      "tableColumnEntities",
+      -1,
+      -1,
+      {
+        "name": 1743591538033,
+        "dataType": 1743591481551,
+        "comment": 1743591511688
+      }
+    ],
+    "room-schedule-end-time": [
+      "tableColumnEntities",
+      -1,
+      -1,
+      {
+        "name": 1743591543335,
+        "dataType": 1743591489752,
+        "comment": 1743591518761
+      }
+    ],
+    "payment-reservation-rel": [
+      "relationshipEntities",
+      -1,
+      1743594411871,
+      {}
+    ],
+    "payment-season-ticket-rel": [
+      "relationshipEntities",
+      -1,
+      1743594411871,
+      {}
+    ],
+    "payment-member-rel": [
+      "relationshipEntities",
+      -1,
+      1743594411871,
+      {}
+    ],
+    "payment-table": [
+      "tableEntities",
+      -1,
+      1743594411871,
+      {}
+    ]
+  }
+}
