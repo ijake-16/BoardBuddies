@@ -1,0 +1,227 @@
+{
+  "info": {
+    "name": "BoardBuddies API",
+    "description": "BoardBuddies 소셜 로그인 API 테스트 컬렉션",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/test/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "test", "health"]
+        }
+      }
+    },
+    {
+      "name": "소셜 로그인 - 카카오",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{kakao_access_token}}",
+            "description": "카카오 액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/auth/social/kakao",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "auth", "social", "kakao"]
+        }
+      }
+    },
+    {
+      "name": "소셜 로그인 - 네이버",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{naver_access_token}}",
+            "description": "네이버 액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/auth/social/naver",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "auth", "social", "naver"]
+        }
+      }
+    },
+    {
+      "name": "회원가입 완료 (추가 정보 입력)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{temp_access_token}}",
+            "description": "소셜 로그인 후 받은 임시 토큰"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"홍길동\",\n  \"birthDate\": \"2000-01-01\",\n  \"school\": \"서울대학교\",\n  \"studentId\": \"2020123456\",\n  \"gender\": \"MALE\",\n  \"phoneNumber\": \"010-1234-5678\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/auth/signup/complete",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "auth", "signup", "complete"]
+        }
+      }
+    },
+    {
+      "name": "에러 케이스 - 토큰 없음",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/auth/social/kakao",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "auth", "social", "kakao"]
+        }
+      }
+    },
+    {
+      "name": "에러 케이스 - 잘못된 토큰 형식",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "InvalidToken"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/auth/social/kakao",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "auth", "social", "kakao"]
+        }
+      }
+    },
+    {
+      "name": "에러 케이스 - 지원하지 않는 제공자",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer test-token"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/auth/social/google",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "auth", "social", "google"]
+        }
+      }
+    },
+    {
+      "name": "토큰 재발급",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{refresh_token}}",
+            "description": "리프레시 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/auth/refresh",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "auth", "refresh"]
+        }
+      }
+    },
+    {
+      "name": "내 정보 조회 (JWT 인증 필요)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/users/me",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "users", "me"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "kakao_access_token",
+      "value": "여기에_실제_카카오_토큰_입력"
+    },
+    {
+      "key": "naver_access_token",
+      "value": "여기에_실제_네이버_토큰_입력"
+    },
+    {
+      "key": "temp_access_token",
+      "value": "소셜_로그인_후_받은_임시_토큰"
+    },
+    {
+      "key": "access_token",
+      "value": "로그인_후_받은_액세스_토큰"
+    },
+    {
+      "key": "refresh_token",
+      "value": "로그인_후_받은_리프레시_토큰"
+    }
+  ]
+}
+
