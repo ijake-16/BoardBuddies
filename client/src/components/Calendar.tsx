@@ -85,7 +85,7 @@ export const Calendar = ({
                     <p className="text-zinc-500 font-medium">{year}</p>
                 </div>
                 <div className={`transition-opacity duration-300 ${viewMode === 'week' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                    <Button variant="ghost" size="sm" onClick={handleBackToMonth} className="text-zinc-500">
+                    <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-500">
                         Return to Month
                     </Button>
                 </div>
