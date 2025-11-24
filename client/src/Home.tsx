@@ -54,16 +54,16 @@ export default function Home({ onReservationClick }: HomeProps) {
         <div className="flex-1 flex flex-col h-full overflow-hidden">
             {/* Header */}
             <header className="px-6 pt-12 pb-4 flex items-center justify-between bg-white dark:bg-zinc-950 z-10">
-                <h1 className="text-[20px] font-normal tracking-tight" style={{ fontFamily: '"Joti One", serif' }}>BoardBuddy</h1>
+                <h1 className="text-[24px] font-normal tracking-tight" style={{ fontFamily: '"Joti One", serif' }}>BoardBuddy</h1>
                 <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100">
-                        <SearchIcon className="w-[40px] h-[40px]" />
+                        <SearchIcon className="w-[24px] h-[24px]" />
                     </Button>
                     <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100">
-                        <BellIcon className="w-[40px] h-[40px]" />
+                        <BellIcon className="w-[24px] h-[24px]" />
                     </Button>
                     <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100">
-                        <SettingsIcon className="w-[40px] h-[40px]" />
+                        <SettingsIcon className="w-[24px] h-[24px]" />
                     </Button>
                 </div>
             </header>
