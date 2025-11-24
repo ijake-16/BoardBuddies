@@ -130,8 +130,7 @@ public class AuthController {
                     .body(ApiResponse.error(401, "유효하지 않은 토큰입니다."));
             }
             
-            // TODO: 임시 토큰 검증 및 userId 추출
-            // 현재는 임시로 토큰에서 userId 추출
+            // 임시 토큰 검증 및 userId 추출
             Long userId = extractUserIdFromTempToken(tempAccessToken);
             
             // 회원가입 완료 처리

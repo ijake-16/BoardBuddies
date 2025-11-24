@@ -89,6 +89,23 @@ public class User {
     @Column(length = 20)
     private String phoneNumber;
     
+    // === 동아리 정보 ===
+    
+    /**
+     * 소속 동아리 (승인 후에만 설정됨)
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "club_id")
+    private Club club;
+    
+    /**
+     * 동아리 내 역할
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private Role role = Role.GUEST;
+    
     // === 계정 상태 ===
     
     /**
@@ -144,6 +161,29 @@ public class User {
      */
     public void updateProfileImage(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+    
+    /**
+     * 동아리 가입 승인 처리
+     */
+    public void joinClub(Club club, Role role) {
+        this.club = club;
+        this.role = role;
+    }
+    
+    /**
+     * 동아리 탈퇴 처리
+     */
+    public void leaveClub() {
+        this.club = null;
+        this.role = Role.GUEST;
+    }
+    
+    /**
+     * 동아리 역할 변경
+     */
+    public void updateRole(Role role) {
+        this.role = role;
     }
 }
 
