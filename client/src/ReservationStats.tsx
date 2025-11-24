@@ -40,6 +40,7 @@ export default function ReservationStats({ onBack }: ReservationStatsProps) {
                         year={2025}
                         startDayOfWeek={1}
                         totalDays={31}
+                        expandable={true}
                         renderDay={(day) => (
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-zinc-800 shadow-sm ${getDayColor(day)}`}>
                                 {day}
