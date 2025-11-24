@@ -2,6 +2,8 @@ import { Button } from './components/Button';
 
 interface HomeProps {
     onReservationClick: () => void;
+    onMyReservationsClick: () => void;
+    onTeamClick: () => void;
 }
 
 // Icons
@@ -21,15 +23,15 @@ const BellIcon = ({ className }: { className?: string }) => (
 
 const SettingsIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l-.15-.09a2 2 0 0 0-.73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
         <circle cx="12" cy="12" r="3" />
     </svg>
 );
 
 const CircleArrowRightIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <circle cx="12" cy="12" r="10" />
-        <path d="m8 12 4 4 4-4" transform="rotate(-90 12 12)" />
+        <circle cx="12" cy="12" r="10" className="opacity-20" />
+        <path d="m10 8 4 4-4 4" />
     </svg>
 );
 
@@ -49,7 +51,7 @@ const SnowflakeDecorIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-export default function Home({ onReservationClick }: HomeProps) {
+export default function Home({ onReservationClick, onMyReservationsClick, onTeamClick }: HomeProps) {
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden">
             {/* Header */}
@@ -74,7 +76,10 @@ export default function Home({ onReservationClick }: HomeProps) {
                 {/* Team Info */}
                 <div className="px-6 mb-8">
                     <div className="text-sm text-zinc-500 font-medium mb-1">홍익대학교</div>
-                    <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity mb-4">
+                    <div
+                        onClick={onTeamClick}
+                        className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity mb-4"
+                    >
                         <h2 className="text-2xl font-bold">Team 401</h2>
                         <CircleArrowRightIcon className="w-5 h-5 text-blue-300" />
                     </div>
@@ -98,11 +103,14 @@ export default function Home({ onReservationClick }: HomeProps) {
                         </div>
                     </button>
 
-                    {/* Yellow Placeholder Card */}
-                    <button className="bg-[#F6E8B1] aspect-[4/3] rounded-[20px] p-5 flex flex-col items-start justify-start text-zinc-800 hover:brightness-95 transition-all shadow-sm">
+                    {/* Yellow Stats Card */}
+                    <button
+                        onClick={onMyReservationsClick}
+                        className="bg-[#F6E8B1] aspect-[4/3] rounded-[20px] p-5 flex flex-col items-start justify-start text-zinc-800 hover:brightness-95 transition-all shadow-sm"
+                    >
                         <div className="flex items-center gap-2">
                             <CheckSquareIcon className="w-5 h-5 opacity-70" />
-                            <span className="font-medium text-base">준비중</span>
+                            <span className="font-medium text-base">예약 현황</span>
                         </div>
                     </button>
                 </div>

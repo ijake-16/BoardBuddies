@@ -1,13 +1,13 @@
 
-
 interface CalendarProps {
     month: string;
     year: number;
     startDayOfWeek: number; // 0 = Sunday, 1 = Monday, etc.
     totalDays: number;
-    availableDays: number[];
-    selectedDays: number[];
-    onDayClick: (day: number) => void;
+    availableDays?: number[];
+    selectedDays?: number[];
+    onDayClick?: (day: number) => void;
+    renderDay?: (day: number) => React.ReactNode;
 }
 
 export const Calendar = ({
@@ -15,9 +15,10 @@ export const Calendar = ({
     year,
     startDayOfWeek,
     totalDays,
-    availableDays,
-    selectedDays,
+    availableDays = [],
+    selectedDays = [],
     onDayClick,
+    renderDay,
 }: CalendarProps) => {
     return (
         <div className="flex flex-col h-full">
@@ -44,13 +45,22 @@ export const Calendar = ({
                 {/* Days */}
                 {[...Array(totalDays)].map((_, i) => {
                     const day = i + 1;
+
+                    if (renderDay) {
+                        return (
+                            <div key={day} className="flex items-center justify-center aspect-square">
+                                {renderDay(day)}
+                            </div>
+                        )
+                    }
+
                     const isAvailable = availableDays.includes(day);
                     const isSelected = selectedDays.includes(day);
 
                     return (
                         <div key={day} className="flex items-center justify-center aspect-square">
                             <button
-                                onClick={() => onDayClick(day)}
+                                onClick={() => onDayClick?.(day)}
                                 disabled={!isAvailable}
                                 className={`
                   w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all
