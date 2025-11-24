@@ -1,11 +1,10 @@
 package com.boardbuddies.boardbuddiesserver.api;
 
 import com.boardbuddies.boardbuddiesserver.config.CurrentUser;
-import com.boardbuddies.boardbuddiesserver.dto.club.ApplicationDecisionRequest;
-import com.boardbuddies.boardbuddiesserver.dto.club.ClubApplicationRequest;
-import com.boardbuddies.boardbuddiesserver.dto.club.ClubApplicationResponse;
+import com.boardbuddies.boardbuddiesserver.dto.club.*;
 import com.boardbuddies.boardbuddiesserver.dto.common.ApiResponse;
 import com.boardbuddies.boardbuddiesserver.service.ClubApplicationService;
+import com.boardbuddies.boardbuddiesserver.service.ClubService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,48 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClubController {
     
+    private final ClubService clubService;
     private final ClubApplicationService clubApplicationService;
+    
+    /**
+     * 동아리 생성
+     * 
+     * POST /api/clubs
+     * 
+     * @param userId 현재 로그인한 사용자 ID (자동으로 PRESIDENT가 됨)
+     * @param request 동아리 생성 요청
+     * @return 생성된 동아리 정보
+     */
+    @PostMapping
+    public ResponseEntity<ApiResponse<ClubCreateResponse>> createClub(
+        @CurrentUser Long userId,
+        @Valid @RequestBody ClubCreateRequest request) {
+        
+        try {
+            ClubCreateResponse response = clubService.createClub(userId, request);
+            
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(201, "동아리 생성 성공", response));
+            
+        } catch (RuntimeException e) {
+            log.error("동아리 생성 처리 중 에러 발생", e);
+            String errorMessage = e.getMessage();
+            
+            if (errorMessage != null && errorMessage.contains("사용자를 찾을 수 없습니다")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, "사용자를 찾을 수 없습니다."));
+            } else if (errorMessage != null && errorMessage.contains("학번") && errorMessage.contains("찾을 수 없습니다")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, errorMessage));
+            } else if (errorMessage != null && errorMessage.contains("소속 대학이") && errorMessage.contains("일치하지 않습니다")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, errorMessage));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+            }
+        }
+    }
     
     /**
      * 동아리 가입 신청
