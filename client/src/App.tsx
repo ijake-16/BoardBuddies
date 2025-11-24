@@ -1,9 +1,22 @@
 import { useState } from 'react';
 import { LowerMenuBar } from './components/LowerMenuBar';
 import { Button } from './components/Button';
+import Reservation from './Reservation';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'reservation'>('home');
+
+  if (currentView === 'reservation') {
+    return (
+      <div className="min-h-screen bg-zinc-100 dark:bg-zinc-900 font-sans text-zinc-900 dark:text-zinc-100 flex justify-center">
+        <div className="w-full max-w-md bg-white dark:bg-zinc-950 min-h-screen relative shadow-2xl overflow-hidden flex flex-col">
+          <Reservation onBack={() => setCurrentView('home')} />
+          <LowerMenuBar activeTab={activeTab} onTabChange={setActiveTab} className="absolute" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-900 font-sans text-zinc-900 dark:text-zinc-100 flex justify-center">
@@ -46,7 +59,10 @@ function App() {
           {/* Action Cards */}
           <div className="px-6 grid grid-cols-2 gap-4 mb-12">
             {/* Reservation Card */}
-            <button className="bg-[#EBAEA2] aspect-[4/3] rounded-[20px] p-5 flex flex-col items-start justify-start text-zinc-800 hover:brightness-95 transition-all shadow-sm">
+            <button
+              onClick={() => setCurrentView('reservation')}
+              className="bg-[#EBAEA2] aspect-[4/3] rounded-[20px] p-5 flex flex-col items-start justify-start text-zinc-800 hover:brightness-95 transition-all shadow-sm"
+            >
               <div className="flex items-center gap-2">
                 <CheckSquareIcon className="w-5 h-5 opacity-70" />
                 <span className="font-medium text-base">예약하기</span>
