@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LowerMenuBar } from './components/LowerMenuBar';
+import { Button } from './components/Button';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
@@ -8,20 +9,26 @@ function App() {
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-900 font-sans text-zinc-900 dark:text-zinc-100 flex justify-center">
       {/* Mobile Container */}
       <div className="w-full max-w-md bg-white dark:bg-zinc-950 min-h-screen relative shadow-2xl overflow-hidden flex flex-col">
-        
+
         {/* Header */}
         <header className="px-6 pt-12 pb-4 flex items-center justify-between bg-white dark:bg-zinc-950 z-10">
-          <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif' }}>BoardBuddy</h1>
-          <div className="flex items-center gap-4">
-            <SearchIcon className="w-6 h-6" />
-            <BellIcon className="w-6 h-6" />
-            <SettingsIcon className="w-6 h-6" />
+          <h1 className="text-[32px] font-normal tracking-tight" style={{ fontFamily: '"Joti One", serif' }}>BoardBuddy</h1>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100">
+              <SearchIcon className="w-[40px] h-[40px]" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100">
+              <BellIcon className="w-[40px] h-[40px]" />
+            </Button>
+            <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100">
+              <SettingsIcon className="w-[40px] h-[40px]" />
+            </Button>
           </div>
         </header>
 
         {/* Content Area with bottom padding for menu */}
         <main className="flex-1 overflow-y-auto pb-[110px]">
-          
+
           {/* Team Info */}
           <div className="px-6 mb-8">
             <div className="text-sm text-zinc-500 font-medium mb-1">홍익대학교</div>
@@ -29,7 +36,7 @@ function App() {
               <h2 className="text-2xl font-bold">Team 401</h2>
               <CircleArrowRightIcon className="w-5 h-5 text-blue-300" />
             </div>
-            
+
             {/* Progress Bar */}
             <div className="h-4 w-full bg-blue-100 rounded-full overflow-hidden">
               <div className="h-full bg-[#8da4ef] w-full rounded-full" />
@@ -47,27 +54,31 @@ function App() {
             </button>
 
             {/* Yellow Placeholder Card */}
-            <div className="bg-[#F6E8B1] aspect-[4/3] rounded-[20px] p-5 shadow-sm">
-            </div>
+            <button className="bg-[#F6E8B1] aspect-[4/3] rounded-[20px] p-5 flex flex-col items-start justify-start text-zinc-800 hover:brightness-95 transition-all shadow-sm">
+              <div className="flex items-center gap-2">
+                <CheckSquareIcon className="w-5 h-5 opacity-70" />
+                <span className="font-medium text-base">준비중</span>
+              </div>
+            </button>
           </div>
 
           {/* Weather Banner */}
           <div className="w-full bg-gradient-to-r from-[#bfdcf7] to-[#d4e7fa] min-h-[120px] flex items-center justify-between relative overflow-hidden">
-             {/* Background decoration */}
-             <div className="absolute left-2 bottom-[-10px] opacity-60">
-                <SnowflakeDecorIcon className="w-32 h-32 text-white" />
-             </div>
-             <div className="absolute left-20 top-[-20px] opacity-40">
-                <SnowflakeDecorIcon className="w-16 h-16 text-white" />
-             </div>
+            {/* Background decoration */}
+            <div className="absolute left-2 bottom-[-10px] opacity-60">
+              <SnowflakeDecorIcon className="w-32 h-32 text-white" />
+            </div>
+            <div className="absolute left-20 top-[-20px] opacity-40">
+              <SnowflakeDecorIcon className="w-16 h-16 text-white" />
+            </div>
 
-             <div className="z-10 pl-8 py-6">
-               <div className="font-bold text-lg">휘닉스파크</div>
-               <div className="text-sm text-zinc-600">2025. 11. 11 Tue</div>
-             </div>
-             <div className="z-10 pr-8 text-5xl font-light text-zinc-700">
-               33<span className="text-2xl align-top">°</span>
-             </div>
+            <div className="z-10 pl-8 py-6">
+              <div className="font-bold text-lg">휘닉스파크</div>
+              <div className="text-sm text-zinc-600">2025. 11. 11 Tue</div>
+            </div>
+            <div className="z-10 pr-8 text-5xl font-light text-zinc-700">
+              33<span className="text-2xl align-top">°</span>
+            </div>
           </div>
 
         </main>

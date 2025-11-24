@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '../lib/utils';
 import { Button } from './Button'; // Import Button
 
-interface IconProps extends React.SVGProps<SVGSVGElement> {}
+interface IconProps extends React.SVGProps<SVGSVGElement> { }
 
 const HomeIcon = ({ className, ...props }: IconProps) => (
   <svg
@@ -123,12 +123,12 @@ export const LowerMenuBar = ({
   return (
     <nav
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-50',
+        'fixed bottom-8 left-1/2 -translate-x-1/2 z-50',
         'flex items-center justify-around',
         'bg-white dark:bg-zinc-900',
-        'shadow-[0_-4px_20px_rgba(0,0,0,0.05)]',
-        'pb-8 pt-4 px-6 h-[100px]',
-        'rounded-t-[24px]',
+        'shadow-[0_4px_20px_rgba(0,0,0,0.1)]',
+        'py-3 px-6 h-auto w-[90%] max-w-[380px]',
+        'rounded-[24px]',
         className
       )}
     >
