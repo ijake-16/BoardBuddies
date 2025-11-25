@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { LowerMenuBar } from './components/LowerMenuBar';
-import Reservation from './Reservation';
-import ReservationStats from './ReservationStats';
-import MyReservations from './MyReservations';
-import LoginLanding from './LoginLanding';
-import Home from './Home';
+import Home from './pages/Home';
+import Reservation from './pages/Reservation';
+import ReservationStats from './pages/ReservationStats';
+import MyReservations from './pages/MyReservations';
+import LoginLanding from './pages/LoginLanding';
+import { Button } from './components/Button';
+import { SearchIcon, BellIcon, SettingsIcon, CheckSquareIcon } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
