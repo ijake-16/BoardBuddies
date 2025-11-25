@@ -40,12 +40,12 @@ public class ClubCreateRequest {
     private String univ;
     
     /**
-     * 예약 요일 (0: SUNDAY ~ 6: SATURDAY, 선택사항)
+     * 예약 요일 (SUNDAY, MONDAY, ..., SATURDAY, 선택사항)
      */
-    @Min(value = 0, message = "예약 요일은 0(일요일) ~ 6(토요일) 사이여야 합니다.")
-    @Max(value = 6, message = "예약 요일은 0(일요일) ~ 6(토요일) 사이여야 합니다.")
+    @Pattern(regexp = "^(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY)$",
+             message = "예약 요일은 SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY 중 하나여야 합니다.")
     @JsonProperty("reservation_day")
-    private Integer reservationDay;
+    private String reservationDay;
     
     /**
      * 예약 시간 (HH:MM:SS, 선택사항)

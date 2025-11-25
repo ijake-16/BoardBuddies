@@ -3,6 +3,7 @@ package com.boardbuddies.boardbuddiesserver.service;
 import com.boardbuddies.boardbuddiesserver.domain.*;
 import com.boardbuddies.boardbuddiesserver.dto.club.ClubCreateRequest;
 import com.boardbuddies.boardbuddiesserver.dto.club.ClubCreateResponse;
+import com.boardbuddies.boardbuddiesserver.dto.club.ClubListResponse;
 import com.boardbuddies.boardbuddiesserver.repository.ClubRepository;
 import com.boardbuddies.boardbuddiesserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 동아리 관련 서비스
@@ -38,9 +41,9 @@ public class ClubService {
         User president = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         
-        // 예약 요일 변환 (int → DayOfWeek, Optional)
+        // 예약 요일 변환 (String → DayOfWeek, Optional)
         DayOfWeek reservationDay = request.getReservationDay() != null 
-            ? DayOfWeek.fromValue(request.getReservationDay()) 
+            ? DayOfWeek.valueOf(request.getReservationDay()) 
             : null;
         
         // 예약 시간 변환 (String → LocalTime, Optional)
@@ -71,7 +74,7 @@ public class ClubService {
         
         // 운영진 설정 (manager_list가 있는 경우)
         if (request.getManagerList() != null && !request.getManagerList().isEmpty()) {
-            Set<User> managers = assignManagers(club, request.getManagerList());
+            Set<User> managers = assignManagers(club, president, request.getManagerList());
             allManagers.addAll(managers);  // 매니저 추가
         }
         
@@ -79,16 +82,48 @@ public class ClubService {
     }
     
     /**
+     * 모든 동아리 목록 조회
+     * 
+     * @return 동아리 목록
+     */
+    @Transactional(readOnly = true)
+    public List<ClubListResponse> getAllClubs() {
+        List<Club> clubs = clubRepository.findAll();
+        
+        return clubs.stream()
+            .map(club -> {
+                // 각 동아리의 회장(PRESIDENT) 찾기
+                Long presidentId = userRepository.findByClubAndRole(club, Role.PRESIDENT)
+                    .map(User::getId)
+                    .orElse(null);
+                
+                return ClubListResponse.from(club, presidentId);
+            })
+            .collect(Collectors.toList());
+    }
+    
+    /**
      * 운영진 지정
      * 
      * @param club 동아리
+     * @param president 동아리 회장 (PRESIDENT로 이미 설정됨, 중복 처리 방지용)
      * @param managerStudentIds 운영진 학번 리스트
      * @return 지정된 운영진 목록
      */
-    private Set<User> assignManagers(Club club, Set<String> managerStudentIds) {
+    private Set<User> assignManagers(Club club, User president, Set<String> managerStudentIds) {
         Set<User> managers = new HashSet<>();
         
-        for (String studentId : managerStudentIds) {
+        // 회장 본인이 manager_list에 있는지 확인
+        Set<String> studentIdsToProcess = managerStudentIds;
+        if (managerStudentIds.contains(president.getStudentId())) {
+            log.info("회장 본인(학번: {})은 manager_list에서 제외됩니다. (이미 PRESIDENT로 설정됨)", 
+                president.getStudentId());
+            // 회장이 포함된 경우에만 새로운 Set 생성
+            studentIdsToProcess = new HashSet<>(managerStudentIds);
+            studentIdsToProcess.remove(president.getStudentId());
+        }
+        
+        for (String studentId : studentIdsToProcess) {
             // 학교 + 학번으로 사용자 조회 (유니크)
             User user = userRepository.findBySchoolAndStudentId(club.getUniv(), studentId)
                 .orElseThrow(() -> new RuntimeException(

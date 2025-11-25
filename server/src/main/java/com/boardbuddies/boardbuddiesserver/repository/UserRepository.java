@@ -1,5 +1,7 @@
 package com.boardbuddies.boardbuddiesserver.repository;
 
+import com.boardbuddies.boardbuddiesserver.domain.Club;
+import com.boardbuddies.boardbuddiesserver.domain.Role;
 import com.boardbuddies.boardbuddiesserver.domain.User;
 import com.boardbuddies.boardbuddiesserver.dto.auth.SocialProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,5 +44,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * 전화번호로 사용자 존재 여부 확인 (중복 검증)
      */
     boolean existsByPhoneNumber(String phoneNumber);
+    
+    /**
+     * 동아리와 역할로 사용자 조회
+     * (예: 동아리의 회장 찾기)
+     */
+    Optional<User> findByClubAndRole(Club club, Role role);
 }
 

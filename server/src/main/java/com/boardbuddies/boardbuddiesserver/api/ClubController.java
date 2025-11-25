@@ -27,6 +27,27 @@ public class ClubController {
     private final ClubApplicationService clubApplicationService;
     
     /**
+     * 모든 동아리 목록 조회
+     * 
+     * GET /api/clubs
+     * 
+     * @return 동아리 목록
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<ClubListResponse>>> getAllClubs() {
+        try {
+            List<ClubListResponse> clubs = clubService.getAllClubs();
+            return ResponseEntity.ok(
+                ApiResponse.success(200, "동아리 목록 조회 성공", clubs)
+            );
+        } catch (RuntimeException e) {
+            log.error("동아리 목록 조회 중 에러 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(500, "서버 에러"));
+        }
+    }
+    
+    /**
      * 동아리 생성
      * 
      * POST /api/clubs
