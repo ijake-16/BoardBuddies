@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Button } from './components/Button';
-import { Calendar } from './components/Calendar';
+import { ArrowLeftIcon, CalendarIcon, ClockIcon, XIcon, CheckCircleIcon, AlertTriangleIcon } from 'lucide-react';
+import { Button } from '../components/Button';
+import { Calendar } from '../components/Calendar';
+import { cn } from '../lib/utils';
 
 interface MyReservationsProps {
     onBack: () => void;

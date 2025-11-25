@@ -1,8 +1,8 @@
 
-import kakaoLogin from './assets/login/kakao.png';
-import naver1 from './assets/login/naver1.png';
-import naver2 from './assets/login/naver2.png';
-import naverFrame from './assets/login/naverframe.png';
+import kakaoLogin from '../assets/login/kakao.png';
+import naver1 from '../assets/login/naver1.png';
+import naver2 from '../assets/login/naver2.png';
+import naverFrame from '../assets/login/naverframe.png';
 
 interface LoginLandingProps {
     onLogin: () => void;

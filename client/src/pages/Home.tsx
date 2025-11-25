@@ -1,4 +1,6 @@
-import { Button } from './components/Button';
+import { Button } from '../components/Button';
+import sharkImage from '../assets/shark.png';
+import { CalendarIcon, UserIcon, UsersIcon, ClockIcon, ChevronRightIcon } from 'lucide-react';
 
 interface HomeProps {
     onReservationClick: () => void;
