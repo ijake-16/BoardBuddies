@@ -80,21 +80,22 @@ public class ClubService {
      */
     private void assignManagers(Club club, Set<String> managerStudentIds) {
         for (String studentId : managerStudentIds) {
-            User user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new RuntimeException("학번 " + studentId + "에 해당하는 사용자를 찾을 수 없습니다."));
+            // 학교 + 학번으로 사용자 조회 (유니크)
+            User user = userRepository.findBySchoolAndStudentId(club.getUniv(), studentId)
+                .orElseThrow(() -> new RuntimeException(
+                    club.getUniv() + " 소속 학번 " + studentId + "에 해당하는 사용자를 찾을 수 없습니다."));
             
-            // 소속 대학이 일치하는지 확인
-            if (!user.getSchool().equals(club.getUniv())) {
-                log.warn("사용자 {}의 소속 대학({})이 동아리 대학({})과 일치하지 않습니다.", 
-                    studentId, user.getSchool(), club.getUniv());
-                throw new RuntimeException("학번 " + studentId + "의 소속 대학이 동아리 대학과 일치하지 않습니다.");
+            // 회원가입 완료 여부 확인
+            if (!user.getIsRegistered()) {
+                log.warn("사용자 {}는 회원가입이 완료되지 않았습니다.", studentId);
+                throw new RuntimeException("학번 " + studentId + "는 회원가입이 완료되지 않았습니다. 회원가입 후 운영진으로 지정할 수 있습니다.");
             }
             
             // 운영진으로 지정 (Role.MANAGER)
             user.joinClub(club, Role.MANAGER);
             
-            log.info("운영진 지정 완료: clubId={}, userId={}, studentId={}, role=MANAGER", 
-                club.getId(), user.getId(), studentId);
+            log.info("운영진 지정 완료: clubId={}, userId={}, school={}, studentId={}, role=MANAGER", 
+                club.getId(), user.getId(), club.getUniv(), studentId);
         }
     }
 }

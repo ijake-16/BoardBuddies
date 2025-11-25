@@ -29,6 +29,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByStudentId(String studentId);
     
     /**
+     * 학교와 학번으로 사용자 조회 (유니크)
+     */
+    Optional<User> findBySchoolAndStudentId(String school, String studentId);
+    
+    /**
      * 학번으로 사용자 존재 여부 확인 (중복 검증)
      */
     boolean existsByStudentId(String studentId);

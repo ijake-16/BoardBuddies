@@ -56,6 +56,9 @@ public class ClubController {
             } else if (errorMessage != null && errorMessage.contains("학번") && errorMessage.contains("찾을 수 없습니다")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.error(404, errorMessage));
+            } else if (errorMessage != null && errorMessage.contains("회원가입이 완료되지 않았습니다")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, errorMessage));
             } else if (errorMessage != null && errorMessage.contains("소속 대학이") && errorMessage.contains("일치하지 않습니다")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error(400, errorMessage));
