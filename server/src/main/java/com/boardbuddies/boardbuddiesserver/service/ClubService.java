@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -64,12 +65,17 @@ public class ClubService {
         
         log.info("동아리 생성 완료: clubId={}, presidentId={}", club.getId(), userId);
         
+        // 운영진 목록 수집 (회장 + 매니저)
+        Set<User> allManagers = new HashSet<>();
+        allManagers.add(president);  // 회장 추가
+        
         // 운영진 설정 (manager_list가 있는 경우)
         if (request.getManagerList() != null && !request.getManagerList().isEmpty()) {
-            assignManagers(club, request.getManagerList());
+            Set<User> managers = assignManagers(club, request.getManagerList());
+            allManagers.addAll(managers);  // 매니저 추가
         }
         
-        return ClubCreateResponse.from(club);
+        return ClubCreateResponse.from(club, allManagers);
     }
     
     /**
@@ -77,8 +83,11 @@ public class ClubService {
      * 
      * @param club 동아리
      * @param managerStudentIds 운영진 학번 리스트
+     * @return 지정된 운영진 목록
      */
-    private void assignManagers(Club club, Set<String> managerStudentIds) {
+    private Set<User> assignManagers(Club club, Set<String> managerStudentIds) {
+        Set<User> managers = new HashSet<>();
+        
         for (String studentId : managerStudentIds) {
             // 학교 + 학번으로 사용자 조회 (유니크)
             User user = userRepository.findBySchoolAndStudentId(club.getUniv(), studentId)
@@ -93,10 +102,13 @@ public class ClubService {
             
             // 운영진으로 지정 (Role.MANAGER)
             user.joinClub(club, Role.MANAGER);
+            managers.add(user);
             
             log.info("운영진 지정 완료: clubId={}, userId={}, school={}, studentId={}, role=MANAGER", 
                 club.getId(), user.getId(), club.getUniv(), studentId);
         }
+        
+        return managers;
     }
 }
 
