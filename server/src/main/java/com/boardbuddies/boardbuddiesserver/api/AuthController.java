@@ -33,7 +33,7 @@ public class AuthController {
     @PostMapping("/social/{provider}")
     public ResponseEntity<ApiResponse<?>> socialLogin(
         @PathVariable("provider") String provider,
-        @RequestHeader("Authorization") String authorization) {
+        @RequestHeader(value = "Authorization", required = false) String authorization) {
         
         try {
             // Authorization 헤더 검증
