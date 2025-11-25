@@ -3,11 +3,16 @@ import { LowerMenuBar } from './components/LowerMenuBar';
 import Reservation from './Reservation';
 import ReservationStats from './ReservationStats';
 import MyReservations from './MyReservations';
+import LoginLanding from './LoginLanding';
 import Home from './Home';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
-  const [currentView, setCurrentView] = useState<'home' | 'reservation' | 'stats' | 'my_reservations'>('home');
+  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations'>('login');
+
+  if (currentView === 'login') {
+    return <LoginLanding onLogin={() => setCurrentView('home')} />;
+  }
 
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-900 font-sans text-zinc-900 dark:text-zinc-100 flex justify-center">
