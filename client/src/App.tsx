@@ -6,13 +6,17 @@ import ReservationStats from './pages/ReservationStats';
 import MyReservations from './pages/MyReservations';
 import LoginLanding from './pages/LoginLanding';
 import CrewDetail from './pages/CrewDetail';
+import UserInfoInput from './pages/UserInfoInput';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
-  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail'>('login');
+  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'user_info'>('login');
 
   if (currentView === 'login') {
-    return <LoginLanding onLogin={() => setCurrentView('home')} />;
+    return <LoginLanding
+      onLogin={() => setCurrentView('home')}
+      onDebugUserInfo={() => setCurrentView('user_info')}
+    />;
   }
 
   return (
@@ -31,6 +35,11 @@ function App() {
             onBack={() => setCurrentView('home')}
             onCalendarClick={() => setCurrentView('stats')}
           />
+        ) : currentView === 'user_info' ? (
+          <UserInfoInput
+            onBack={() => setCurrentView('login')}
+            onSubmit={() => setCurrentView('home')}
+          />
         ) : (
           <Home
             onReservationClick={() => setCurrentView('reservation')}
@@ -40,7 +49,9 @@ function App() {
         )}
 
         {/* Fixed Bottom Menu */}
-        <LowerMenuBar activeTab={activeTab} onTabChange={setActiveTab} className="absolute" />
+        {currentView !== 'user_info' && (
+          <LowerMenuBar activeTab={activeTab} onTabChange={setActiveTab} className="absolute" />
+        )}
       </div>
     </div>
   );
