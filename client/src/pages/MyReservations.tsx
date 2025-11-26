@@ -96,11 +96,11 @@ export default function MyReservations({ onBack }: MyReservationsProps) {
                         </p>
                         <div className="flex gap-3">
                             <Button
-                                variant="ghost"
+                                variant="secondary"
                                 onClick={() => setWithdrawDay(null)}
-                                className="flex-1"
+                                className="flex-1 bg-zinc-200 hover:bg-zinc-300 text-zinc-700 border-transparent"
                             >
-                                유지하기
+                                돌아가기
                             </Button>
                             <Button
                                 variant="primary"
