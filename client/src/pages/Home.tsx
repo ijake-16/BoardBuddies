@@ -1,6 +1,5 @@
 import { Button } from '../components/Button';
-import sharkImage from '../assets/shark.png';
-import { CalendarIcon, UserIcon, UsersIcon, ClockIcon, ChevronRightIcon } from 'lucide-react';
+import { CalendarIcon, UserIcon, UsersIcon, ClockIcon, ChevronRightIcon, MessageSquareIcon, PlusIcon } from 'lucide-react';
 
 interface HomeProps {
     onReservationClick: () => void;
@@ -57,15 +56,18 @@ export default function Home({ onReservationClick, onMyReservationsClick, onTeam
         <div className="flex-1 flex flex-col h-full overflow-hidden">
             {/* Header */}
             <header className="px-6 pt-12 pb-4 flex items-center justify-between bg-white dark:bg-zinc-950 z-10">
-                <h1 className="text-[24px] font-normal tracking-tight" style={{ fontFamily: '"Joti One", serif' }}>BoardBuddy</h1>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100">
+                    <h1 className="text-[24px] font-normal tracking-tight" style={{ fontFamily: '"Joti One", serif' }}>BoardBuddy</h1>
+                    {/* Shark Image removed due to missing file */}
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <SearchIcon className="w-[24px] h-[24px]" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100">
+                    <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <BellIcon className="w-[24px] h-[24px]" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100">
+                    <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <SettingsIcon className="w-[24px] h-[24px]" />
                     </Button>
                 </div>
@@ -79,45 +81,61 @@ export default function Home({ onReservationClick, onMyReservationsClick, onTeam
                     <div className="text-sm text-zinc-500 font-medium mb-1">홍익대학교</div>
                     <div
                         onClick={onTeamClick}
-                        className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity mb-4"
+                        className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
                     >
                         <h2 className="text-2xl font-bold">Team 401</h2>
-                        <CircleArrowRightIcon className="w-5 h-5 text-blue-300" />
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="h-4 w-full bg-blue-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-[#8da4ef] w-full rounded-full" />
+                        <CircleArrowRightIcon className="w-5 h-5 text-[#FCD34D]" />
                     </div>
                 </div>
 
                 {/* Action Cards */}
-                <div className="px-6 grid grid-cols-2 gap-4 mb-12">
+                <div className="px-6 grid grid-cols-2 gap-4 mb-8">
                     {/* Reservation Card */}
                     <button
                         onClick={onReservationClick}
-                        className="bg-[#EBAEA2] aspect-[4/3] rounded-[20px] p-5 flex flex-col items-start justify-start text-zinc-800 hover:brightness-95 transition-all shadow-sm"
+                        className="bg-[#FCD34D] aspect-[4/3] rounded-[20px] p-4 flex flex-col items-start justify-start text-zinc-900 hover:brightness-95 transition-all shadow-sm"
                     >
                         <div className="flex items-center gap-2">
-                            <CheckSquareIcon className="w-5 h-5 opacity-70" />
-                            <span className="font-medium text-base">예약하기</span>
+                            <div className="bg-white p-1.5 rounded-lg">
+                                <CheckSquareIcon className="w-5 h-5 text-zinc-900" />
+                            </div>
+                            <span className="font-bold text-base">예약하기</span>
                         </div>
                     </button>
 
-                    {/* Yellow Stats Card */}
+                    {/* Check Reservation Card */}
                     <button
                         onClick={onMyReservationsClick}
-                        className="bg-[#F6E8B1] aspect-[4/3] rounded-[20px] p-5 flex flex-col items-start justify-start text-zinc-800 hover:brightness-95 transition-all shadow-sm"
+                        className="bg-[#F3E5D8] aspect-[4/3] rounded-[20px] p-4 flex flex-col items-start justify-start text-zinc-900 hover:brightness-95 transition-all shadow-sm"
                     >
                         <div className="flex items-center gap-2">
-                            <CheckSquareIcon className="w-5 h-5 opacity-70" />
-                            <span className="font-medium text-base">예약 현황</span>
+                            <div className="bg-white p-1.5 rounded-lg">
+                                <CalendarIcon className="w-5 h-5 text-zinc-900" />
+                            </div>
+                            <span className="font-bold text-base">예약 확인</span>
                         </div>
                     </button>
                 </div>
 
+                {/* Bulletin Board */}
+                <div className="px-6 mb-12">
+                    <div className="bg-[#D6E6F5] rounded-[20px] p-5 min-h-[160px] flex flex-col">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                                <MessageSquareIcon className="w-5 h-5 text-zinc-700" />
+                                <span className="font-bold text-base text-zinc-800">게시판</span>
+                            </div>
+                            <PlusIcon className="w-5 h-5 text-zinc-700 cursor-pointer" />
+                        </div>
+                        <div className="w-full h-[1px] bg-zinc-400/30 mb-4" />
+                        <div className="flex-1">
+                            {/* Placeholder content */}
+                        </div>
+                    </div>
+                </div>
+
                 {/* Weather Banner */}
-                <div className="w-full bg-gradient-to-r from-[#bfdcf7] to-[#d4e7fa] min-h-[120px] flex items-center justify-between relative overflow-hidden">
+                <div className="w-full bg-gradient-to-r from-[#F8CACC] to-[#A0C4FF] min-h-[120px] flex items-center justify-between relative overflow-hidden">
                     {/* Background decoration */}
                     <div className="absolute left-2 bottom-[-10px] opacity-60">
                         <SnowflakeDecorIcon className="w-32 h-32 text-white" />
@@ -127,10 +145,10 @@ export default function Home({ onReservationClick, onMyReservationsClick, onTeam
                     </div>
 
                     <div className="z-10 pl-8 py-6">
-                        <div className="font-bold text-lg">휘닉스파크</div>
-                        <div className="text-sm text-zinc-600">2025. 11. 11 Tue</div>
+                        <div className="font-bold text-lg text-white">휘닉스파크</div>
+                        <div className="text-sm text-white/90">2025. 11. 11 Tue</div>
                     </div>
-                    <div className="z-10 pr-8 text-5xl font-light text-zinc-700">
+                    <div className="z-10 pr-8 text-5xl font-light text-white">
                         33<span className="text-2xl align-top">°</span>
                     </div>
                 </div>

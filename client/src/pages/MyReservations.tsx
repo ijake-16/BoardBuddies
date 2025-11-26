@@ -20,6 +20,8 @@ const CheckIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+import { PageBackground } from '../components/PageBackground';
+
 export default function MyReservations({ onBack }: MyReservationsProps) {
     // Mock reservations
     const [reservations, setReservations] = useState<number[]>([16, 20]);
@@ -39,7 +41,8 @@ export default function MyReservations({ onBack }: MyReservationsProps) {
     };
 
     return (
-        <div className="flex-1 flex flex-col bg-zinc-50 dark:bg-zinc-900 h-full overflow-hidden relative">
+        <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+            <PageBackground />
             {/* Header */}
             <header className="px-6 pt-12 pb-4 flex items-center justify-between bg-white dark:bg-zinc-950 z-10 shadow-sm">
                 <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">

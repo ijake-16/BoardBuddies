@@ -8,6 +8,8 @@ interface ReservationProps {
 }
 
 
+import { PageBackground } from '../components/PageBackground';
+
 export default function Reservation({ onBack }: ReservationProps) {
     const [selectedDays, setSelectedDays] = useState<number[]>([]);
 
@@ -32,7 +34,8 @@ export default function Reservation({ onBack }: ReservationProps) {
     };
 
     return (
-        <div className="flex-1 flex flex-col bg-zinc-50 dark:bg-zinc-900 h-full overflow-hidden">
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <PageBackground />
             {/* Header */}
             <header className="px-6 pt-12 pb-4 flex items-center justify-between bg-white dark:bg-zinc-950 z-10 shadow-sm">
                 <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
@@ -56,9 +59,14 @@ export default function Reservation({ onBack }: ReservationProps) {
                 />
 
                 {/* Apply Button */}
-                <div className="mt-8">
+                <div className="mt-8 flex justify-center">
                     <Button
-                        className="w-full bg-[#F6C555] hover:bg-[#e5b64e] text-black border-none h-14 text-lg font-bold rounded-2xl shadow-sm"
+                        disabled={selectedDays.length === 0}
+                        className={`
+                            w-80 h-12 bg-blue-950 rounded-[20px] text-white text-base font-semibold font-['Inter'] leading-4
+                            transition-opacity duration-200
+                            ${selectedDays.length === 0 ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:bg-blue-900'}
+                        `}
                     >
                         신청하기
                     </Button>

@@ -43,3 +43,7 @@ a:hover {
     color: #747bff;
   }
 }
+
+@theme {
+  --color-light-blue: #d4e7fa;
+}
