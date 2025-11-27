@@ -11,6 +11,7 @@ interface CalendarProps {
     onDayClick?: (day: number) => void;
     renderDay?: (day: number) => React.ReactNode;
     expandable?: boolean;
+    hideHeader?: boolean;
 }
 
 export const Calendar = ({
@@ -23,6 +24,7 @@ export const Calendar = ({
     onDayClick,
     renderDay,
     expandable = false,
+    hideHeader = false,
 }: CalendarProps) => {
     const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
     const [focusedWeekIndex, setFocusedWeekIndex] = useState<number | null>(null);
@@ -68,33 +70,29 @@ export const Calendar = ({
 
     const handleBackToMonth = () => {
         setViewMode('month');
-        // Keep focusedWeekIndex for a moment if we want to animate back, 
-        // but for now clearing it or keeping it doesn't break the logic if we use viewMode
-        // Actually, to animate back, we should probably keep it until animation is done, 
-        // but for simplicity let's just switch mode. 
-        // If we want smooth collapse back, we need to let all rows expand.
-        // The CSS logic below handles 'month' view by expanding all.
     };
 
     return (
         <div className="flex flex-col h-full">
             {/* Month Title */}
-            <div className="mb-8 flex items-center justify-between">
-                <div>
-                    <h1 className="text-4xl mb-1" style={{ fontFamily: '"Joti One", serif' }}>{month}</h1>
-                    <p className="text-zinc-500 font-medium">{year}</p>
+            {!hideHeader && (
+                <div className="mb-6 flex items-center justify-center relative">
+                    <div className="text-center">
+                        <h1 className="text-lg font-bold text-zinc-900">{month}</h1>
+                        <p className="text-xs text-zinc-400 font-medium">{year}</p>
+                    </div>
+                    <div className={`absolute right-0 transition-opacity duration-300 ${viewMode === 'week' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                        <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-500 text-xs">
+                            Back
+                        </Button>
+                    </div>
                 </div>
-                <div className={`transition-opacity duration-300 ${viewMode === 'week' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                    <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-500">
-                        Return to Month
-                    </Button>
-                </div>
-            </div>
+            )}
 
             {/* Calendar Grid Header */}
-            <div className="grid grid-cols-7 gap-x-2 mb-4">
-                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-                    <div key={day} className="text-center text-zinc-400 text-sm font-medium">
+            <div className="grid grid-cols-7 gap-x-2 mb-6">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                    <div key={day} className="text-center text-zinc-400 text-sm font-bold">
                         {day}
                     </div>
                 ))}

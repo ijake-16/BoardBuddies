@@ -40,48 +40,61 @@ export default function MyReservations({ onBack }: MyReservationsProps) {
     };
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-            <PageBackground />
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
             {/* Header */}
-            <header className="px-6 pt-12 pb-4 flex items-center justify-between bg-white dark:bg-zinc-950 z-10 shadow-sm">
-                <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
+            <header className="px-6 pt-12 pb-4 flex items-center justify-between z-10">
+                <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 hover:text-zinc-900">
                     <ChevronLeftIcon className="w-6 h-6" />
-                    <span className="text-lg font-medium">Back</span>
                 </Button>
-                <h1 className="text-lg font-bold">내 예약</h1>
-                <div className="w-12" /> {/* Spacer */}
             </header>
 
-            <main className="flex-1 overflow-y-auto p-6 pb-[120px] flex flex-col">
-                <div className="flex-1">
-                    <Calendar
-                        month="December"
-                        year={2025}
-                        startDayOfWeek={1}
-                        totalDays={31}
-                        renderDay={(day: number) => {
-                            const isReserved = reservations.includes(day);
-                            if (isReserved) {
+            <main className="flex-1 overflow-y-auto px-6 pb-[120px] flex flex-col items-center">
+
+                {/* Page Title */}
+                <div className="w-full mb-6">
+                    <h1 className="text-3xl font-black italic text-zinc-900 font-['Joti_One']">December</h1>
+                    <p className="text-sm font-medium text-zinc-900">2025</p>
+                </div>
+
+                {/* Grey Container */}
+                <div className="w-full bg-[#F4F4F5] rounded-[30px] p-4 mb-8">
+                    {/* Header Pill */}
+                    <div className="w-full bg-white rounded-2xl py-3 shadow-sm mb-4 flex justify-center items-center">
+                        <h2 className="text-base font-bold text-zinc-900">내 예약</h2>
+                    </div>
+
+                    {/* Calendar Card */}
+                    <div className="w-full bg-white rounded-[30px] p-6 shadow-sm">
+                        <Calendar
+                            month="December"
+                            year={2025}
+                            startDayOfWeek={1}
+                            totalDays={31}
+                            hideHeader={true}
+                            renderDay={(day) => {
+                                const isReserved = reservations.includes(day);
+                                if (isReserved) {
+                                    return (
+                                        <button
+                                            onClick={() => handleDayClick(day)}
+                                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm bg-[#4CAF50] hover:bg-[#43A047] transition-colors relative"
+                                        >
+                                            {day}
+                                            <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
+                                                <CheckIcon className="w-3 h-3 text-[#4CAF50]" />
+                                            </div>
+                                        </button>
+                                    );
+                                }
+                                // Default rendering for non-reserved days
                                 return (
-                                    <button
-                                        onClick={() => handleDayClick(day)}
-                                        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm bg-[#4CAF50] hover:bg-[#43A047] transition-colors relative"
-                                    >
+                                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-zinc-300">
                                         {day}
-                                        <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
-                                            <CheckIcon className="w-3 h-3 text-[#4CAF50]" />
-                                        </div>
-                                    </button>
+                                    </div>
                                 );
-                            }
-                            // Default rendering for non-reserved days (just the number, maybe greyed out if we want to show they aren't interactive)
-                            return (
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-zinc-300 dark:text-zinc-700">
-                                    {day}
-                                </div>
-                            );
-                        }}
-                    />
+                            }}
+                        />
+                    </div>
                 </div>
             </main>
 
