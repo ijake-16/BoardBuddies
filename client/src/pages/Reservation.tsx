@@ -78,7 +78,7 @@ export default function Reservation({ onBack }: ReservationProps) {
                     <Button
                         disabled={selectedDays.length === 0}
                         className={`
-                            w-full h-14 bg-[#8B9DB0] rounded-[20px] text-white text-lg font-bold
+                            w-full h-14 bg-[#162660] rounded-[20px] text-white text-lg font-bold
                             transition-all duration-200 shadow-md
                             ${selectedDays.length === 0 ? 'opacity-50 cursor-not-allowed' : 'opacity-100 hover:bg-[#7A8C9F] hover:scale-[1.02]'}
                         `}
