@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { ArrowLeftIcon, CalendarIcon, ClockIcon, XIcon, CheckCircleIcon, AlertTriangleIcon } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
-import { cn } from '../lib/utils';
+
 
 interface MyReservationsProps {
     onBack: () => void;
@@ -60,7 +59,7 @@ export default function MyReservations({ onBack }: MyReservationsProps) {
                         year={2025}
                         startDayOfWeek={1}
                         totalDays={31}
-                        renderDay={(day) => {
+                        renderDay={(day: number) => {
                             const isReserved = reservations.includes(day);
                             if (isReserved) {
                                 return (

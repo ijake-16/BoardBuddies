@@ -1,6 +1,6 @@
 import { Button } from '../components/Button';
 import { ChevronLeftIcon, ChevronRightIcon, SmileIcon, UserPlusIcon } from 'lucide-react';
-import { PageBackground } from '../components/PageBackground';
+
 
 interface CrewDetailProps {
     onBack: () => void;

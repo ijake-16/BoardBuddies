@@ -4,10 +4,10 @@ import { useState } from 'react';
 
 interface UserInfoInputProps {
     onBack: () => void;
-    onSubmit: () => void;
+
 }
 
-export default function UserInfoInput({ onBack, onSubmit }: UserInfoInputProps) {
+export default function UserInfoInput({ onBack }: UserInfoInputProps) {
     const [gender, setGender] = useState<'female' | 'male' | null>(null);
     const [terms, setTerms] = useState({
         term1: false,

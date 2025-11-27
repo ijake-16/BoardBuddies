@@ -38,7 +38,6 @@ function App() {
         ) : currentView === 'user_info' ? (
           <UserInfoInput
             onBack={() => setCurrentView('login')}
-            onSubmit={() => setCurrentView('home')}
           />
         ) : (
           <Home

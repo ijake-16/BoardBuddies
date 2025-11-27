@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export const PageBackground = () => (
     <div className="fixed inset-0 -z-10 w-full h-full bg-gradient-to-b from-white to-[#d4e7fa] blur-[2px] pointer-events-none" />

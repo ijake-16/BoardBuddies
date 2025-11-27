@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { ArrowLeftIcon, ChevronLeftIcon } from 'lucide-react';
+
+import { ChevronLeftIcon } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
-import { cn } from '../lib/utils';
+
 
 interface ReservationStatsProps {
     onBack: () => void;

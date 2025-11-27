@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '../components/Button';
-import { ArrowLeftIcon, ChevronLeftIcon } from 'lucide-react';
+import { ChevronLeftIcon } from 'lucide-react';
 import { Calendar } from '../components/Calendar';
 
 interface ReservationProps {
