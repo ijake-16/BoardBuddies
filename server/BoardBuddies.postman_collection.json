@@ -13,15 +13,22 @@
         "url": {
           "raw": "http://localhost:8080/api/test/health",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "test", "health"]
+          "path": [
+            "api",
+            "test",
+            "health"
+          ]
         }
       }
     },
     {
       "name": "소셜 로그인 - 카카오",
       "request": {
+        "description": "신규 회원의 경우 DB에 저장하지 않고, 소셜 정보가 담긴 임시 토큰을 반환합니다.",
         "method": "POST",
         "header": [
           {
@@ -37,9 +44,16 @@
         "url": {
           "raw": "http://localhost:8080/api/auth/social/kakao",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "auth", "social", "kakao"]
+          "path": [
+            "api",
+            "auth",
+            "social",
+            "kakao"
+          ]
         }
       }
     },
@@ -61,15 +75,23 @@
         "url": {
           "raw": "http://localhost:8080/api/auth/social/naver",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "auth", "social", "naver"]
+          "path": [
+            "api",
+            "auth",
+            "social",
+            "naver"
+          ]
         }
       }
     },
     {
       "name": "회원가입 완료 (추가 정보 입력)",
       "request": {
+        "description": "임시 토큰(소셜 정보 포함)과 추가 정보를 받아 실제 사용자를 DB에 생성합니다.",
         "method": "POST",
         "header": [
           {
@@ -89,9 +111,16 @@
         "url": {
           "raw": "http://localhost:8080/api/auth/signup/complete",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "auth", "signup", "complete"]
+          "path": [
+            "api",
+            "auth",
+            "signup",
+            "complete"
+          ]
         }
       }
     },
@@ -108,9 +137,16 @@
         "url": {
           "raw": "http://localhost:8080/api/auth/social/kakao",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "auth", "social", "kakao"]
+          "path": [
+            "api",
+            "auth",
+            "social",
+            "kakao"
+          ]
         }
       }
     },
@@ -131,9 +167,16 @@
         "url": {
           "raw": "http://localhost:8080/api/auth/social/kakao",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "auth", "social", "kakao"]
+          "path": [
+            "api",
+            "auth",
+            "social",
+            "kakao"
+          ]
         }
       }
     },
@@ -154,9 +197,16 @@
         "url": {
           "raw": "http://localhost:8080/api/auth/social/google",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "auth", "social", "google"]
+          "path": [
+            "api",
+            "auth",
+            "social",
+            "google"
+          ]
         }
       }
     },
@@ -174,9 +224,15 @@
         "url": {
           "raw": "http://localhost:8080/api/auth/refresh",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "auth", "refresh"]
+          "path": [
+            "api",
+            "auth",
+            "refresh"
+          ]
         }
       }
     },
@@ -194,9 +250,15 @@
         "url": {
           "raw": "http://localhost:8080/api/users/me",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "users", "me"]
+          "path": [
+            "api",
+            "users",
+            "me"
+          ]
         }
       }
     },
@@ -222,9 +284,14 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs"]
+          "path": [
+            "api",
+            "clubs"
+          ]
         }
       }
     },
@@ -250,9 +317,14 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs"]
+          "path": [
+            "api",
+            "clubs"
+          ]
         }
       }
     },
@@ -274,9 +346,14 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs"]
+          "path": [
+            "api",
+            "clubs"
+          ]
         }
       }
     },
@@ -302,9 +379,16 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs/{{club_id}}/applications",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs", "{{club_id}}", "applications"]
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}",
+            "applications"
+          ]
         }
       }
     },
@@ -322,9 +406,16 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs/{{club_id}}/applications",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs", "{{club_id}}", "applications"]
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}",
+            "applications"
+          ]
         }
       }
     },
@@ -350,9 +441,18 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs/{{club_id}}/applications/{{application_id}}/approve",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs", "{{club_id}}", "applications", "{{application_id}}", "approve"]
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}",
+            "applications",
+            "{{application_id}}",
+            "approve"
+          ]
         }
       }
     },
@@ -378,9 +478,18 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs/{{club_id}}/applications/{{application_id}}/approve",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs", "{{club_id}}", "applications", "{{application_id}}", "approve"]
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}",
+            "applications",
+            "{{application_id}}",
+            "approve"
+          ]
         }
       }
     },
@@ -405,9 +514,16 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs/{{club_id}}/applications",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs", "{{club_id}}", "applications"]
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}",
+            "applications"
+          ]
         }
       }
     },
@@ -432,9 +548,14 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs"]
+          "path": [
+            "api",
+            "clubs"
+          ]
         }
       }
     },
@@ -456,9 +577,15 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs/{{club_id}}",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs", "{{club_id}}"]
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}"
+          ]
         }
       }
     },
@@ -484,9 +611,15 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs/{{club_id}}",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs", "{{club_id}}"]
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}"
+          ]
         }
       }
     },
@@ -512,9 +645,15 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs/{{club_id}}",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs", "{{club_id}}"]
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}"
+          ]
         }
       }
     },
@@ -539,9 +678,152 @@
         "url": {
           "raw": "http://localhost:8080/api/clubs/{{club_id}}",
           "protocol": "http",
-          "host": ["localhost"],
+          "host": [
+            "localhost"
+          ],
           "port": "8080",
-          "path": ["api", "clubs", "{{club_id}}"]
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "내 예약 조회",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/users/me/reservations",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "users",
+            "me",
+            "reservations"
+          ]
+        }
+      }
+    },
+    {
+      "name": "시즌방 예약 (일괄 신청)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{$guid}}",
+            "description": "중복 방지 키 (UUID)"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"dates\": [\"2025-12-05\", \"2025-12-06\"]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/clubs/{{club_id}}/reservations",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}",
+            "reservations"
+          ]
+        }
+      }
+    },
+    {
+      "name": "예약 취소 (일괄 취소)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"dates\": [\"2025-12-05\"]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/clubs/{{club_id}}/reservations/cancel",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}",
+            "reservations",
+            "cancel"
+          ]
+        }
+      }
+    },
+    {
+      "name": "예약자 명단 조회 (날짜별)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/clubs/{{club_id}}/reservations?date=2025-12-05",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}",
+            "reservations"
+          ],
+          "query": [
+            {
+              "key": "date",
+              "value": "2025-12-05",
+              "description": "조회할 날짜 (YYYY-MM-DD)"
+            }
+          ]
         }
       }
     }
@@ -579,4 +861,3 @@
     }
   ]
 }
-
