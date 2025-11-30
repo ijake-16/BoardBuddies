@@ -18,9 +18,9 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-    
+
     private final JwtProperties jwtProperties;
-    
+
     /**
      * SecretKey 생성
      */
@@ -28,7 +28,7 @@ public class JwtUtil {
         byte[] keyBytes = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
-    
+
     /**
      * 액세스 토큰 생성
      * 
@@ -38,16 +38,16 @@ public class JwtUtil {
     public String generateAccessToken(Long userId) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration());
-        
+
         return Jwts.builder()
-            .subject(String.valueOf(userId))
-            .claim("type", "access")
-            .issuedAt(now)
-            .expiration(expiration)
-            .signWith(getSigningKey())
-            .compact();
+                .subject(String.valueOf(userId))
+                .claim("type", "access")
+                .issuedAt(now)
+                .expiration(expiration)
+                .signWith(getSigningKey())
+                .compact();
     }
-    
+
     /**
      * 리프레시 토큰 생성
      * 
@@ -57,35 +57,47 @@ public class JwtUtil {
     public String generateRefreshToken(Long userId) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + jwtProperties.getRefreshTokenExpiration());
-        
+
         return Jwts.builder()
-            .subject(String.valueOf(userId))
-            .claim("type", "refresh")
-            .issuedAt(now)
-            .expiration(expiration)
-            .signWith(getSigningKey())
-            .compact();
+                .subject(String.valueOf(userId))
+                .claim("type", "refresh")
+                .issuedAt(now)
+                .expiration(expiration)
+                .signWith(getSigningKey())
+                .compact();
     }
-    
+
     /**
      * 임시 액세스 토큰 생성 (회원가입 중)
      * 
-     * @param userId 사용자 ID
+     * @param socialId 소셜 ID
+     * @param provider 소셜 제공자
+     * @param email    이메일
      * @return 임시 액세스 토큰 (30분 유효)
      */
-    public String generateTempAccessToken(Long userId) {
+    public String generateTempAccessToken(String socialId, String provider, String email) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + 1800000); // 30분
-        
+
         return Jwts.builder()
-            .subject(String.valueOf(userId))
-            .claim("type", "temp")
-            .issuedAt(now)
-            .expiration(expiration)
-            .signWith(getSigningKey())
-            .compact();
+                .subject("TEMP_USER")
+                .claim("type", "temp")
+                .claim("socialId", socialId)
+                .claim("provider", provider)
+                .claim("email", email)
+                .issuedAt(now)
+                .expiration(expiration)
+                .signWith(getSigningKey())
+                .compact();
     }
-    
+
+    /**
+     * 토큰에서 소셜 정보 추출
+     */
+    public Claims getClaimsFromToken(String token) {
+        return parseToken(token);
+    }
+
     /**
      * 토큰에서 사용자 ID 추출
      * 
@@ -96,7 +108,7 @@ public class JwtUtil {
         Claims claims = parseToken(token);
         return Long.parseLong(claims.getSubject());
     }
-    
+
     /**
      * 토큰 파싱
      * 
@@ -106,10 +118,10 @@ public class JwtUtil {
     public Claims parseToken(String token) {
         try {
             return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (ExpiredJwtException e) {
             log.error("만료된 JWT 토큰입니다.", e);
             throw new RuntimeException("만료된 토큰입니다.");
@@ -127,7 +139,7 @@ public class JwtUtil {
             throw new RuntimeException("유효하지 않은 토큰입니다.");
         }
     }
-    
+
     /**
      * 토큰 검증
      * 
@@ -142,7 +154,7 @@ public class JwtUtil {
             return false;
         }
     }
-    
+
     /**
      * 토큰 타입 확인
      * 
@@ -154,4 +166,3 @@ public class JwtUtil {
         return claims.get("type", String.class);
     }
 }
-
