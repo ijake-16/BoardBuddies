@@ -48,6 +48,114 @@ public class ClubController {
     }
     
     /**
+     * 동아리 상세 정보 조회
+     * 
+     * GET /api/clubs/{clubId}
+     * 
+     * @param clubId 동아리 ID
+     * @return 동아리 상세 정보
+     */
+    @GetMapping("/{clubId}")
+    public ResponseEntity<ApiResponse<ClubDetailResponse>> getClubDetail(@PathVariable Long clubId) {
+        try {
+            ClubDetailResponse club = clubService.getClubDetail(clubId);
+            return ResponseEntity.ok(
+                ApiResponse.success(200, "동아리 정보 조회 성공", club)
+            );
+        } catch (RuntimeException e) {
+            log.error("동아리 정보 조회 중 에러 발생", e);
+            
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && errorMessage.contains("찾을 수 없습니다")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, "해당 동아리를 찾을 수 없습니다."));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+            }
+        }
+    }
+    
+    /**
+     * 동아리 정보 수정
+     * 
+     * PATCH /api/clubs/{clubId}
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param clubId 동아리 ID
+     * @param request 수정 요청
+     * @return 수정 결과
+     */
+    @PatchMapping("/{clubId}")
+    public ResponseEntity<ApiResponse<Void>> updateClub(
+        @CurrentUser Long userId,
+        @PathVariable Long clubId,
+        @Valid @RequestBody ClubUpdateRequest request) {
+        
+        try {
+            clubService.updateClub(userId, clubId, request);
+            return ResponseEntity.ok(
+                ApiResponse.success(200, "동아리 정보 수정 성공", null)
+            );
+        } catch (RuntimeException e) {
+            log.error("동아리 정보 수정 중 에러 발생", e);
+            
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && errorMessage.contains("수정 권한이 없습니다")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, "수정 권한이 없습니다."));
+            } else if (errorMessage != null && errorMessage.contains("찾을 수 없습니다")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, "해당 동아리를 찾을 수 없습니다."));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+            }
+        }
+    }
+    
+    /**
+     * 동아리 삭제
+     * 
+     * DELETE /api/clubs/{clubId}
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param clubId 동아리 ID
+     * @param request 삭제 요청 (PIN 확인용)
+     * @return 삭제 결과
+     */
+    @DeleteMapping("/{clubId}")
+    public ResponseEntity<ApiResponse<Void>> deleteClub(
+        @CurrentUser Long userId,
+        @PathVariable Long clubId,
+        @Valid @RequestBody ClubDeleteRequest request) {
+        
+        try {
+            clubService.deleteClub(userId, clubId, request);
+            return ResponseEntity.ok(
+                ApiResponse.success(200, "동아리 삭제 성공", null)
+            );
+        } catch (RuntimeException e) {
+            log.error("동아리 삭제 중 에러 발생", e);
+            
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && errorMessage.contains("삭제 권한이 없습니다")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error(401, "동아리 삭제 권한이 없습니다."));
+            } else if (errorMessage != null && errorMessage.contains("PIN이 일치하지 않습니다")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, "PIN이 일치하지 않습니다."));
+            } else if (errorMessage != null && errorMessage.contains("찾을 수 없습니다")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, "해당 동아리를 찾을 수 없습니다."));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+            }
+        }
+    }
+    
+    /**
      * 동아리 생성
      * 
      * POST /api/clubs

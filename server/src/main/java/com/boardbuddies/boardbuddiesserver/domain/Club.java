@@ -77,5 +77,33 @@ public class Club {
     public boolean verifyPIN(Integer pin) {
         return this.clubPIN.equals(pin);
     }
+    
+    /**
+     * 동아리 이름 수정
+     */
+    public void updateName(String name) {
+        this.name = name;
+    }
+    
+    /**
+     * 동아리 PIN 수정
+     */
+    public void updateClubPIN(Integer clubPIN) {
+        this.clubPIN = clubPIN;
+    }
+    
+    /**
+     * 예약 요일 수정
+     */
+    public void updateReservationDay(DayOfWeek reservationDay) {
+        this.reservationDay = reservationDay;
+    }
+    
+    /**
+     * 예약 시간 수정
+     */
+    public void updateReservationTime(LocalTime reservationTime) {
+        this.reservationTime = reservationTime;
+    }
 }
 

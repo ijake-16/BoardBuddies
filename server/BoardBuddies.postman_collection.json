@@ -437,6 +437,113 @@
           "path": ["api", "clubs"]
         }
       }
+    },
+    {
+      "name": "동아리 상세 조회",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/clubs/{{club_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "clubs", "{{club_id}}"]
+        }
+      }
+    },
+    {
+      "name": "동아리 정보 수정",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰 (MANAGER 이상 권한 필요)"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clubName\": \"snoooowholic\",\n  \"manager_list\": [\"2312345\", \"2412345\", \"2212345\"],\n  \"clubPIN\": 5678,\n  \"reservation_day\": \"SATURDAY\",\n  \"reservation_time\": \"18:00:00\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/clubs/{{club_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "clubs", "{{club_id}}"]
+        }
+      }
+    },
+    {
+      "name": "동아리 삭제",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰 (PRESIDENT 권한 필요)"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clubPIN\": 1234\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/clubs/{{club_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "clubs", "{{club_id}}"]
+        }
+      }
+    },
+    {
+      "name": "에러 - 잘못된 PIN으로 동아리 삭제",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clubPIN\": 9999\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/clubs/{{club_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "clubs", "{{club_id}}"]
+        }
+      }
     }
   ],
   "variable": [

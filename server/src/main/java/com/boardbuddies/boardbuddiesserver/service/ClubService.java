@@ -1,9 +1,7 @@
 package com.boardbuddies.boardbuddiesserver.service;
 
 import com.boardbuddies.boardbuddiesserver.domain.*;
-import com.boardbuddies.boardbuddiesserver.dto.club.ClubCreateRequest;
-import com.boardbuddies.boardbuddiesserver.dto.club.ClubCreateResponse;
-import com.boardbuddies.boardbuddiesserver.dto.club.ClubListResponse;
+import com.boardbuddies.boardbuddiesserver.dto.club.*;
 import com.boardbuddies.boardbuddiesserver.repository.ClubRepository;
 import com.boardbuddies.boardbuddiesserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -100,6 +98,127 @@ public class ClubService {
                 return ClubListResponse.from(club, presidentId);
             })
             .collect(Collectors.toList());
+    }
+    
+    /**
+     * 동아리 상세 정보 조회
+     * 
+     * @param clubId 동아리 ID
+     * @return 동아리 상세 정보
+     */
+    @Transactional(readOnly = true)
+    public ClubDetailResponse getClubDetail(Long clubId) {
+        Club club = clubRepository.findById(clubId)
+            .orElseThrow(() -> new RuntimeException("해당 동아리를 찾을 수 없습니다."));
+        
+        return ClubDetailResponse.from(club);
+    }
+    
+    /**
+     * 동아리 정보 수정
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param clubId 동아리 ID
+     * @param request 수정 요청
+     */
+    @Transactional
+    public void updateClub(Long userId, Long clubId, ClubUpdateRequest request) {
+        // 동아리 조회
+        Club club = clubRepository.findById(clubId)
+            .orElseThrow(() -> new RuntimeException("해당 동아리를 찾을 수 없습니다."));
+        
+        // 사용자 조회 및 권한 확인 (MANAGER 또는 PRESIDENT)
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        
+        if (!user.getClub().equals(club) || 
+            (user.getRole() != Role.MANAGER && user.getRole() != Role.PRESIDENT)) {
+            throw new RuntimeException("수정 권한이 없습니다.");
+        }
+        
+        // 동아리명 수정
+        if (request.getClubName() != null && !request.getClubName().isBlank()) {
+            club.updateName(request.getClubName());
+        }
+        
+        // PIN 수정
+        if (request.getClubPIN() != null) {
+            club.updateClubPIN(request.getClubPIN());
+        }
+        
+        // 예약 요일 수정
+        if (request.getReservationDay() != null && !request.getReservationDay().isBlank()) {
+            DayOfWeek dayOfWeek = DayOfWeek.valueOf(request.getReservationDay());
+            club.updateReservationDay(dayOfWeek);
+        }
+        
+        // 예약 시간 수정
+        if (request.getReservationTime() != null && !request.getReservationTime().isBlank()) {
+            LocalTime time = LocalTime.parse(request.getReservationTime());
+            club.updateReservationTime(time);
+        }
+        
+        // 운영진 목록 수정
+        if (request.getManagerList() != null) {
+            // 기존 운영진 제거 (PRESIDENT 제외)
+            List<User> existingManagers = userRepository.findAll().stream()
+                .filter(u -> u.getClub() != null && u.getClub().equals(club) && u.getRole() == Role.MANAGER)
+                .collect(Collectors.toList());
+            
+            for (User manager : existingManagers) {
+                manager.leaveClub();
+            }
+            
+            // 회장 찾기
+            User president = userRepository.findByClubAndRole(club, Role.PRESIDENT)
+                .orElseThrow(() -> new RuntimeException("동아리 회장을 찾을 수 없습니다."));
+            
+            // 새로운 운영진 지정
+            assignManagers(club, president, request.getManagerList());
+        }
+        
+        log.info("동아리 정보 수정 완료: clubId={}, updatedBy={}", clubId, userId);
+    }
+    
+    /**
+     * 동아리 삭제
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param clubId 동아리 ID
+     * @param request 삭제 요청 (PIN 확인용)
+     */
+    @Transactional
+    public void deleteClub(Long userId, Long clubId, ClubDeleteRequest request) {
+        // 동아리 조회
+        Club club = clubRepository.findById(clubId)
+            .orElseThrow(() -> new RuntimeException("해당 동아리를 찾을 수 없습니다."));
+        
+        // 사용자 조회 및 권한 확인 (PRESIDENT만 가능)
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        
+        if (!user.getClub().equals(club) || user.getRole() != Role.PRESIDENT) {
+            throw new RuntimeException("동아리 삭제 권한이 없습니다.");
+        }
+        
+        // PIN 확인
+        if (!club.verifyPIN(request.getClubPIN())) {
+            throw new RuntimeException("PIN이 일치하지 않습니다.");
+        }
+        
+        // 동아리 소속 모든 회원의 club과 role 제거
+        List<User> members = userRepository.findAll().stream()
+            .filter(u -> u.getClub() != null && u.getClub().equals(club))
+            .collect(Collectors.toList());
+        
+        for (User member : members) {
+            member.leaveClub();
+        }
+        
+        // 동아리 삭제
+        clubRepository.delete(club);
+        
+        log.info("동아리 삭제 완료: clubId={}, deletedBy={}", clubId, userId);
     }
     
     /**
