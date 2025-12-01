@@ -68,4 +68,16 @@ public class ReservationController {
 
         return ResponseEntity.ok(ApiResponse.success(200, "예약자 명단 조회 성공", response));
     }
+
+    @GetMapping("/{clubId}/reservations/day/{date}")
+    public ResponseEntity<ApiResponse<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse>> getDayReservationDetail(
+            @PathVariable Long clubId,
+            @CurrentUser Long userId,
+            @PathVariable String date) {
+
+        com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse response = reservationService
+                .getDayReservationDetail(userId, clubId, java.time.LocalDate.parse(date));
+
+        return ResponseEntity.ok(ApiResponse.success(200, "일자 상세 조회 성공", response));
+    }
 }

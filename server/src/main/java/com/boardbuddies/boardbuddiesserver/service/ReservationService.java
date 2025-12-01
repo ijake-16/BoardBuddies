@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +48,7 @@ public class ReservationService {
         }
 
         // 3. 오픈 시각 검증
-        validateOpenTime(club);
+        validateOpenTime(club, request.getDates());
 
         List<ReservationMultiResponse.ReservationResult> results = new ArrayList<>();
         int succeeded = 0;
@@ -102,63 +101,6 @@ public class ReservationService {
                         .failed(failed)
                         .build())
                 .build();
-    }
-
-    private void validateOpenTime(Club club) {
-        if (club.getReservationDay() == null || club.getReservationTime() == null) {
-            return; // 설정 없으면 상시 오픈으로 간주 (또는 에러 처리)
-        }
-
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        DayOfWeek currentDay = DayOfWeek.valueOf(now.getDayOfWeek().name());
-        LocalTime currentTime = now.toLocalTime();
-
-        // 간단한 로직: 오픈 요일/시간 이후여야 함.
-        // 실제로는 "이번 주 오픈 시간"을 계산해야 하지만, 여기서는 단순하게 요일/시간만 비교
-        // (더 정교한 로직이 필요하면 추가 구현)
-        // 예: 매주 월요일 10시 오픈 -> 현재가 월요일 10시 이후인지, 아니면 화~일인지.
-
-        // 여기서는 단순화하여 "현재 요일이 오픈 요일보다 빠르면 불가" 또는 "같은 요일인데 시간이 빠르면 불가"로 구현
-        // 주의: DayOfWeek enum 순서 (SUNDAY=0, ... SATURDAY=6) 가정
-        // Java DayOfWeek는 MONDAY(1) ~ SUNDAY(7).
-        // 우리 도메인 DayOfWeek는 SUNDAY, MONDAY... 순서라고 가정하고 valueOf로 변환했음.
-        // 도메인 DayOfWeek의 ordinal을 확인해야 함.
-
-        int openDayOrdinal = club.getReservationDay().ordinal(); // SUNDAY=0, MONDAY=1...
-        int currentDayOrdinal = convertJavaDayOfWeekToDomain(now.getDayOfWeek());
-
-        if (currentDayOrdinal < openDayOrdinal) {
-            // 아직 오픈 요일이 아님 (이번 주 기준)
-            // 하지만 "지난 주 오픈"일 수도 있음. 이 부분은 정책에 따라 다름.
-            // 보통 "매주 월요일 10시에 이번 주/다음 주 예약 오픈" 형식이 많음.
-            // 여기서는 "예약 오픈 시각 이후"라는 요구사항만 충족하도록,
-            // "현재 시각이 오픈 시각보다 이전이면 에러"라고 가정하지 않고,
-            // "오픈 요일/시간이 되면 열린다"는 개념으로 접근.
-
-            // 일단 단순하게: 오늘이 오픈 요일이고, 시간이 아직 안 됐으면 에러.
-            // 오늘이 오픈 요일보다 이전이면? (예: 오픈 월요일, 오늘 일요일) -> 에러?
-            // 이 부분은 "주차" 개념이 없어서 애매함.
-            // 요구사항: "예약 오픈 시각 이후"
-
-            // 가장 안전한 해석:
-            // 만약 오늘이 오픈 요일이라면, 오픈 시간 이후여야 함.
-            // 오늘이 오픈 요일이 아니라면? 열려있는 것으로 간주? 아니면 닫힌 것으로 간주?
-            // 보통 "예약 기간"이 정해져 있지 않으면 상시 오픈이거나, 특정 요일에만 열림.
-            // 여기서는 "오픈 시각 이후에는 계속 열려있다"고 가정.
-            // 즉, 금주 오픈 요일/시간을 지났는지 체크.
-        }
-
-        if (currentDayOrdinal == openDayOrdinal && currentTime.isBefore(club.getReservationTime())) {
-            throw new RuntimeException("예약 오픈 시간 전입니다.");
-        }
-    }
-
-    private int convertJavaDayOfWeekToDomain(java.time.DayOfWeek javaDay) {
-        // Java: MON(1) ... SUN(7)
-        // Domain: SUN(0), MON(1) ... SAT(6) (가정)
-        if (javaDay == java.time.DayOfWeek.SUNDAY)
-            return 0;
-        return javaDay.getValue();
     }
 
     private Reservation processSingleReservation(User user, Club club, LocalDate date) {
@@ -292,5 +234,161 @@ public class ReservationService {
                 .confirmed(confirmedList)
                 .waiting(waitingList)
                 .build();
+    }
+
+    /**
+     * 날짜별 예약 상세 조회 (단건)
+     */
+    @Transactional(readOnly = true)
+    public com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse getDayReservationDetail(
+            Long userId, Long clubId, LocalDate date) {
+
+        // 1. 사용자 및 동아리 조회
+        User user = Objects.requireNonNull(userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> new RuntimeException("동아리를 찾을 수 없습니다."));
+
+        if (!user.getClub().equals(club)) {
+            throw new RuntimeException("해당 동아리의 회원이 아닙니다.");
+        }
+
+        // 2. 상태 결정 (open/closed)
+        String status = "open";
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+
+        // 2-1. 마감 시간 체크 (예약일 다음날 새벽 2시까지)
+        LocalDateTime deadline = getDeadline(date);
+        if (now.isAfter(deadline)) {
+            status = "closed";
+        }
+
+        // 2-2. 오픈 시간 체크
+        if (club.getReservationDay() != null && club.getReservationTime() != null) {
+            LocalDateTime openDateTime = getOpenDateTime(date, club);
+            if (now.isBefore(openDateTime)) {
+                status = "closed";
+            }
+        }
+
+        // 3. 예약 목록 조회
+        List<Reservation> reservations = reservationRepository.findByClubAndDateAndStatusNot(club, date, "CANCELLED");
+
+        int booked = 0;
+        List<String> memberList = new ArrayList<>();
+        List<String> waitingMemberList = new ArrayList<>();
+        com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo myReservationInfo = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo
+                .builder()
+                .exists(false)
+                .build();
+
+        for (Reservation r : reservations) {
+            String memberName = r.getUser().getSchool() + " " + r.getUser().getName();
+
+            if ("confirmed".equals(r.getStatus())) {
+                booked++;
+                memberList.add(memberName);
+            } else if ("waiting".equals(r.getStatus())) {
+                waitingMemberList.add(memberName);
+            }
+
+            // 내 예약 확인
+            if (r.getUser().getId().equals(userId)) {
+                myReservationInfo = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo
+                        .builder()
+                        .exists(true)
+                        .reservationId(r.getId())
+                        .createdAt(r.getCreatedAt().atZone(ZoneId.of("Asia/Seoul")))
+                        .build();
+            }
+        }
+
+        int remaining = Math.max(0, club.getDailyCapacity() - booked);
+
+        return com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.builder()
+                .date(date)
+                .status(status)
+                .booked(booked)
+                .remaining(remaining)
+                .memberList(memberList)
+                .waitingMemberList(waitingMemberList)
+                .myReservation(myReservationInfo)
+                .build();
+    }
+
+    /**
+     * 예약 마감 시간 계산
+     * 해당 날짜의 다음날 새벽 2시
+     */
+    private LocalDateTime getDeadline(LocalDate date) {
+        return date.plusDays(1).atTime(2, 0);
+    }
+
+    /**
+     * 예약 오픈 시간 계산
+     * 해당 날짜가 속한 주의 전 주(Previous Week)의 설정된 요일/시간
+     * (주의 시작은 월요일 기준)
+     */
+    private LocalDateTime getOpenDateTime(LocalDate targetDate, Club club) {
+        // 1. 해당 날짜가 속한 주의 월요일 구하기
+        LocalDate targetWeekMonday = targetDate
+                .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+
+        // 2. 전 주 월요일 구하기
+        LocalDate prevWeekMonday = targetWeekMonday.minusWeeks(1);
+
+        // 3. 전 주의 설정된 요일 구하기
+        // Club의 DayOfWeek는 도메인 Enum이므로 Java DayOfWeek로 변환 필요
+        java.time.DayOfWeek javaDayOfWeek = convertDomainDayToJavaDay(club.getReservationDay());
+
+        // 전 주 월요일부터 해당 요일까지 이동
+        // (월요일부터 시작하므로, 해당 요일이 월요일이면 +0, 화요일이면 +1 ...)
+        // TemporalAdjusters.nextOrSame을 사용하면 편리함
+        LocalDate openDate = prevWeekMonday.with(java.time.temporal.TemporalAdjusters.nextOrSame(javaDayOfWeek));
+
+        return LocalDateTime.of(openDate, club.getReservationTime());
+    }
+
+    private java.time.DayOfWeek convertDomainDayToJavaDay(DayOfWeek domainDay) {
+        switch (domainDay) {
+            case MONDAY:
+                return java.time.DayOfWeek.MONDAY;
+            case TUESDAY:
+                return java.time.DayOfWeek.TUESDAY;
+            case WEDNESDAY:
+                return java.time.DayOfWeek.WEDNESDAY;
+            case THURSDAY:
+                return java.time.DayOfWeek.THURSDAY;
+            case FRIDAY:
+                return java.time.DayOfWeek.FRIDAY;
+            case SATURDAY:
+                return java.time.DayOfWeek.SATURDAY;
+            case SUNDAY:
+                return java.time.DayOfWeek.SUNDAY;
+            default:
+                throw new IllegalArgumentException("Invalid DayOfWeek: " + domainDay);
+        }
+    }
+
+    private void validateOpenTime(Club club, List<LocalDate> dates) {
+        if (club.getReservationDay() == null || club.getReservationTime() == null) {
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+
+        for (LocalDate date : dates) {
+            // 1. 마감 시간 체크
+            LocalDateTime deadline = getDeadline(date);
+            if (now.isAfter(deadline)) {
+                throw new RuntimeException("예약 마감 시간이 지났습니다. (" + date + ")");
+            }
+
+            // 2. 오픈 시간 체크
+            LocalDateTime openDateTime = getOpenDateTime(date, club);
+            if (now.isBefore(openDateTime)) {
+                throw new RuntimeException("아직 예약 오픈 시간이 아닙니다. (" + date + " 예약은 " + openDateTime + "에 오픈)");
+            }
+        }
     }
 }

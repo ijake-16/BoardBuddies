@@ -826,6 +826,35 @@
           ]
         }
       }
+    },
+    {
+      "name": "일자별 예약 상세 조회 (캘린더)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/clubs/{{club_id}}/reservations/day/2025-12-05",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "clubs",
+            "{{club_id}}",
+            "reservations",
+            "day",
+            "2025-12-05"
+          ]
+        }
+      }
     }
   ],
   "variable": [
