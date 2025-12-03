@@ -7,24 +7,22 @@ import MyReservations from './pages/MyReservations';
 import LoginLanding from './pages/LoginLanding';
 import CrewDetail from './pages/CrewDetail';
 import UserInfoInput from './pages/UserInfoInput';
+import SearchCrew from './pages/SearchCrew';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
-  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'user_info'>('login');
-
-  if (currentView === 'login') {
-    return <LoginLanding
-      onLogin={() => setCurrentView('home')}
-      onDebugUserInfo={() => setCurrentView('user_info')}
-    />;
-  }
+  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info'>('login');
+  const [hasCrew, setHasCrew] = useState(false);
 
   return (
-    <div className="min-h-screen bg-zinc-100 dark:bg-zinc-900 font-sans text-zinc-900 dark:text-zinc-100 flex justify-center">
-      {/* Mobile Container */}
-      <div className="w-full max-w-md bg-white dark:bg-zinc-950 min-h-screen relative shadow-2xl overflow-hidden flex flex-col">
-
-        {currentView === 'reservation' ? (
+    <div className="w-full h-screen bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center overflow-hidden">
+      <div className="w-full h-full max-w-md bg-white dark:bg-black relative shadow-2xl overflow-hidden flex flex-col">
+        {currentView === 'login' ? (
+          <LoginLanding
+            onLogin={() => setCurrentView('home')}
+            onDebugUserInfo={() => setCurrentView('user_info')}
+          />
+        ) : currentView === 'reservation' ? (
           <Reservation onBack={() => setCurrentView('home')} />
         ) : currentView === 'stats' ? (
           <ReservationStats onBack={() => setCurrentView('home')} />
@@ -35,20 +33,18 @@ function App() {
             onBack={() => setCurrentView('home')}
             onCalendarClick={() => setCurrentView('stats')}
           />
+        ) : currentView === 'search_crew' ? (
+          <SearchCrew onBack={() => setCurrentView('home')} />
         ) : currentView === 'user_info' ? (
-          <UserInfoInput
-            onBack={() => setCurrentView('login')}
-          />
+          <UserInfoInput onBack={() => setCurrentView('login')} />
         ) : (
           <Home
             onReservationClick={() => setCurrentView('reservation')}
             onTeamClick={() => setCurrentView('crew_detail')}
+            onSearchClick={() => setCurrentView('search_crew')}
+            hasCrew={hasCrew}
+            onJoinCrew={() => setHasCrew(true)}
           />
-        )}
-
-        {/* Fixed Bottom Menu */}
-        {currentView !== 'user_info' && (
-          <LowerMenuBar activeTab={activeTab} onTabChange={setActiveTab} className="absolute" />
         )}
       </div>
     </div>

@@ -44,18 +44,33 @@ const SnowflakeDecorIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-export default function Home({ onReservationClick, onTeamClick }: HomeProps) {
+const SearchIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+    </svg>
+);
+
+interface HomeProps {
+    onReservationClick: () => void;
+    onTeamClick: () => void;
+    onSearchClick: () => void;
+    hasCrew?: boolean;
+    onJoinCrew?: () => void;
+}
+
+export default function Home({ onReservationClick, onTeamClick, onSearchClick, hasCrew = true, onJoinCrew }: HomeProps) {
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F8F9FA] relative">
             {/* Header */}
-            <header className="px-6 pt-12 pb-4 flex items-center justify-between bg-white dark:bg-zinc-950 z-10">
+            <header className="px-6 pt-12 pb-4 flex items-center justify-between z-10">
                 <div className="flex items-center gap-2">
-                    <h1 className="text-[24px] font-normal tracking-tight" style={{ fontFamily: '"Joti One", serif' }}>BoardBuddy</h1>
+                    <h1 className="text-[20px] font-black italic text-zinc-900 font-['Joti_One']">BoardBuddy</h1>
                     {/* Shark Image removed due to missing file */}
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
-                        <BellIcon className="w-[24px] h-[24px]" />
+                    <Button variant="ghost" size="icon" onClick={onSearchClick} className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
+                        <SearchIcon className="w-[40px] h-[40px]" />
                     </Button>
                     <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <SettingsIcon className="w-[24px] h-[24px]" />
@@ -68,92 +83,120 @@ export default function Home({ onReservationClick, onTeamClick }: HomeProps) {
 
                 {/* Team Info */}
                 <div className="px-6 mb-8">
-                    <div className="text-sm text-zinc-500 font-medium mb-1">홍익대학교</div>
-                    <div
-                        onClick={onTeamClick}
-                        className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-                    >
-                        <h2 className="text-2xl font-bold">Team 401</h2>
-                        <CircleArrowRightIcon className="w-5 h-5 text-[#FCD34D]" />
-                    </div>
-                </div>
-
-                {/* Action Cards */}
-                <div className="px-8 grid grid-cols-2 gap-6 mb-8">
-                    {/* Reservation Card */}
-                    <button
-                        onClick={onReservationClick}
-                        className="bg-[#FCD34D] aspect-square rounded-[30px] p-6 flex flex-col items-center justify-center gap-3 text-zinc-900 hover:brightness-95 transition-all shadow-sm"
-                    >
-                        <div className="bg-white p-3 rounded-full shadow-sm">
-                            <CheckSquareIcon className="w-12 h-12 text-zinc-900" />
+                    {hasCrew ? (
+                        <>
+                            <div className="text-sm text-zinc-500 font-medium mb-1">홍익대학교</div>
+                            <div
+                                onClick={onTeamClick}
+                                className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                            >
+                                <h2 className="text-2xl font-bold">Team 401</h2>
+                                <CircleArrowRightIcon className="w-5 h-5 text-[#FCD34D]" />
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex items-center justify-between">
+                            <div
+                                onClick={onSearchClick}
+                                className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity py-2"
+                            >
+                                <h2 className="text-2xl font-bold text-zinc-400">크루에 가입하세요</h2>
+                                <CircleArrowRightIcon className="w-5 h-5 text-zinc-300" />
+                            </div>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onJoinCrew?.();
+                                }}
+                                className="text-xs h-8 px-3"
+                            >
+                                가입 (Debug)
+                            </Button>
                         </div>
-                        <span className="font-bold text-xl">예약하기</span>
-                    </button>
+                    )}
+                </div>
 
-                    {/* Upcoming Schedule Card */}
-                    <button
-                        onClick={onReservationClick}
-                        className="bg-[#D6E6F5] aspect-square rounded-[30px] p-5 flex flex-col hover:brightness-95 transition-all shadow-sm overflow-hidden relative text-left"
-                    >
-                        <div className="text-zinc-500 font-bold text-sm mb-3 w-full">다가오는 일정</div>
+                {hasCrew && (
+                    <>
+                        {/* Action Cards */}
+                        <div className="px-8 grid grid-cols-2 gap-6 mb-8">
+                            {/* Reservation Card */}
+                            <button
+                                onClick={onReservationClick}
+                                className="bg-[#FCD34D] aspect-square rounded-[30px] p-6 flex flex-col items-center justify-center gap-3 text-zinc-900 hover:brightness-95 transition-all shadow-sm"
+                            >
+                                <div className="bg-white p-3 rounded-full shadow-sm">
+                                    <CheckSquareIcon className="w-12 h-12 text-zinc-900" />
+                                </div>
+                                <span className="font-bold text-xl">예약하기</span>
+                            </button>
 
-                        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 w-full flex-1 flex flex-col justify-center gap-1 border-l-4 border-[#1E3A8A]">
-                            <div className="text-lg font-bold text-zinc-900">12월 30일</div>
-                            <div className="text-sm text-zinc-500 font-medium">예약 확정</div>
+                            {/* Upcoming Schedule Card */}
+                            <button
+                                onClick={onReservationClick}
+                                className="bg-[#D6E6F5] aspect-square rounded-[30px] p-5 flex flex-col hover:brightness-95 transition-all shadow-sm overflow-hidden relative text-left"
+                            >
+                                <div className="text-zinc-500 font-bold text-sm mb-3 w-full">다가오는 일정</div>
+
+                                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 w-full flex-1 flex flex-col justify-center gap-1 border-l-4 border-[#1E3A8A]">
+                                    <div className="text-lg font-bold text-zinc-900">12월 30일</div>
+                                    <div className="text-sm text-zinc-500 font-medium">예약 확정</div>
+                                </div>
+                            </button>
                         </div>
-                    </button>
-                </div>
 
-                {/* Calendar Section */}
-                <div className="px-8 mb-12">
-                    <div className="bg-[#F3E5D8] rounded-[30px] p-6 shadow-sm">
-                        <Calendar
-                            month="December"
-                            year={2025}
-                            startDayOfWeek={1}
-                            totalDays={31}
-                            hideHeader={true}
-                            maxWeeks={2}
-                            renderDay={(day) => {
-                                // Dummy dots for visualization
-                                const hasDot = [5, 12, 19].includes(day);
-                                const hasBlueDot = [2, 3].includes(day);
+                        {/* Calendar Section */}
+                        <div className="px-8 mb-12">
+                            <div className="bg-[#F3E5D8] rounded-[30px] p-6 shadow-sm">
+                                <Calendar
+                                    month="December"
+                                    year={2025}
+                                    startDayOfWeek={1}
+                                    totalDays={31}
+                                    hideHeader={true}
+                                    maxWeeks={2}
+                                    renderDay={(day) => {
+                                        // Dummy dots for visualization
+                                        const hasDot = [5, 12, 19].includes(day);
+                                        const hasBlueDot = [2, 3].includes(day);
 
-                                return (
-                                    <div className="w-8 h-8 flex flex-col items-center justify-center relative">
-                                        <span className={`text-sm font-medium text-zinc-500`}>{day}</span>
-                                        {hasDot && (
-                                            <div className="w-2 h-2 rounded-full bg-[#1E3A8A] opacity-60 absolute bottom-0" />
-                                        )}
-                                        {hasBlueDot && (
-                                            <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-0" />
-                                        )}
-                                    </div>
-                                );
-                            }}
-                        />
-                    </div>
-                </div>
+                                        return (
+                                            <div className="w-8 h-8 flex flex-col items-center justify-center relative">
+                                                <span className={`text-sm font-medium text-zinc-500`}>{day}</span>
+                                                {hasDot && (
+                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] opacity-60 absolute bottom-0" />
+                                                )}
+                                                {hasBlueDot && (
+                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-0" />
+                                                )}
+                                            </div>
+                                        );
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div className="w-full bg-gradient-to-r from-[#F8CACC] to-[#A0C4FF] min-h-[120px] flex items-center justify-between relative overflow-hidden">
+                            {/* Background decoration */}
+                            <div className="absolute left-2 bottom-[-10px] opacity-60">
+                                <SnowflakeDecorIcon className="w-32 h-32 text-white" />
+                            </div>
+                            <div className="absolute left-20 top-[-20px] opacity-40">
+                                <SnowflakeDecorIcon className="w-16 h-16 text-white" />
+                            </div>
 
-                {/* Weather Banner */}
-                <div className="w-full bg-gradient-to-r from-[#F8CACC] to-[#A0C4FF] min-h-[120px] flex items-center justify-between relative overflow-hidden">
-                    {/* Background decoration */}
-                    <div className="absolute left-2 bottom-[-10px] opacity-60">
-                        <SnowflakeDecorIcon className="w-32 h-32 text-white" />
-                    </div>
-                    <div className="absolute left-20 top-[-20px] opacity-40">
-                        <SnowflakeDecorIcon className="w-16 h-16 text-white" />
-                    </div>
+                            <div className="z-10 pl-8 py-6">
+                                <div className="font-bold text-lg text-white">휘닉스파크</div>
+                                <div className="text-sm text-white/90">2025. 11. 11 Tue</div>
+                            </div>
+                            <div className="z-10 pr-8 text-5xl font-light text-white">
+                                33<span className="text-2xl align-top">°</span>
+                            </div>
+                        </div>
+                    </>
+                )}
 
-                    <div className="z-10 pl-8 py-6">
-                        <div className="font-bold text-lg text-white">휘닉스파크</div>
-                        <div className="text-sm text-white/90">2025. 11. 11 Tue</div>
-                    </div>
-                    <div className="z-10 pr-8 text-5xl font-light text-white">
-                        33<span className="text-2xl align-top">°</span>
-                    </div>
-                </div>
 
             </main>
         </div>
