@@ -13,6 +13,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
   const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info'>('login');
   const [hasCrew, setHasCrew] = useState(false);
+  const [statsInitialView, setStatsInitialView] = useState<'crew' | 'my'>('crew');
 
   return (
     <div className="w-full h-screen bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center overflow-hidden">
@@ -25,13 +26,19 @@ function App() {
         ) : currentView === 'reservation' ? (
           <Reservation onBack={() => setCurrentView('home')} />
         ) : currentView === 'stats' ? (
-          <ReservationStats onBack={() => setCurrentView('home')} />
+          <ReservationStats
+            onBack={() => setCurrentView('home')}
+            initialView={statsInitialView}
+          />
         ) : currentView === 'my_reservations' ? (
           <MyReservations onBack={() => setCurrentView('home')} />
         ) : currentView === 'crew_detail' ? (
           <CrewDetail
             onBack={() => setCurrentView('home')}
-            onCalendarClick={() => setCurrentView('stats')}
+            onCalendarClick={() => {
+              setStatsInitialView('crew');
+              setCurrentView('stats');
+            }}
           />
         ) : currentView === 'search_crew' ? (
           <SearchCrew onBack={() => setCurrentView('home')} />
@@ -39,7 +46,15 @@ function App() {
           <UserInfoInput onBack={() => setCurrentView('login')} />
         ) : (
           <Home
-            onReservationClick={() => setCurrentView('reservation')}
+            onMakeReservationClick={() => setCurrentView('reservation')}
+            onCheckScheduleClick={() => {
+              setStatsInitialView('my');
+              setCurrentView('stats');
+            }}
+            onCalendarClick={() => {
+              setStatsInitialView('crew');
+              setCurrentView('stats');
+            }}
             onTeamClick={() => setCurrentView('crew_detail')}
             onSearchClick={() => setCurrentView('search_crew')}
             hasCrew={hasCrew}

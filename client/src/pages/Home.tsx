@@ -52,14 +52,24 @@ const SearchIcon = ({ className }: { className?: string }) => (
 );
 
 interface HomeProps {
-    onReservationClick: () => void;
+    onMakeReservationClick: () => void;
+    onCheckScheduleClick: () => void;
+    onCalendarClick: () => void;
     onTeamClick: () => void;
     onSearchClick: () => void;
     hasCrew?: boolean;
     onJoinCrew?: () => void;
 }
 
-export default function Home({ onReservationClick, onTeamClick, onSearchClick, hasCrew = true, onJoinCrew }: HomeProps) {
+export default function Home({
+    onMakeReservationClick,
+    onCheckScheduleClick,
+    onCalendarClick,
+    onTeamClick,
+    onSearchClick,
+    hasCrew = true,
+    onJoinCrew
+}: HomeProps) {
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F8F9FA] relative">
             {/* Header */}
@@ -121,22 +131,22 @@ export default function Home({ onReservationClick, onTeamClick, onSearchClick, h
                 {hasCrew && (
                     <>
                         {/* Action Cards */}
-                        <div className="px-8 grid grid-cols-2 gap-6 mb-8">
+                        <div className="px-6 mb-8 grid grid-cols-2 gap-4">
                             {/* Reservation Card */}
                             <button
-                                onClick={onReservationClick}
-                                className="bg-[#FCD34D] aspect-square rounded-[30px] p-6 flex flex-col items-center justify-center gap-3 text-zinc-900 hover:brightness-95 transition-all shadow-sm"
+                                onClick={onMakeReservationClick}
+                                className="bg-[#FCD34D] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-3"
                             >
-                                <div className="bg-white p-3 rounded-full shadow-sm">
-                                    <CheckSquareIcon className="w-12 h-12 text-zinc-900" />
+                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
+                                    <CheckSquareIcon className="w-6 h-6 text-zinc-900" />
                                 </div>
-                                <span className="font-bold text-xl">예약하기</span>
+                                <span className="font-bold text-lg">예약하기</span>
                             </button>
 
                             {/* Upcoming Schedule Card */}
                             <button
-                                onClick={onReservationClick}
-                                className="bg-[#D6E6F5] aspect-square rounded-[30px] p-5 flex flex-col hover:brightness-95 transition-all shadow-sm overflow-hidden relative text-left"
+                                onClick={onCheckScheduleClick}
+                                className="bg-[#D6E6F5] aspect-square rounded-[20px] p-5 flex flex-col hover:brightness-95 transition-all shadow-sm overflow-hidden relative text-left"
                             >
                                 <div className="text-zinc-500 font-bold text-sm mb-3 w-full">다가오는 일정</div>
 
@@ -148,28 +158,31 @@ export default function Home({ onReservationClick, onTeamClick, onSearchClick, h
                         </div>
 
                         {/* Calendar Section */}
-                        <div className="px-8 mb-12">
-                            <div className="bg-[#F3E5D8] rounded-[30px] p-6 shadow-sm">
+                        <div className="px-6 mb-8">
+                            <div
+                                onClick={onCalendarClick}
+                                className="bg-[#F3E5D8] rounded-[30px] p-6 shadow-sm cursor-pointer hover:brightness-95 transition-all"
+                            >
                                 <Calendar
                                     month="December"
                                     year={2025}
                                     startDayOfWeek={1}
                                     totalDays={31}
+                                    expandable={false}
                                     hideHeader={true}
                                     maxWeeks={2}
                                     renderDay={(day) => {
-                                        // Dummy dots for visualization
                                         const hasDot = [5, 12, 19].includes(day);
                                         const hasBlueDot = [2, 3].includes(day);
 
                                         return (
                                             <div className="w-8 h-8 flex flex-col items-center justify-center relative">
-                                                <span className={`text-sm font-medium text-zinc-500`}>{day}</span>
+                                                <span className="text-sm font-medium text-zinc-500">{day}</span>
                                                 {hasDot && (
-                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] opacity-60 absolute bottom-0" />
+                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] opacity-60 absolute bottom-1" />
                                                 )}
                                                 {hasBlueDot && (
-                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-0" />
+                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-1" />
                                                 )}
                                             </div>
                                         );
@@ -177,6 +190,8 @@ export default function Home({ onReservationClick, onTeamClick, onSearchClick, h
                                 />
                             </div>
                         </div>
+
+                        {/* Weather Banner */}
                         <div className="w-full bg-gradient-to-r from-[#F8CACC] to-[#A0C4FF] min-h-[120px] flex items-center justify-between relative overflow-hidden">
                             {/* Background decoration */}
                             <div className="absolute left-2 bottom-[-10px] opacity-60">
@@ -198,7 +213,7 @@ export default function Home({ onReservationClick, onTeamClick, onSearchClick, h
                 )}
 
 
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }

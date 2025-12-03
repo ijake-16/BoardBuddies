@@ -97,11 +97,11 @@ export default function Reservation({ onBack }: ReservationProps) {
                                     return (
                                         <button
                                             onClick={() => toggleDay(day)}
-                                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm bg-[#4CAF50] hover:bg-[#43A047] transition-colors relative"
+                                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm bg-[#162660] hover:bg-[#43A047] transition-colors relative"
                                         >
                                             {day}
                                             <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
-                                                <CheckIcon className="w-3 h-3 text-[#4CAF50]" />
+                                                <CheckIcon className="w-3 h-3 text-[#162660]" />
                                             </div>
                                         </button>
                                     );
