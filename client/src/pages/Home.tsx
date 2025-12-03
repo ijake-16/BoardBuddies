@@ -108,7 +108,7 @@ export default function Home({
                                 <CircleArrowRightIcon className="w-5 h-5 text-zinc-300" />
                             </div>
                             <Button
-                                size="sm"
+                                size="small"
                                 variant="outline"
                                 onClick={(e) => {
                                     e.stopPropagation();

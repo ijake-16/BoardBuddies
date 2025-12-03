@@ -70,12 +70,18 @@ export default function ReservationStats({ onBack, initialView = 'crew' }: Reser
                         <div className="bg-white px-4 py-1.5 rounded-full shadow-sm text-sm font-bold text-zinc-900">
                             2025
                         </div>
-                        <button
-                            onClick={() => setView(view === 'crew' ? 'my' : 'crew')}
-                            className="bg-[#71717A] px-4 py-1.5 rounded-full shadow-sm text-sm font-bold text-white hover:bg-zinc-600 transition-colors"
-                        >
-                            {view === 'crew' ? '나의 달력' : '크루 달력'}
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <span className={`text-sm font-bold transition-colors ${view === 'crew' ? 'text-zinc-900' : 'text-zinc-400'}`}>크루 달력</span>
+                            <button
+                                onClick={() => setView(view === 'crew' ? 'my' : 'crew')}
+                                className={`w-12 h-7 rounded-full p-1 transition-colors duration-200 ease-in-out relative ${view === 'my' ? 'bg-[#4CAF50]' : 'bg-zinc-300'}`}
+                            >
+                                <div
+                                    className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ease-in-out ${view === 'my' ? 'translate-x-5' : 'translate-x-0'}`}
+                                />
+                            </button>
+                            <span className={`text-sm font-bold transition-colors ${view === 'my' ? 'text-zinc-900' : 'text-zinc-400'}`}>나의 달력</span>
+                        </div>
                     </div>
 
                     {/* Calendar Card */}
