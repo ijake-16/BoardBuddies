@@ -123,11 +123,11 @@ export const LowerMenuBar = ({
   return (
     <nav
       className={cn(
-        'fixed bottom-8 left-1/2 -translate-x-1/2 z-50',
+        'absolute bottom-2 left-1/2 -translate-x-1/2 z-50',
         'flex items-center justify-around',
         'bg-white dark:bg-zinc-900',
         'shadow-[0_4px_20px_rgba(0,0,0,0.1)]',
-        'py-3 px-6 h-auto w-[90%] max-w-[380px]',
+        'py-2 px-6 h-auto w-[75%] max-w-[380px]',
         'rounded-[24px]',
         className
       )}

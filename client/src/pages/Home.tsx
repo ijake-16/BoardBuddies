@@ -1,3 +1,4 @@
+import { Bell } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
 
@@ -44,13 +45,6 @@ const SnowflakeDecorIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-const SearchIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <circle cx="11" cy="11" r="8" />
-        <path d="m21 21-4.3-4.3" />
-    </svg>
-);
-
 interface HomeProps {
     onMakeReservationClick: () => void;
     onCheckScheduleClick: () => void;
@@ -80,7 +74,7 @@ export default function Home({
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" onClick={onSearchClick} className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
-                        <SearchIcon className="w-[40px] h-[40px]" />
+                        <BellIcon className="w-[24px] h-[24px]" />
                     </Button>
                     <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <SettingsIcon className="w-[24px] h-[24px]" />
@@ -131,11 +125,11 @@ export default function Home({
                 {hasCrew && (
                     <>
                         {/* Action Cards */}
-                        <div className="px-6 mb-8 grid grid-cols-2 gap-4">
+                        <div className="px-8 mb-8 grid grid-cols-2 gap-6">
                             {/* Reservation Card */}
                             <button
                                 onClick={onMakeReservationClick}
-                                className="bg-[#FCD34D] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-3"
+                                className="bg-[#FCD34D] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-4"
                             >
                                 <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
                                     <CheckSquareIcon className="w-6 h-6 text-zinc-900" />
@@ -158,7 +152,7 @@ export default function Home({
                         </div>
 
                         {/* Calendar Section */}
-                        <div className="px-6 mb-8">
+                        <div className="px-8 mb-8">
                             <div
                                 onClick={onCalendarClick}
                                 className="bg-[#F3E5D8] rounded-[30px] p-6 shadow-sm cursor-pointer hover:brightness-95 transition-all"
@@ -179,10 +173,10 @@ export default function Home({
                                             <div className="w-8 h-8 flex flex-col items-center justify-center relative">
                                                 <span className="text-sm font-medium text-zinc-500">{day}</span>
                                                 {hasDot && (
-                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] opacity-60 absolute bottom-1" />
+                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] opacity-40 absolute bottom-[-4px]" />
                                                 )}
                                                 {hasBlueDot && (
-                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-1" />
+                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-[-4px]" />
                                                 )}
                                             </div>
                                         );

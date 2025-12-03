@@ -61,6 +61,14 @@ function App() {
             onJoinCrew={() => setHasCrew(true)}
           />
         )}
+
+
+        {currentView !== 'login' && (
+          <LowerMenuBar
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        )}
       </div>
     </div>
   );
