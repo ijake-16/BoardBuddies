@@ -19,7 +19,7 @@ const CheckIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-import { PageBackground } from '../components/PageBackground';
+
 
 export default function MyReservations({ onBack }: MyReservationsProps) {
     // Mock reservations

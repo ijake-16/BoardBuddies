@@ -1,11 +1,7 @@
-import { Bell } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
 
-interface HomeProps {
-    onReservationClick: () => void;
-    onTeamClick: () => void;
-}
+
 
 // Icons
 

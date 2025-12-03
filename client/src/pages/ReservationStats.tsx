@@ -10,7 +10,6 @@ interface ReservationStatsProps {
 }
 
 
-import { PageBackground } from '../components/PageBackground';
 
 export default function ReservationStats({ onBack, initialView = 'crew' }: ReservationStatsProps) {
     const [view, setView] = useState<'crew' | 'my'>(initialView);
