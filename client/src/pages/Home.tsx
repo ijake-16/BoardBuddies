@@ -129,7 +129,7 @@ export default function Home({
                             {/* Reservation Card */}
                             <button
                                 onClick={onMakeReservationClick}
-                                className="bg-[#FCD34D] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-4"
+                                className="bg-[#FCD34D] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-2"
                             >
                                 <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
                                     <CheckSquareIcon className="w-6 h-6 text-zinc-900" />
@@ -155,33 +155,36 @@ export default function Home({
                         <div className="px-8 mb-8">
                             <div
                                 onClick={onCalendarClick}
-                                className="bg-[#F3E5D8] rounded-[30px] p-6 shadow-sm cursor-pointer hover:brightness-95 transition-all"
+                                className="bg-[#F3E5D8] rounded-[20px] p-3 shadow-sm cursor-pointer hover:brightness-95 transition-all"
                             >
-                                <Calendar
-                                    month="December"
-                                    year={2025}
-                                    startDayOfWeek={1}
-                                    totalDays={31}
-                                    expandable={false}
-                                    hideHeader={true}
-                                    maxWeeks={2}
-                                    renderDay={(day) => {
-                                        const hasDot = [5, 12, 19].includes(day);
-                                        const hasBlueDot = [2, 3].includes(day);
+                                <span className="font-bold text-zinc-500 ml-2 text-sm">나의 예약</span>
+                                <div className="bg-white rounded-[20px] p-1">
+                                    <Calendar
+                                        month="December"
+                                        year={2025}
+                                        startDayOfWeek={1}
+                                        totalDays={31}
+                                        expandable={false}
+                                        hideHeader={true}
+                                        maxWeeks={2}
+                                        renderDay={(day) => {
+                                            const hasDot = [5, 12, 19].includes(day);
+                                            const hasBlueDot = [2, 3].includes(day);
 
-                                        return (
-                                            <div className="w-8 h-8 flex flex-col items-center justify-center relative">
-                                                <span className="text-sm font-medium text-zinc-500">{day}</span>
-                                                {hasDot && (
-                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] opacity-40 absolute bottom-[-4px]" />
-                                                )}
-                                                {hasBlueDot && (
-                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-[-4px]" />
-                                                )}
-                                            </div>
-                                        );
-                                    }}
-                                />
+                                            return (
+                                                <div className="w-8 h-8 flex flex-col items-center justify-center relative">
+                                                    <span className="text-sm font-medium text-zinc-500">{day}</span>
+                                                    {hasDot && (
+                                                        <div className="w-2 h-2 rounded-full bg-[#1E3A8A] opacity-40 absolute bottom-[-4px]" />
+                                                    )}
+                                                    {hasBlueDot && (
+                                                        <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-[-4px]" />
+                                                    )}
+                                                </div>
+                                            );
+                                        }}
+                                    />
+                                </div>
                             </div>
                         </div>
 

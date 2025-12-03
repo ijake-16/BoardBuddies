@@ -97,7 +97,7 @@ export default function Reservation({ onBack }: ReservationProps) {
                                     return (
                                         <button
                                             onClick={() => toggleDay(day)}
-                                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm bg-[#162660] hover:bg-[#43A047] transition-colors relative"
+                                            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm bg-[#162660] hover:bg-[#43A047] transition-colors relative"
                                         >
                                             {day}
                                             <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
@@ -112,7 +112,7 @@ export default function Reservation({ onBack }: ReservationProps) {
                                         onClick={() => toggleDay(day)}
                                         disabled={!isAvailable}
                                         className={`
-                                            w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all
+                                            w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all
                                             ${isSelected ? 'bg-[#F6C555] text-black shadow-sm' : ''}
                                             ${!isSelected && isAvailable ? 'text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800' : ''}
                                             ${!isSelected && !isAvailable ? 'text-zinc-300 dark:text-zinc-700 cursor-default' : ''}
