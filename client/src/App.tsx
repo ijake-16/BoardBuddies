@@ -42,7 +42,6 @@ function App() {
         ) : (
           <Home
             onReservationClick={() => setCurrentView('reservation')}
-            onMyReservationsClick={() => setCurrentView('my_reservations')}
             onTeamClick={() => setCurrentView('crew_detail')}
           />
         )}

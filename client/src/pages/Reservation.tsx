@@ -7,11 +7,17 @@ interface ReservationProps {
     onBack: () => void;
 }
 
-
-import { PageBackground } from '../components/PageBackground';
+const CheckIcon = ({ className }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <polyline points="20 6 9 17 4 12" />
+    </svg>
+);
 
 export default function Reservation({ onBack }: ReservationProps) {
     const [selectedDays, setSelectedDays] = useState<number[]>([]);
+    // Mock existing reservations
+    const [reservations, setReservations] = useState<number[]>([16, 20]);
+    const [withdrawDay, setWithdrawDay] = useState<number | null>(null);
 
     // Mocking Today as Tuesday, Dec 14, 2025
     const availableStart = 15; // Wed
@@ -24,6 +30,13 @@ export default function Reservation({ onBack }: ReservationProps) {
     );
 
     const toggleDay = (day: number) => {
+        // If it's an existing reservation, trigger withdrawal
+        if (reservations.includes(day)) {
+            setWithdrawDay(day);
+            return;
+        }
+
+        // Otherwise, handle selection for new reservation
         if (!availableDays.includes(day)) return;
 
         setSelectedDays(prev =>
@@ -33,8 +46,15 @@ export default function Reservation({ onBack }: ReservationProps) {
         );
     };
 
+    const confirmWithdraw = () => {
+        if (withdrawDay !== null) {
+            setReservations(prev => prev.filter(d => d !== withdrawDay));
+            setWithdrawDay(null);
+        }
+    };
+
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
             {/* Header */}
             <header className="px-6 pt-12 pb-4 flex items-center justify-between z-10">
                 <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 hover:text-zinc-900">
@@ -67,8 +87,41 @@ export default function Reservation({ onBack }: ReservationProps) {
                             totalDays={31}
                             availableDays={availableDays}
                             selectedDays={selectedDays}
-                            onDayClick={toggleDay}
                             hideHeader={true}
+                            renderDay={(day) => {
+                                const isReserved = reservations.includes(day);
+                                const isSelected = selectedDays.includes(day);
+                                const isAvailable = availableDays.includes(day);
+
+                                if (isReserved) {
+                                    return (
+                                        <button
+                                            onClick={() => toggleDay(day)}
+                                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm bg-[#4CAF50] hover:bg-[#43A047] transition-colors relative"
+                                        >
+                                            {day}
+                                            <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
+                                                <CheckIcon className="w-3 h-3 text-[#4CAF50]" />
+                                            </div>
+                                        </button>
+                                    );
+                                }
+
+                                return (
+                                    <button
+                                        onClick={() => toggleDay(day)}
+                                        disabled={!isAvailable}
+                                        className={`
+                                            w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all
+                                            ${isSelected ? 'bg-[#F6C555] text-black shadow-sm' : ''}
+                                            ${!isSelected && isAvailable ? 'text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800' : ''}
+                                            ${!isSelected && !isAvailable ? 'text-zinc-300 dark:text-zinc-700 cursor-default' : ''}
+                                        `}
+                                    >
+                                        {day}
+                                    </button>
+                                );
+                            }}
                         />
                     </div>
                 </div>
@@ -88,6 +141,34 @@ export default function Reservation({ onBack }: ReservationProps) {
                 </div>
 
             </main>
+
+            {/* Withdrawal Modal */}
+            {withdrawDay !== null && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-6">
+                    <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-xs shadow-xl animate-in fade-in zoom-in duration-200">
+                        <h3 className="text-xl font-bold mb-2">예약 취소</h3>
+                        <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+                            <span className="font-bold text-zinc-900 dark:text-zinc-100">12월 {withdrawDay}일</span> 예약을 취소하시겠습니까?
+                        </p>
+                        <div className="flex gap-3">
+                            <Button
+                                variant="secondary"
+                                onClick={() => setWithdrawDay(null)}
+                                className="flex-1 bg-zinc-200 hover:bg-zinc-300 text-zinc-700 border-transparent"
+                            >
+                                돌아가기
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={confirmWithdraw}
+                                className="flex-1 bg-red-500 hover:bg-red-600 border-red-500 hover:border-red-600 text-white"
+                            >
+                                취소하기
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

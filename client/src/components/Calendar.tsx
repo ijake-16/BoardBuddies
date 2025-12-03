@@ -12,6 +12,7 @@ interface CalendarProps {
     renderDay?: (day: number) => React.ReactNode;
     expandable?: boolean;
     hideHeader?: boolean;
+    maxWeeks?: number;
 }
 
 export const Calendar = ({
@@ -25,6 +26,7 @@ export const Calendar = ({
     renderDay,
     expandable = false,
     hideHeader = false,
+    maxWeeks,
 }: CalendarProps) => {
     const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
     const [focusedWeekIndex, setFocusedWeekIndex] = useState<number | null>(null);
@@ -56,8 +58,12 @@ export const Calendar = ({
             weeksArray.push(currentWeek);
         }
 
+        if (maxWeeks) {
+            return weeksArray.slice(0, maxWeeks);
+        }
+
         return weeksArray;
-    }, [startDayOfWeek, totalDays]);
+    }, [startDayOfWeek, totalDays, maxWeeks]);
 
     const handleDayClick = (day: number, weekIndex: number) => {
         if (expandable && viewMode === 'month') {
@@ -80,11 +86,6 @@ export const Calendar = ({
                     <div className="text-center">
                         <h1 className="text-lg font-bold text-zinc-900">{month}</h1>
                         <p className="text-xs text-zinc-400 font-medium">{year}</p>
-                    </div>
-                    <div className={`absolute right-0 transition-opacity duration-300 ${viewMode === 'week' ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                        <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-500 text-xs">
-                            Back
-                        </Button>
                     </div>
                 </div>
             )}
@@ -151,6 +152,13 @@ export const Calendar = ({
                         </div>
                     );
                 })}
+            </div>
+
+            {/* Back to Month Button (Bottom) */}
+            <div className={`mt-auto flex justify-center transition-opacity duration-300 ${viewMode === 'week' ? 'opacity-100' : 'opacity-0 pointer-events-none h-0'}`}>
+                <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-400 hover:text-zinc-600 text-xs">
+                    Back to Month
+                </Button>
             </div>
         </div>
     );
