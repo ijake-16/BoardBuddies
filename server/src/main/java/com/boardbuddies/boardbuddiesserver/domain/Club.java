@@ -62,11 +62,11 @@ public class Club {
     private Integer clubPIN;
 
     /**
-     * 일별 수용 인원 (기본값 1)
+     * 일별 수용 인원 (기본값 20)
      */
     @Column(nullable = false)
     @Builder.Default
-    private Integer dailyCapacity = 1;
+    private Integer dailyCapacity = 20;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -111,5 +111,12 @@ public class Club {
      */
     public void updateReservationTime(LocalTime reservationTime) {
         this.reservationTime = reservationTime;
+    }
+
+    /**
+     * 일별 수용 인원 수정
+     */
+    public void updateDailyCapacity(Integer dailyCapacity) {
+        this.dailyCapacity = dailyCapacity;
     }
 }

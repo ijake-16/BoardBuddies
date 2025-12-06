@@ -24,4 +24,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findByUserAndClubAndDateAndStatusNot(User user, Club club, LocalDate date, String status);
 
     List<Reservation> findByClubAndDateAndStatusNot(Club club, LocalDate date, String status);
+
+    List<Reservation> findByClubAndStatus(Club club, String status);
 }

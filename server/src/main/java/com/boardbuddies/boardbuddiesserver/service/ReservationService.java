@@ -192,6 +192,45 @@ public class ReservationService {
     }
 
     /**
+     * 동아리 수용 인원 증가 시 대기열 승격 처리
+     */
+    @Transactional
+    public void promoteWaitingUsers(Club club) {
+        // 대기 중인 모든 예약 조회
+        List<Reservation> waitingReservations = reservationRepository.findByClubAndStatus(club, "waiting");
+
+        // 날짜별로 그룹화
+        List<LocalDate> dates = waitingReservations.stream()
+                .map(Reservation::getDate)
+                .distinct()
+                .toList();
+
+        for (LocalDate date : dates) {
+            // 해당 날짜의 현재 확정된 예약 수 조회
+            long confirmedCount = reservationRepository.findByClubAndDateAndStatusNot(club, date, "CANCELLED").stream()
+                    .filter(r -> "confirmed".equals(r.getStatus()))
+                    .count();
+
+            // 남은 자리 계산
+            long remaining = club.getDailyCapacity() - confirmedCount;
+
+            if (remaining > 0) {
+                // 대기열에서 오래된 순으로 조회
+                List<Reservation> waitingList = reservationRepository.findByClubAndDateAndStatusOrderByCreatedAtAsc(
+                        club, date, "waiting");
+
+                // 남은 자리만큼 승격
+                for (int i = 0; i < Math.min(remaining, waitingList.size()); i++) {
+                    Reservation reservation = waitingList.get(i);
+                    reservation.confirm();
+                    log.info("대기열 승격 (용량 증가): reservationId={}, userId={}", reservation.getId(),
+                            reservation.getUser().getId());
+                }
+            }
+        }
+    }
+
+    /**
      * 날짜별 예약자 명단 조회
      */
     @Transactional(readOnly = true)

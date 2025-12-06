@@ -25,6 +25,7 @@ public class ClubService {
 
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
+    private final ReservationService reservationService;
 
     /**
      * 동아리 생성
@@ -57,6 +58,7 @@ public class ClubService {
                 .reservationTime(reservationTime)
                 .status("ACTIVE")
                 .clubPIN(request.getClubPIN())
+                .dailyCapacity(request.getDailyCapacity() != null ? request.getDailyCapacity() : 20)
                 .build();
 
         club = clubRepository.save(club);
@@ -169,6 +171,13 @@ public class ClubService {
         if (request.getReservationTime() != null && !request.getReservationTime().isBlank()) {
             LocalTime time = LocalTime.parse(request.getReservationTime());
             club.updateReservationTime(time);
+        }
+
+        // 일별 수용 인원 수정
+        if (request.getDailyCapacity() != null) {
+            club.updateDailyCapacity(request.getDailyCapacity());
+            // 수용 인원 증가 시 대기열 승격 시도
+            reservationService.promoteWaitingUsers(club);
         }
 
         // 운영진 목록 수정
