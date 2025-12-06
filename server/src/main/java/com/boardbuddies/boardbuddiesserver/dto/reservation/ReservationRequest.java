@@ -15,8 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 public class ReservationRequest {
 
-    @JsonProperty("club_id")
-    private Long clubId;
+    @JsonProperty("crew_id")
+    private Long crewId;
 
     private List<LocalDate> dates;
 }

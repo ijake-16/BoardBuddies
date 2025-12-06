@@ -1,4 +1,4 @@
-package com.boardbuddies.boardbuddiesserver.dto.club;
+package com.boardbuddies.boardbuddiesserver.dto.crew;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
@@ -12,19 +12,19 @@ import lombok.NoArgsConstructor;
 import java.util.Set;
 
 /**
- * 동아리 정보 수정 요청
+ * 크루 정보 수정 요청
  */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClubUpdateRequest {
+public class CrewUpdateRequest {
 
     /**
-     * 동아리명 (선택사항)
+     * 크루명 (선택사항)
      */
-    @Size(max = 50, message = "동아리명은 50자를 초과할 수 없습니다.")
-    @JsonProperty("clubName")
-    private String clubName;
+    @Size(max = 50, message = "크루명은 50자를 초과할 수 없습니다.")
+    @JsonProperty("crewName")
+    private String crewName;
 
     /**
      * 운영진 학번 리스트 (선택사항)
@@ -33,12 +33,12 @@ public class ClubUpdateRequest {
     private Set<String> managerList;
 
     /**
-     * 동아리 PIN (선택사항)
+     * 크루 PIN (선택사항)
      */
-    @Min(value = 0, message = "동아리 PIN은 0000 이상이어야 합니다.")
-    @Max(value = 9999, message = "동아리 PIN은 9999 이하여야 합니다.")
-    @JsonProperty("clubPIN")
-    private Integer clubPIN;
+    @Min(value = 0, message = "크루 PIN은 0000 이상이어야 합니다.")
+    @Max(value = 9999, message = "크루 PIN은 9999 이하여야 합니다.")
+    @JsonProperty("crewPIN")
+    private Integer crewPIN;
 
     /**
      * 예약 요일 (선택사항)

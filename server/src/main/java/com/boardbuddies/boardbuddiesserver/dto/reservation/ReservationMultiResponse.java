@@ -15,8 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 public class ReservationMultiResponse {
 
-    @JsonProperty("club_id")
-    private Long clubId;
+    @JsonProperty("crew_id")
+    private Long crewId;
 
     private List<ReservationResult> results;
 

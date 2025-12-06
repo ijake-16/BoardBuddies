@@ -1,6 +1,6 @@
-package com.boardbuddies.boardbuddiesserver.dto.club;
+package com.boardbuddies.boardbuddiesserver.dto.crew;
 
-import com.boardbuddies.boardbuddiesserver.domain.Club;
+import com.boardbuddies.boardbuddiesserver.domain.Crew;
 import com.boardbuddies.boardbuddiesserver.domain.DayOfWeek;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -12,22 +12,22 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
- * 동아리 상세 조회 응답
+ * 크루 상세 조회 응답
  */
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClubDetailResponse {
+public class CrewDetailResponse {
 
     /**
-     * 동아리 ID
+     * 크루 ID
      */
-    @JsonProperty("club_id")
-    private Long clubId;
+    @JsonProperty("crew_id")
+    private Long crewId;
 
     /**
-     * 동아리명
+     * 크루명
      */
     @JsonProperty("name")
     private String name;
@@ -58,7 +58,7 @@ public class ClubDetailResponse {
     private Integer dailyCapacity;
 
     /**
-     * 동아리 상태
+     * 크루 상태
      */
     @JsonProperty("status")
     private String status;
@@ -76,22 +76,22 @@ public class ClubDetailResponse {
     private LocalDateTime updatedAt;
 
     /**
-     * Club 엔티티로부터 DTO 생성
+     * Crew 엔티티로부터 DTO 생성
      * 
-     * @param club 동아리 엔티티
-     * @return 동아리 상세 응답 DTO
+     * @param crew 크루 엔티티
+     * @return 크루 상세 응답 DTO
      */
-    public static ClubDetailResponse from(Club club) {
-        return ClubDetailResponse.builder()
-                .clubId(club.getId())
-                .name(club.getName())
-                .univ(club.getUniv())
-                .reservationDay(club.getReservationDay())
-                .reservationTime(club.getReservationTime())
-                .dailyCapacity(club.getDailyCapacity())
-                .status(club.getStatus())
-                .createdAt(club.getCreatedAt())
-                .updatedAt(club.getUpdatedAt())
+    public static CrewDetailResponse from(Crew crew) {
+        return CrewDetailResponse.builder()
+                .crewId(crew.getId())
+                .name(crew.getName())
+                .univ(crew.getUniv())
+                .reservationDay(crew.getReservationDay())
+                .reservationTime(crew.getReservationTime())
+                .dailyCapacity(crew.getDailyCapacity())
+                .status(crew.getStatus())
+                .createdAt(crew.getCreatedAt())
+                .updatedAt(crew.getUpdatedAt())
                 .build();
     }
 }

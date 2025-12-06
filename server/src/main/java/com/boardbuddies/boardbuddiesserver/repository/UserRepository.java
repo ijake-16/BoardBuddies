@@ -1,6 +1,6 @@
 package com.boardbuddies.boardbuddiesserver.repository;
 
-import com.boardbuddies.boardbuddiesserver.domain.Club;
+import com.boardbuddies.boardbuddiesserver.domain.Crew;
 import com.boardbuddies.boardbuddiesserver.domain.Role;
 import com.boardbuddies.boardbuddiesserver.domain.User;
 import com.boardbuddies.boardbuddiesserver.dto.auth.SocialProvider;
@@ -47,10 +47,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPhoneNumber(String phoneNumber);
 
     /**
-     * 동아리와 역할로 사용자 조회 (단건)
-     * (예: 동아리의 회장 찾기)
+     * 크루와 역할로 사용자 조회 (단건)
+     * (예: 크루의 회장 찾기)
      */
-    Optional<User> findByClubAndRole(Club club, Role role);
+    Optional<User> findByCrewAndRole(Crew crew, Role role);
 
     /**
      * 역할로 모든 사용자 조회
@@ -58,12 +58,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllByRole(Role role);
 
     /**
-     * 동아리로 모든 사용자 조회
+     * 크루로 모든 사용자 조회
      */
-    List<User> findAllByClub(Club club);
+    List<User> findAllByCrew(Crew crew);
 
     /**
-     * 동아리와 역할로 모든 사용자 조회
+     * 크루와 역할로 모든 사용자 조회
      */
-    List<User> findAllByClubAndRole(Club club, Role role);
+    List<User> findAllByCrewAndRole(Crew crew, Role role);
 }

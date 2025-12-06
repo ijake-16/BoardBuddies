@@ -9,22 +9,22 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
- * 동아리 엔티티
+ * 크루 엔티티
  */
 @Entity
-@Table(name = "club")
+@Table(name = "crew")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Club {
+public class Crew {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * 동아리명
+     * 크루명
      */
     @Column(nullable = false, length = 50)
     private String name;
@@ -49,17 +49,17 @@ public class Club {
     private LocalTime reservationTime;
 
     /**
-     * 동아리 상태 (ACTIVE, INACTIVE 등)
+     * 크루 상태 (ACTIVE, INACTIVE 등)
      */
     @Column(nullable = false, length = 20)
     @Builder.Default
     private String status = "ACTIVE";
 
     /**
-     * 동아리 PIN (가입 신청 시 필요)
+     * 크루 PIN (가입 신청 시 필요)
      */
     @Column(nullable = false)
-    private Integer clubPIN;
+    private Integer crewPIN;
 
     /**
      * 일별 수용 인원 (기본값 20)
@@ -82,21 +82,21 @@ public class Club {
      * PIN 일치 여부 확인
      */
     public boolean verifyPIN(Integer pin) {
-        return this.clubPIN.equals(pin);
+        return this.crewPIN.equals(pin);
     }
 
     /**
-     * 동아리 이름 수정
+     * 크루 이름 수정
      */
     public void updateName(String name) {
         this.name = name;
     }
 
     /**
-     * 동아리 PIN 수정
+     * 크루 PIN 수정
      */
-    public void updateClubPIN(Integer clubPIN) {
-        this.clubPIN = clubPIN;
+    public void updateCrewPIN(Integer crewPIN) {
+        this.crewPIN = crewPIN;
     }
 
     /**

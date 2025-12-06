@@ -23,8 +23,8 @@ public class Reservation {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_id", nullable = false)
-    private Club club;
+    @JoinColumn(name = "crew_id", nullable = false)
+    private Crew crew;
 
     @Column(nullable = false)
     private LocalDate date;

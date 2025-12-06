@@ -1,6 +1,6 @@
 package com.boardbuddies.boardbuddiesserver.repository;
 
-import com.boardbuddies.boardbuddiesserver.domain.Club;
+import com.boardbuddies.boardbuddiesserver.domain.Crew;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * 동아리 Repository
+ * 크루 Repository
  */
 @Repository
-public interface ClubRepository extends JpaRepository<Club, Long> {
+public interface CrewRepository extends JpaRepository<Crew, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT c FROM Club c WHERE c.id = :id")
-    Optional<Club> findByIdWithLock(Long id);
+    @Query("SELECT c FROM Crew c WHERE c.id = :id")
+    Optional<Crew> findByIdWithLock(Long id);
 }

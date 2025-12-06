@@ -3,7 +3,7 @@ package com.boardbuddies.boardbuddiesserver.service;
 import com.boardbuddies.boardbuddiesserver.domain.*;
 import com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMultiResponse;
 import com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationRequest;
-import com.boardbuddies.boardbuddiesserver.repository.ClubRepository;
+import com.boardbuddies.boardbuddiesserver.repository.CrewRepository;
 import com.boardbuddies.boardbuddiesserver.repository.ReservationRepository;
 import com.boardbuddies.boardbuddiesserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private final ClubRepository clubRepository;
+    private final CrewRepository crewRepository;
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
 
@@ -31,24 +31,27 @@ public class ReservationService {
      * 시즌방 예약 (일괄 신청)
      */
     @Transactional
-    public ReservationMultiResponse reserve(Long userId, Long clubId, ReservationRequest request) {
-        // 1. 동아리 조회 (비관적 락 사용 - 동시성 제어)
-        Club club = clubRepository.findByIdWithLock(clubId)
-                .orElseThrow(() -> new RuntimeException("동아리를 찾을 수 없습니다."));
+    public ReservationMultiResponse reserve(Long userId, Long crewId, ReservationRequest request) {
+        if (userId == null || crewId == null) {
+            throw new IllegalArgumentException("User ID and Crew ID must not be null");
+        }
+        // 1. 크루 조회 (비관적 락 사용 - 동시성 제어)
+        Crew crew = crewRepository.findByIdWithLock(crewId)
+                .orElseThrow(() -> new RuntimeException("크루를 찾을 수 없습니다."));
 
         // 2. 사용자 조회 및 권한 검증
         User user = Objects.requireNonNull(userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
 
-        if (!user.getClub().equals(club)) {
-            throw new RuntimeException("해당 동아리의 회원이 아닙니다.");
+        if (!user.getCrew().equals(crew)) {
+            throw new RuntimeException("해당 크루의 회원이 아닙니다.");
         }
         if (user.getRole() == Role.GUEST || !user.getIsRegistered()) {
             throw new RuntimeException("승인된 회원만 예약할 수 있습니다.");
         }
 
         // 3. 오픈 시각 검증
-        validateOpenTime(club, request.getDates());
+        validateOpenTime(crew, request.getDates());
 
         List<ReservationMultiResponse.ReservationResult> results = new ArrayList<>();
         int succeeded = 0;
@@ -58,7 +61,7 @@ public class ReservationService {
         for (LocalDate date : request.getDates()) {
             try {
                 // 개별 날짜 검증 및 예약
-                Reservation reservation = processSingleReservation(user, club, date);
+                Reservation reservation = processSingleReservation(user, crew, date);
 
                 String status = "created";
                 if ("waiting".equals(reservation.getStatus())) {
@@ -93,7 +96,7 @@ public class ReservationService {
 
         // 5. 응답 생성
         return ReservationMultiResponse.builder()
-                .clubId(club.getId())
+                .crewId(crew.getId())
                 .results(results)
                 .summary(ReservationMultiResponse.ReservationSummary.builder()
                         .requested(request.getDates().size())
@@ -103,7 +106,7 @@ public class ReservationService {
                 .build();
     }
 
-    private Reservation processSingleReservation(User user, Club club, LocalDate date) {
+    private Reservation processSingleReservation(User user, Crew crew, LocalDate date) {
         // 1. 과거 날짜 제외
         if (date.isBefore(LocalDate.now())) {
             throw new RuntimeException("과거 날짜는 예약할 수 없습니다.");
@@ -123,17 +126,17 @@ public class ReservationService {
         }
 
         // 3. 용량(Capacity) 체크
-        Long currentCount = reservationRepository.countByClubAndDateAndStatusNot(club, date, "CANCELLED");
+        Long currentCount = reservationRepository.countByCrewAndDateAndStatusNot(crew, date, "CANCELLED");
         String status = "confirmed";
 
-        if (currentCount >= club.getDailyCapacity()) {
+        if (currentCount >= crew.getDailyCapacity()) {
             status = "waiting";
         }
 
         // 4. 예약 생성
         Reservation reservation = Reservation.builder()
                 .user(user)
-                .club(club)
+                .crew(crew)
                 .date(date)
                 .status(status)
                 .build();
@@ -147,10 +150,13 @@ public class ReservationService {
      * 예약 취소 (일괄 취소)
      */
     @Transactional
-    public void cancel(Long userId, Long clubId, ReservationRequest request) {
-        // 1. 동아리 조회 (비관적 락 사용 - 동시성 제어)
-        Club club = clubRepository.findByIdWithLock(clubId)
-                .orElseThrow(() -> new RuntimeException("동아리를 찾을 수 없습니다."));
+    public void cancel(Long userId, Long crewId, ReservationRequest request) {
+        if (userId == null || crewId == null) {
+            throw new IllegalArgumentException("User ID and Crew ID must not be null");
+        }
+        // 1. 크루 조회 (비관적 락 사용 - 동시성 제어)
+        Crew crew = crewRepository.findByIdWithLock(crewId)
+                .orElseThrow(() -> new RuntimeException("크루를 찾을 수 없습니다."));
 
         // 2. 사용자 조회
         User user = Objects.requireNonNull(userRepository.findById(userId)
@@ -158,14 +164,14 @@ public class ReservationService {
 
         // 3. 날짜별 취소 처리
         for (LocalDate date : request.getDates()) {
-            cancelSingleReservation(user, club, date);
+            cancelSingleReservation(user, crew, date);
         }
     }
 
-    private void cancelSingleReservation(User user, Club club, LocalDate date) {
+    private void cancelSingleReservation(User user, Crew crew, LocalDate date) {
         // 내 예약 조회 (취소되지 않은 것)
-        Reservation myReservation = reservationRepository.findByUserAndClubAndDateAndStatusNot(
-                user, club, date, "CANCELLED")
+        Reservation myReservation = reservationRepository.findByUserAndCrewAndDateAndStatusNot(
+                user, crew, date, "CANCELLED")
                 .orElseThrow(() -> new RuntimeException("해당 날짜에 예약이 없습니다."));
 
         String oldStatus = myReservation.getStatus();
@@ -175,14 +181,14 @@ public class ReservationService {
 
         // 만약 기존 상태가 CONFIRMED였다면, 대기열 승격 시도
         if ("confirmed".equals(oldStatus)) {
-            promoteNextWaitingUser(club, date);
+            promoteNextWaitingUser(crew, date);
         }
     }
 
-    private void promoteNextWaitingUser(Club club, LocalDate date) {
+    private void promoteNextWaitingUser(Crew crew, LocalDate date) {
         // 대기열에서 가장 오래된 예약 조회
-        List<Reservation> waitingList = reservationRepository.findByClubAndDateAndStatusOrderByCreatedAtAsc(
-                club, date, "waiting");
+        List<Reservation> waitingList = reservationRepository.findByCrewAndDateAndStatusOrderByCreatedAtAsc(
+                crew, date, "waiting");
 
         if (!waitingList.isEmpty()) {
             Reservation nextReservation = waitingList.get(0);
@@ -192,12 +198,12 @@ public class ReservationService {
     }
 
     /**
-     * 동아리 수용 인원 증가 시 대기열 승격 처리
+     * 크루 수용 인원 증가 시 대기열 승격 처리
      */
     @Transactional
-    public void promoteWaitingUsers(Club club) {
+    public void promoteWaitingUsers(Crew crew) {
         // 대기 중인 모든 예약 조회
-        List<Reservation> waitingReservations = reservationRepository.findByClubAndStatus(club, "waiting");
+        List<Reservation> waitingReservations = reservationRepository.findByCrewAndStatus(crew, "waiting");
 
         // 날짜별로 그룹화
         List<LocalDate> dates = waitingReservations.stream()
@@ -207,17 +213,17 @@ public class ReservationService {
 
         for (LocalDate date : dates) {
             // 해당 날짜의 현재 확정된 예약 수 조회
-            long confirmedCount = reservationRepository.findByClubAndDateAndStatusNot(club, date, "CANCELLED").stream()
+            long confirmedCount = reservationRepository.findByCrewAndDateAndStatusNot(crew, date, "CANCELLED").stream()
                     .filter(r -> "confirmed".equals(r.getStatus()))
                     .count();
 
             // 남은 자리 계산
-            long remaining = club.getDailyCapacity() - confirmedCount;
+            long remaining = crew.getDailyCapacity() - confirmedCount;
 
             if (remaining > 0) {
                 // 대기열에서 오래된 순으로 조회
-                List<Reservation> waitingList = reservationRepository.findByClubAndDateAndStatusOrderByCreatedAtAsc(
-                        club, date, "waiting");
+                List<Reservation> waitingList = reservationRepository.findByCrewAndDateAndStatusOrderByCreatedAtAsc(
+                        crew, date, "waiting");
 
                 // 남은 자리만큼 승격
                 for (int i = 0; i < Math.min(remaining, waitingList.size()); i++) {
@@ -235,20 +241,23 @@ public class ReservationService {
      */
     @Transactional(readOnly = true)
     public com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse getReservationsByDate(
-            Long userId, Long clubId, LocalDate date) {
+            Long userId, Long crewId, LocalDate date) {
+        if (userId == null || crewId == null) {
+            throw new IllegalArgumentException("User ID and Crew ID must not be null");
+        }
 
         // 권한 확인 (회원 이상)
         User user = Objects.requireNonNull(userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
-        Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new RuntimeException("동아리를 찾을 수 없습니다."));
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("크루를 찾을 수 없습니다."));
 
-        if (!user.getClub().equals(club)) {
-            throw new RuntimeException("해당 동아리의 회원이 아닙니다.");
+        if (!user.getCrew().equals(crew)) {
+            throw new RuntimeException("해당 크루의 회원이 아닙니다.");
         }
 
         // 해당 날짜의 모든 예약 조회 (취소 제외)
-        List<Reservation> reservations = reservationRepository.findByClubAndDateAndStatusNot(club, date, "CANCELLED");
+        List<Reservation> reservations = reservationRepository.findByCrewAndDateAndStatusNot(crew, date, "CANCELLED");
 
         List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary> confirmedList = new ArrayList<>();
         List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary> waitingList = new ArrayList<>();
@@ -280,16 +289,19 @@ public class ReservationService {
      */
     @Transactional(readOnly = true)
     public com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse getDayReservationDetail(
-            Long userId, Long clubId, LocalDate date) {
+            Long userId, Long crewId, LocalDate date) {
+        if (userId == null || crewId == null) {
+            throw new IllegalArgumentException("User ID and Crew ID must not be null");
+        }
 
-        // 1. 사용자 및 동아리 조회
+        // 1. 사용자 및 크루 조회
         User user = Objects.requireNonNull(userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
-        Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new RuntimeException("동아리를 찾을 수 없습니다."));
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("크루를 찾을 수 없습니다."));
 
-        if (!user.getClub().equals(club)) {
-            throw new RuntimeException("해당 동아리의 회원이 아닙니다.");
+        if (!user.getCrew().equals(crew)) {
+            throw new RuntimeException("해당 크루의 회원이 아닙니다.");
         }
 
         // 2. 상태 결정 (open/closed)
@@ -303,15 +315,15 @@ public class ReservationService {
         }
 
         // 2-2. 오픈 시간 체크
-        if (club.getReservationDay() != null && club.getReservationTime() != null) {
-            LocalDateTime openDateTime = getOpenDateTime(date, club);
+        if (crew.getReservationDay() != null && crew.getReservationTime() != null) {
+            LocalDateTime openDateTime = getOpenDateTime(date, crew);
             if (now.isBefore(openDateTime)) {
                 status = "closed";
             }
         }
 
         // 3. 예약 목록 조회
-        List<Reservation> reservations = reservationRepository.findByClubAndDateAndStatusNot(club, date, "CANCELLED");
+        List<Reservation> reservations = reservationRepository.findByCrewAndDateAndStatusNot(crew, date, "CANCELLED");
 
         int booked = 0;
         List<String> memberList = new ArrayList<>();
@@ -342,7 +354,7 @@ public class ReservationService {
             }
         }
 
-        int remaining = Math.max(0, club.getDailyCapacity() - booked);
+        int remaining = Math.max(0, crew.getDailyCapacity() - booked);
 
         return com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.builder()
                 .date(date)
@@ -368,7 +380,7 @@ public class ReservationService {
      * 해당 날짜가 속한 주의 전 주(Previous Week)의 설정된 요일/시간
      * (주의 시작은 월요일 기준)
      */
-    private LocalDateTime getOpenDateTime(LocalDate targetDate, Club club) {
+    private LocalDateTime getOpenDateTime(LocalDate targetDate, Crew crew) {
         // 1. 해당 날짜가 속한 주의 월요일 구하기
         LocalDate targetWeekMonday = targetDate
                 .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
@@ -377,15 +389,15 @@ public class ReservationService {
         LocalDate prevWeekMonday = targetWeekMonday.minusWeeks(1);
 
         // 3. 전 주의 설정된 요일 구하기
-        // Club의 DayOfWeek는 도메인 Enum이므로 Java DayOfWeek로 변환 필요
-        java.time.DayOfWeek javaDayOfWeek = convertDomainDayToJavaDay(club.getReservationDay());
+        // Crew의 DayOfWeek는 도메인 Enum이므로 Java DayOfWeek로 변환 필요
+        java.time.DayOfWeek javaDayOfWeek = convertDomainDayToJavaDay(crew.getReservationDay());
 
         // 전 주 월요일부터 해당 요일까지 이동
         // (월요일부터 시작하므로, 해당 요일이 월요일이면 +0, 화요일이면 +1 ...)
         // TemporalAdjusters.nextOrSame을 사용하면 편리함
         LocalDate openDate = prevWeekMonday.with(java.time.temporal.TemporalAdjusters.nextOrSame(javaDayOfWeek));
 
-        return LocalDateTime.of(openDate, club.getReservationTime());
+        return LocalDateTime.of(openDate, crew.getReservationTime());
     }
 
     private java.time.DayOfWeek convertDomainDayToJavaDay(DayOfWeek domainDay) {
@@ -409,8 +421,8 @@ public class ReservationService {
         }
     }
 
-    private void validateOpenTime(Club club, List<LocalDate> dates) {
-        if (club.getReservationDay() == null || club.getReservationTime() == null) {
+    private void validateOpenTime(Crew crew, List<LocalDate> dates) {
+        if (crew.getReservationDay() == null || crew.getReservationTime() == null) {
             return;
         }
 
@@ -424,7 +436,7 @@ public class ReservationService {
             }
 
             // 2. 오픈 시간 체크
-            LocalDateTime openDateTime = getOpenDateTime(date, club);
+            LocalDateTime openDateTime = getOpenDateTime(date, crew);
             if (now.isBefore(openDateTime)) {
                 throw new RuntimeException("아직 예약 오픈 시간이 아닙니다. (" + date + " 예약은 " + openDateTime + "에 오픈)");
             }

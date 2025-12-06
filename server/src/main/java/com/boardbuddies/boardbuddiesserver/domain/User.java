@@ -19,95 +19,95 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class User {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     // === 소셜 로그인 정보 ===
-    
+
     /**
      * 소셜 제공자 (KAKAO, NAVER)
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private SocialProvider socialProvider;
-    
+
     /**
      * 소셜 고유 ID
      */
     @Column(nullable = false, unique = true, length = 100)
     private String socialId;
-    
+
     /**
      * 소셜 이메일
      */
     @Column(length = 100)
     private String email;
-    
+
     /**
      * 소셜 프로필 이미지 URL
      */
     @Column(length = 500)
     private String profileImageUrl;
-    
+
     // === 추가 입력 정보 ===
-    
+
     /**
      * 이름
      */
     @Column(length = 50)
     private String name;
-    
+
     /**
      * 생년월일
      */
     private LocalDate birthDate;
-    
+
     /**
      * 소속학교
      */
     @Column(length = 100)
     private String school;
-    
+
     /**
      * 학번
      */
     @Column(length = 20)
     private String studentId;
-    
+
     /**
      * 성별 (MALE, FEMALE)
      */
     @Enumerated(EnumType.STRING)
     @Column(length = 10)
     private Gender gender;
-    
+
     /**
      * 전화번호
      */
     @Column(length = 20)
     private String phoneNumber;
-    
-    // === 동아리 정보 ===
-    
+
+    // === 크루 정보 ===
+
     /**
-     * 소속 동아리 (승인 후에만 설정됨)
+     * 소속 크루 (승인 후에만 설정됨)
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_id")
-    private Club club;
-    
+    @JoinColumn(name = "crew_id")
+    private Crew crew;
+
     /**
-     * 동아리 내 역할
+     * 크루 내 역할
      */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
     private Role role = Role.GUEST;
-    
+
     // === 계정 상태 ===
-    
+
     /**
      * 회원가입 완료 여부
      * false: 소셜 로그인만 완료 (추가 정보 입력 대기)
@@ -116,30 +116,30 @@ public class User {
     @Column(nullable = false)
     @Builder.Default
     private Boolean isRegistered = false;
-    
+
     /**
      * 리프레시 토큰 (로그인 유지용)
      */
     @Column(length = 500)
     private String refreshToken;
-    
+
     // === 타임스탬프 ===
-    
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    
+
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-    
+
     // === 비즈니스 메서드 ===
-    
+
     /**
      * 회원가입 완료 처리
      */
-    public void completeRegistration(String name, LocalDate birthDate, String school, 
-                                     String studentId, Gender gender, String phoneNumber) {
+    public void completeRegistration(String name, LocalDate birthDate, String school,
+            String studentId, Gender gender, String phoneNumber) {
         this.name = name;
         this.birthDate = birthDate;
         this.school = school;
@@ -148,37 +148,37 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.isRegistered = true;
     }
-    
+
     /**
      * 리프레시 토큰 업데이트
      */
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
-    
+
     /**
      * 프로필 이미지 업데이트
      */
     public void updateProfileImage(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
-    
+
     /**
-     * 동아리 가입 승인 처리
+     * 크루 가입 승인 처리
      */
-    public void joinClub(Club club, Role role) {
-        this.club = club;
+    public void joinCrew(Crew crew, Role role) {
+        this.crew = crew;
         this.role = role;
     }
-    
+
     /**
-     * 동아리 탈퇴 처리
+     * 크루 탈퇴 처리
      */
-    public void leaveClub() {
-        this.club = null;
+    public void leaveCrew() {
+        this.crew = null;
         this.role = Role.GUEST;
     }
-    
+
     /**
      * 동아리 역할 변경
      */
@@ -186,4 +186,3 @@ public class User {
         this.role = role;
     }
 }
-

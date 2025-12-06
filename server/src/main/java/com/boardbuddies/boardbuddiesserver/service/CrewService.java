@@ -1,8 +1,8 @@
 package com.boardbuddies.boardbuddiesserver.service;
 
 import com.boardbuddies.boardbuddiesserver.domain.*;
-import com.boardbuddies.boardbuddiesserver.dto.club.*;
-import com.boardbuddies.boardbuddiesserver.repository.ClubRepository;
+import com.boardbuddies.boardbuddiesserver.dto.crew.*;
+import com.boardbuddies.boardbuddiesserver.repository.CrewRepository;
 import com.boardbuddies.boardbuddiesserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,26 +16,29 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 동아리 관련 서비스
+ * 크루 관련 서비스
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ClubService {
+public class CrewService {
 
-    private final ClubRepository clubRepository;
+    private final CrewRepository crewRepository;
     private final UserRepository userRepository;
     private final ReservationService reservationService;
 
     /**
-     * 동아리 생성
+     * 크루 생성
      * 
      * @param userId  생성자 ID (자동으로 PRESIDENT가 됨)
-     * @param request 동아리 생성 요청
-     * @return 생성된 동아리 정보
+     * @param request 크루 생성 요청
+     * @return 생성된 크루 정보
      */
     @Transactional
-    public ClubCreateResponse createClub(Long userId, ClubCreateRequest request) {
+    public CrewCreateResponse createCrew(Long userId, CrewCreateRequest request) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID must not be null");
+        }
         // 생성자 조회
         User president = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
@@ -50,23 +53,23 @@ public class ClubService {
                 ? LocalTime.parse(request.getReservationTime())
                 : null;
 
-        // 동아리 생성
-        Club club = Club.builder()
-                .name(request.getClubName())
+        // 크루 생성
+        Crew crew = Crew.builder()
+                .name(request.getCrewName())
                 .univ(request.getUniv())
                 .reservationDay(reservationDay)
                 .reservationTime(reservationTime)
                 .status("ACTIVE")
-                .clubPIN(request.getClubPIN())
+                .crewPIN(request.getCrewPIN())
                 .dailyCapacity(request.getDailyCapacity() != null ? request.getDailyCapacity() : 20)
                 .build();
 
-        club = clubRepository.save(club);
+        crew = crewRepository.save(crew);
 
         // 생성자를 PRESIDENT로 설정
-        president.joinClub(club, Role.PRESIDENT);
+        president.joinCrew(crew, Role.PRESIDENT);
 
-        log.info("동아리 생성 완료: clubId={}, presidentId={}", club.getId(), userId);
+        log.info("크루 생성 완료: crewId={}, presidentId={}", crew.getId(), userId);
 
         // 운영진 목록 수집 (회장 + 매니저)
         Set<User> allManagers = new HashSet<>();
@@ -74,180 +77,184 @@ public class ClubService {
 
         // 운영진 설정 (manager_list가 있는 경우)
         if (request.getManagerList() != null && !request.getManagerList().isEmpty()) {
-            Set<User> managers = assignManagers(club, president, request.getManagerList());
+            Set<User> managers = assignManagers(crew, president, request.getManagerList());
             allManagers.addAll(managers); // 매니저 추가
         }
 
-        return ClubCreateResponse.from(club, allManagers);
+        return CrewCreateResponse.from(crew, allManagers);
     }
 
     /**
-     * 모든 동아리 목록 조회
+     * 모든 크루 목록 조회
      * 
-     * @return 동아리 목록
-     */
-    /**
-     * 모든 동아리 목록 조회
-     * 
-     * @return 동아리 목록
+     * @return 크루 목록
      */
     @Transactional(readOnly = true)
-    public List<ClubListResponse> getAllClubs() {
-        List<Club> clubs = clubRepository.findAll();
+    public List<CrewListResponse> getAllCrews() {
+        List<Crew> crews = crewRepository.findAll();
 
         // 모든 회장(PRESIDENT) 조회
         List<User> presidents = userRepository.findAllByRole(Role.PRESIDENT);
 
-        // clubId -> presidentId 맵 생성
-        java.util.Map<Long, Long> clubPresidentMap = presidents.stream()
-                .filter(user -> user.getClub() != null)
+        // crewId -> presidentId 맵 생성
+        java.util.Map<Long, Long> crewPresidentMap = presidents.stream()
+                .filter(user -> user.getCrew() != null)
                 .collect(Collectors.toMap(
-                        user -> user.getClub().getId(),
+                        user -> user.getCrew().getId(),
                         User::getId,
                         (existing, replacement) -> existing // 중복 시 기존 값 유지
                 ));
 
-        return clubs.stream()
-                .map(club -> {
-                    Long presidentId = clubPresidentMap.get(club.getId());
-                    return ClubListResponse.from(club, presidentId);
+        return crews.stream()
+                .map(crew -> {
+                    Long presidentId = crewPresidentMap.get(crew.getId());
+                    return CrewListResponse.from(crew, presidentId);
                 })
                 .collect(Collectors.toList());
     }
 
     /**
-     * 동아리 상세 정보 조회
+     * 크루 상세 정보 조회
      * 
-     * @param clubId 동아리 ID
-     * @return 동아리 상세 정보
+     * @param crewId 크루 ID
+     * @return 크루 상세 정보
      */
     @Transactional(readOnly = true)
-    public ClubDetailResponse getClubDetail(Long clubId) {
-        Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new RuntimeException("해당 동아리를 찾을 수 없습니다."));
+    public CrewDetailResponse getCrewDetail(Long crewId) {
+        if (crewId == null) {
+            throw new IllegalArgumentException("Crew ID must not be null");
+        }
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
 
-        return ClubDetailResponse.from(club);
+        return CrewDetailResponse.from(crew);
     }
 
     /**
-     * 동아리 정보 수정
+     * 크루 정보 수정
      * 
      * @param userId  현재 로그인한 사용자 ID
-     * @param clubId  동아리 ID
+     * @param crewId  크루 ID
      * @param request 수정 요청
      */
     @Transactional
-    public void updateClub(Long userId, Long clubId, ClubUpdateRequest request) {
-        // 동아리 조회
-        Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new RuntimeException("해당 동아리를 찾을 수 없습니다."));
+    public void updateCrew(Long userId, Long crewId, CrewUpdateRequest request) {
+        if (userId == null || crewId == null) {
+            throw new IllegalArgumentException("User ID and Crew ID must not be null");
+        }
+        // 크루 조회
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
 
         // 사용자 조회 및 권한 확인 (MANAGER 또는 PRESIDENT)
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        if (!user.getClub().equals(club) ||
+        if (!user.getCrew().equals(crew) ||
                 (user.getRole() != Role.MANAGER && user.getRole() != Role.PRESIDENT)) {
             throw new RuntimeException("수정 권한이 없습니다.");
         }
 
-        // 동아리명 수정
-        if (request.getClubName() != null && !request.getClubName().isBlank()) {
-            club.updateName(request.getClubName());
+        // 크루명 수정
+        if (request.getCrewName() != null && !request.getCrewName().isBlank()) {
+            crew.updateName(request.getCrewName());
         }
 
         // PIN 수정
-        if (request.getClubPIN() != null) {
-            club.updateClubPIN(request.getClubPIN());
+        if (request.getCrewPIN() != null) {
+            crew.updateCrewPIN(request.getCrewPIN());
         }
 
         // 예약 요일 수정
         if (request.getReservationDay() != null && !request.getReservationDay().isBlank()) {
             DayOfWeek dayOfWeek = DayOfWeek.valueOf(request.getReservationDay());
-            club.updateReservationDay(dayOfWeek);
+            crew.updateReservationDay(dayOfWeek);
         }
 
         // 예약 시간 수정
         if (request.getReservationTime() != null && !request.getReservationTime().isBlank()) {
             LocalTime time = LocalTime.parse(request.getReservationTime());
-            club.updateReservationTime(time);
+            crew.updateReservationTime(time);
         }
 
         // 일별 수용 인원 수정
         if (request.getDailyCapacity() != null) {
-            club.updateDailyCapacity(request.getDailyCapacity());
+            crew.updateDailyCapacity(request.getDailyCapacity());
             // 수용 인원 증가 시 대기열 승격 시도
-            reservationService.promoteWaitingUsers(club);
+            reservationService.promoteWaitingUsers(crew);
         }
 
         // 운영진 목록 수정
         if (request.getManagerList() != null) {
             // 기존 운영진 제거 (PRESIDENT 제외)
-            List<User> existingManagers = userRepository.findAllByClubAndRole(club, Role.MANAGER);
+            List<User> existingManagers = userRepository.findAllByCrewAndRole(crew, Role.MANAGER);
 
             for (User manager : existingManagers) {
-                manager.leaveClub();
+                manager.leaveCrew();
             }
 
             // 회장 찾기
-            User president = userRepository.findByClubAndRole(club, Role.PRESIDENT)
-                    .orElseThrow(() -> new RuntimeException("동아리 회장을 찾을 수 없습니다."));
+            User president = userRepository.findByCrewAndRole(crew, Role.PRESIDENT)
+                    .orElseThrow(() -> new RuntimeException("크루 회장을 찾을 수 없습니다."));
 
             // 새로운 운영진 지정
-            assignManagers(club, president, request.getManagerList());
+            assignManagers(crew, president, request.getManagerList());
         }
 
-        log.info("동아리 정보 수정 완료: clubId={}, updatedBy={}", clubId, userId);
+        log.info("크루 정보 수정 완료: crewId={}, updatedBy={}", crewId, userId);
     }
 
     /**
-     * 동아리 삭제
+     * 크루 삭제
      * 
      * @param userId  현재 로그인한 사용자 ID
-     * @param clubId  동아리 ID
+     * @param crewId  크루 ID
      * @param request 삭제 요청 (PIN 확인용)
      */
     @Transactional
-    public void deleteClub(Long userId, Long clubId, ClubDeleteRequest request) {
-        // 동아리 조회
-        Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new RuntimeException("해당 동아리를 찾을 수 없습니다."));
+    public void deleteCrew(Long userId, Long crewId, CrewDeleteRequest request) {
+        if (userId == null || crewId == null) {
+            throw new IllegalArgumentException("User ID and Crew ID must not be null");
+        }
+        // 크루 조회
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
 
         // 사용자 조회 및 권한 확인 (PRESIDENT만 가능)
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        if (!user.getClub().equals(club) || user.getRole() != Role.PRESIDENT) {
-            throw new RuntimeException("동아리 삭제 권한이 없습니다.");
+        if (!user.getCrew().equals(crew) || user.getRole() != Role.PRESIDENT) {
+            throw new RuntimeException("크루 삭제 권한이 없습니다.");
         }
 
         // PIN 확인
-        if (!club.verifyPIN(request.getClubPIN())) {
+        if (!crew.verifyPIN(request.getCrewPIN())) {
             throw new RuntimeException("PIN이 일치하지 않습니다.");
         }
 
-        // 동아리 소속 모든 회원 조회 (최적화)
-        List<User> members = userRepository.findAllByClub(club);
+        // 크루 소속 모든 회원 조회 (최적화)
+        List<User> members = userRepository.findAllByCrew(crew);
 
         for (User member : members) {
-            member.leaveClub();
+            member.leaveCrew();
         }
 
-        // 동아리 삭제
-        clubRepository.delete(club);
+        // 크루 삭제
+        crewRepository.delete(crew);
 
-        log.info("동아리 삭제 완료: clubId={}, deletedBy={}", clubId, userId);
+        log.info("크루 삭제 완료: crewId={}, deletedBy={}", crewId, userId);
     }
 
     /**
      * 운영진 지정
      * 
-     * @param club              동아리
-     * @param president         동아리 회장 (PRESIDENT로 이미 설정됨, 중복 처리 방지용)
+     * @param crew              크루
+     * @param president         크루 회장 (PRESIDENT로 이미 설정됨, 중복 처리 방지용)
      * @param managerStudentIds 운영진 학번 리스트
      * @return 지정된 운영진 목록
      */
-    private Set<User> assignManagers(Club club, User president, Set<String> managerStudentIds) {
+    private Set<User> assignManagers(Crew crew, User president, Set<String> managerStudentIds) {
         Set<User> managers = new HashSet<>();
 
         // 회장 본인이 manager_list에 있는지 확인
@@ -262,9 +269,9 @@ public class ClubService {
 
         for (String studentId : studentIdsToProcess) {
             // 학교 + 학번으로 사용자 조회 (유니크)
-            User user = userRepository.findBySchoolAndStudentId(club.getUniv(), studentId)
+            User user = userRepository.findBySchoolAndStudentId(crew.getUniv(), studentId)
                     .orElseThrow(() -> new RuntimeException(
-                            club.getUniv() + " 소속 학번 " + studentId + "에 해당하는 사용자를 찾을 수 없습니다."));
+                            crew.getUniv() + " 소속 학번 " + studentId + "에 해당하는 사용자를 찾을 수 없습니다."));
 
             // 회원가입 완료 여부 확인
             if (!user.getIsRegistered()) {
@@ -273,11 +280,11 @@ public class ClubService {
             }
 
             // 운영진으로 지정 (Role.MANAGER)
-            user.joinClub(club, Role.MANAGER);
+            user.joinCrew(crew, Role.MANAGER);
             managers.add(user);
 
-            log.info("운영진 지정 완료: clubId={}, userId={}, school={}, studentId={}, role=MANAGER",
-                    club.getId(), user.getId(), club.getUniv(), studentId);
+            log.info("운영진 지정 완료: crewId={}, userId={}, school={}, studentId={}, role=MANAGER",
+                    crew.getId(), user.getId(), crew.getUniv(), studentId);
         }
 
         return managers;
