@@ -36,6 +36,11 @@ out/
 ### VS Code ###
 .vscode/
 
+### Local Configuration ###
+# 로컬 환경 설정 파일 (실제 키 포함)
+application-local.yaml
+src/main/resources/application-local.yaml
+
 ### macOS ###
 # General
 .DS_Store
