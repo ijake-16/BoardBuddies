@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "BoardBuddies API",
-    "description": "BoardBuddies API 테스트 컬렉션 - 소셜 로그인, 회원가입, 동아리 관리",
+    "description": "BoardBuddies API 테스트 컬렉션 - 소셜 로그인, 회원가입, 크루 관리",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -263,7 +263,7 @@
       }
     },
     {
-      "name": "동아리 생성",
+      "name": "크루 생성",
       "request": {
         "method": "POST",
         "header": [
@@ -279,10 +279,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"clubName\": \"snowholic\",\n  \"clubPIN\": 1234,\n  \"univ\": \"숙명여자대학교\",\n  \"reservation_day\": \"SUNDAY\",\n  \"reservation_time\": \"20:00:00\",\n  \"manager_list\": [\"2312345\", \"2412345\"]\n}"
+          "raw": "{\n  \"crewName\": \"snowholic\",\n  \"crewPIN\": 1234,\n  \"univ\": \"숙명여자대학교\",\n  \"reservation_day\": \"SUNDAY\",\n  \"reservation_time\": \"20:00:00\",\n  \"manager_list\": [\"2312345\", \"2412345\"]\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs",
+          "raw": "http://localhost:8080/api/crews",
           "protocol": "http",
           "host": [
             "localhost"
@@ -290,13 +290,13 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs"
+            "crews"
           ]
         }
       }
     },
     {
-      "name": "동아리 생성 (예약 정보 없이)",
+      "name": "크루 생성 (예약 정보 없이)",
       "request": {
         "method": "POST",
         "header": [
@@ -312,10 +312,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"clubName\": \"보드게임 동아리\",\n  \"clubPIN\": 5678,\n  \"univ\": \"서울대학교\"\n}"
+          "raw": "{\n  \"crewName\": \"보드게임 크루\",\n  \"crewPIN\": 5678,\n  \"univ\": \"서울대학교\"\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs",
+          "raw": "http://localhost:8080/api/crews",
           "protocol": "http",
           "host": [
             "localhost"
@@ -323,13 +323,13 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs"
+            "crews"
           ]
         }
       }
     },
     {
-      "name": "동아리 목록 조회",
+      "name": "크루 목록 조회",
       "request": {
         "method": "GET",
         "header": [
@@ -344,7 +344,7 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:8080/api/clubs",
+          "raw": "http://localhost:8080/api/crews",
           "protocol": "http",
           "host": [
             "localhost"
@@ -352,13 +352,13 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs"
+            "crews"
           ]
         }
       }
     },
     {
-      "name": "동아리 가입 신청",
+      "name": "크루 가입 신청",
       "request": {
         "method": "POST",
         "header": [
@@ -374,10 +374,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"clubPIN\": 1234\n}"
+          "raw": "{\n  \"crewPIN\": 1234\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}/applications",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/applications",
           "protocol": "http",
           "host": [
             "localhost"
@@ -385,8 +385,8 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}",
+            "crews",
+            "{{crew_id}}",
             "applications"
           ]
         }
@@ -404,7 +404,7 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}/applications",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/applications",
           "protocol": "http",
           "host": [
             "localhost"
@@ -412,8 +412,8 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}",
+            "crews",
+            "{{crew_id}}",
             "applications"
           ]
         }
@@ -439,7 +439,7 @@
           "raw": "{\n  \"decision\": 1\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}/applications/{{application_id}}/approve",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/applications/{{application_id}}/approve",
           "protocol": "http",
           "host": [
             "localhost"
@@ -447,8 +447,8 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}",
+            "crews",
+            "{{crew_id}}",
             "applications",
             "{{application_id}}",
             "approve"
@@ -476,7 +476,7 @@
           "raw": "{\n  \"decision\": 0\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}/applications/{{application_id}}/approve",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/applications/{{application_id}}/approve",
           "protocol": "http",
           "host": [
             "localhost"
@@ -484,8 +484,8 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}",
+            "crews",
+            "{{crew_id}}",
             "applications",
             "{{application_id}}",
             "approve"
@@ -509,10 +509,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"clubPIN\": 9999\n}"
+          "raw": "{\n  \"crewPIN\": 9999\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}/applications",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/applications",
           "protocol": "http",
           "host": [
             "localhost"
@@ -520,8 +520,8 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}",
+            "crews",
+            "{{crew_id}}",
             "applications"
           ]
         }
@@ -543,10 +543,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"clubName\": \"테스트 동아리\",\n  \"clubPIN\": 1234,\n  \"univ\": \"숙명여자대학교\",\n  \"manager_list\": [\"9999999\"]\n}"
+          "raw": "{\n  \"crewName\": \"테스트 크루\",\n  \"crewPIN\": 1234,\n  \"univ\": \"숙명여자대학교\",\n  \"manager_list\": [\"9999999\"]\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs",
+          "raw": "http://localhost:8080/api/crews",
           "protocol": "http",
           "host": [
             "localhost"
@@ -554,13 +554,13 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs"
+            "crews"
           ]
         }
       }
     },
     {
-      "name": "동아리 상세 조회",
+      "name": "크루 상세 조회",
       "request": {
         "method": "GET",
         "header": [
@@ -575,7 +575,7 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}",
           "protocol": "http",
           "host": [
             "localhost"
@@ -583,14 +583,14 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}"
+            "crews",
+            "{{crew_id}}"
           ]
         }
       }
     },
     {
-      "name": "동아리 정보 수정",
+      "name": "크루 정보 수정",
       "request": {
         "method": "PATCH",
         "header": [
@@ -606,10 +606,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"clubName\": \"snoooowholic\",\n  \"manager_list\": [\"2312345\", \"2412345\", \"2212345\"],\n  \"clubPIN\": 5678,\n  \"reservation_day\": \"SATURDAY\",\n  \"reservation_time\": \"18:00:00\"\n}"
+          "raw": "{\n  \"crewName\": \"snoooowholic\",\n  \"manager_list\": [\"2312345\", \"2412345\", \"2212345\"],\n  \"crewPIN\": 5678,\n  \"reservation_day\": \"SATURDAY\",\n  \"reservation_time\": \"18:00:00\"\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}",
           "protocol": "http",
           "host": [
             "localhost"
@@ -617,14 +617,14 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}"
+            "crews",
+            "{{crew_id}}"
           ]
         }
       }
     },
     {
-      "name": "동아리 삭제",
+      "name": "크루 삭제",
       "request": {
         "method": "DELETE",
         "header": [
@@ -640,10 +640,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"clubPIN\": 1234\n}"
+          "raw": "{\n  \"crewPIN\": 1234\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}",
           "protocol": "http",
           "host": [
             "localhost"
@@ -651,14 +651,14 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}"
+            "crews",
+            "{{crew_id}}"
           ]
         }
       }
     },
     {
-      "name": "에러 - 잘못된 PIN으로 동아리 삭제",
+      "name": "에러 - 잘못된 PIN으로 크루 삭제",
       "request": {
         "method": "DELETE",
         "header": [
@@ -673,10 +673,10 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"clubPIN\": 9999\n}"
+          "raw": "{\n  \"crewPIN\": 9999\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}",
           "protocol": "http",
           "host": [
             "localhost"
@@ -684,8 +684,8 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}"
+            "crews",
+            "{{crew_id}}"
           ]
         }
       }
@@ -742,7 +742,7 @@
           "raw": "{\n  \"dates\": [\"2025-12-05\", \"2025-12-06\"]\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}/reservations",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations",
           "protocol": "http",
           "host": [
             "localhost"
@@ -750,8 +750,8 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}",
+            "crews",
+            "{{crew_id}}",
             "reservations"
           ]
         }
@@ -777,7 +777,7 @@
           "raw": "{\n  \"dates\": [\"2025-12-05\"]\n}"
         },
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}/reservations/cancel",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations/cancel",
           "protocol": "http",
           "host": [
             "localhost"
@@ -785,8 +785,8 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}",
+            "crews",
+            "{{crew_id}}",
             "reservations",
             "cancel"
           ]
@@ -805,7 +805,7 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}/reservations?date=2025-12-05",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations?date=2025-12-05",
           "protocol": "http",
           "host": [
             "localhost"
@@ -813,8 +813,8 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}",
+            "crews",
+            "{{crew_id}}",
             "reservations"
           ],
           "query": [
@@ -839,7 +839,7 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:8080/api/clubs/{{club_id}}/reservations/day/2025-12-05",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations/day/2025-12-05",
           "protocol": "http",
           "host": [
             "localhost"
@@ -847,8 +847,8 @@
           "port": "8080",
           "path": [
             "api",
-            "clubs",
-            "{{club_id}}",
+            "crews",
+            "{{crew_id}}",
             "reservations",
             "day",
             "2025-12-05"
@@ -879,9 +879,9 @@
       "value": "로그인_후_받은_리프레시_토큰"
     },
     {
-      "key": "club_id",
+      "key": "crew_id",
       "value": "1",
-      "description": "동아리 ID (동아리 생성 후 받은 club_id)"
+      "description": "크루 ID (크루 생성 후 받은 crew_id)"
     },
     {
       "key": "application_id",

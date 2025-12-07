@@ -2,6 +2,7 @@ package com.boardbuddies.boardbuddiesserver.dto.crew;
 
 import com.boardbuddies.boardbuddiesserver.domain.Crew;
 import com.boardbuddies.boardbuddiesserver.domain.DayOfWeek;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,6 +55,7 @@ public class CrewListResponse {
     /**
      * 예약 시간 (HH:MM:SS)
      */
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     @JsonProperty("reservation_time")
     private LocalTime reservationTime;
 
