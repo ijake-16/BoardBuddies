@@ -590,6 +590,52 @@
       }
     },
     {
+      "name": "크루 달력 조회",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/calendar?year=2025&month=12",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "crews",
+            "{{crew_id}}",
+            "calendar"
+          ],
+          "query": [
+            {
+              "key": "year",
+              "value": "2025"
+            },
+            {
+              "key": "month",
+              "value": "12"
+            },
+            {
+              "key": "showMySchedule",
+              "value": "true",
+              "description": "내 일정 포함 여부 (true/false)"
+            }
+          ]
+        }
+      }
+    },
+    {
       "name": "크루 정보 수정",
       "request": {
         "method": "PATCH",

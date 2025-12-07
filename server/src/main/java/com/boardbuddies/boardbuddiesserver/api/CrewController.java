@@ -243,6 +243,44 @@ public class CrewController {
     }
 
     /**
+     * 월별 크루 달력 조회
+     * 
+     * GET /api/crews/{crewId}/calendar?year=2025&month=12
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @param year   년도
+     * @param month  월
+     * @return 크루 달력 응답
+     */
+    @GetMapping("/{crewId}/calendar")
+    public ResponseEntity<ApiResponse<CrewCalendarWrapperResponse>> getCrewCalendar(
+            @CurrentUser Long userId,
+            @PathVariable Long crewId,
+            @RequestParam int year,
+            @RequestParam int month,
+            @RequestParam(defaultValue = "false") boolean showMySchedule) {
+
+        try {
+            CrewCalendarWrapperResponse calendar = crewService.getCrewCalendar(userId, crewId, year, month,
+                    showMySchedule);
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "크루 달력 조회 성공", calendar));
+        } catch (RuntimeException e) {
+            log.error("크루 달력 조회 중 에러 발생", e);
+            String errorMessage = e.getMessage();
+
+            if (errorMessage != null && errorMessage.contains("크루를 찾을 수 없습니다")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(404, errorMessage));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ApiResponse.error(500, "서버 에러"));
+            }
+        }
+    }
+
+    /**
      * 크루 가입 신청 목록 조회 (운영진용)
      * 
      * GET /api/crews/{crewId}/applications

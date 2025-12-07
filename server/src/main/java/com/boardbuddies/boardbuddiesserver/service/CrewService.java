@@ -3,12 +3,14 @@ package com.boardbuddies.boardbuddiesserver.service;
 import com.boardbuddies.boardbuddiesserver.domain.*;
 import com.boardbuddies.boardbuddiesserver.dto.crew.*;
 import com.boardbuddies.boardbuddiesserver.repository.CrewRepository;
+import com.boardbuddies.boardbuddiesserver.repository.ReservationRepository;
 import com.boardbuddies.boardbuddiesserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +27,7 @@ public class CrewService {
 
     private final CrewRepository crewRepository;
     private final UserRepository userRepository;
+    private final ReservationRepository reservationRepository;
     private final ReservationService reservationService;
 
     /**
@@ -288,5 +291,104 @@ public class CrewService {
         }
 
         return managers;
+    }
+
+    /**
+     * 월별 크루 달력 조회
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @param year   년도
+     * @param month  월
+     * @return 크루 달력 응답 리스트
+     */
+    @Transactional(readOnly = true)
+    public CrewCalendarWrapperResponse getCrewCalendar(Long userId, Long crewId, int year, int month,
+            boolean showMySchedule) {
+        // 크루 및 사용자 확인
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 조회 기간 설정 (해당 월의 1일 ~ 마지막 날)
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        // 1. 일별 예약 수 집계 (DB에서 Count만 조회)
+        List<DailyReservationCount> dailyCounts = reservationRepository.findDailyCountsByCrewAndDateBetween(
+                crew, startDate, endDate);
+
+        // 날짜별 Count 매핑
+        java.util.Map<LocalDate, Long> countMap = dailyCounts.stream()
+                .collect(Collectors.toMap(DailyReservationCount::getDate, DailyReservationCount::getCount));
+
+        List<CrewCalendarResponse> calendarResponses = new java.util.ArrayList<>();
+
+        // 2. 1일부터 말일까지 응답 생성
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            Long countLong = countMap.getOrDefault(date, 0L);
+            int count = countLong.intValue();
+
+            // 혼잡도 상태 결정
+            String occupancyStatus;
+            if (count < 5) {
+                occupancyStatus = "LOW";
+            } else if (count < 10) {
+                occupancyStatus = "MEDIUM";
+            } else {
+                occupancyStatus = "HIGH";
+            }
+
+            calendarResponses.add(CrewCalendarResponse.builder()
+                    .date(date)
+                    .occupancyStatus(occupancyStatus)
+                    .build());
+        }
+
+        // 3. 내 예약 정보 조회 (옵션)
+        List<CrewMyMonthlyReservationResponse> myReservations = null;
+        if (showMySchedule) {
+            myReservations = getMyMonthlyReservations(userId, crewId, year, month);
+        }
+
+        return CrewCalendarWrapperResponse.builder()
+                .calendar(calendarResponses)
+                .myReservations(myReservations)
+                .build();
+    }
+
+    /**
+     * 내 월별 예약 내역 조회
+     * 
+     * @param userId 사용자 ID
+     * @param crewId 크루 ID
+     * @param year   년도
+     * @param month  월
+     * @return 내 예약 목록 (날짜, 상태)
+     */
+    @Transactional(readOnly = true)
+    public List<CrewMyMonthlyReservationResponse> getMyMonthlyReservations(Long userId, Long crewId, int year,
+            int month) {
+        // 크루 및 사용자 확인
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 조회 기간 설정 (해당 월의 1일 ~ 마지막 날)
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        // 내 예약 정보 조회
+        List<Reservation> myReservations = reservationRepository.findAllByCrewAndUserAndDateBetweenAndStatusNot(
+                crew, user, startDate, endDate, "CANCELLED");
+
+        return myReservations.stream()
+                .map(r -> CrewMyMonthlyReservationResponse.builder()
+                        .date(r.getDate())
+                        .status("confirmed".equalsIgnoreCase(r.getStatus()) ? "CONFIRMED" : "WAITING")
+                        .build())
+                .collect(Collectors.toList());
     }
 }
