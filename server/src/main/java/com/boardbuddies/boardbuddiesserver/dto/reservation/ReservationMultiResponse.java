@@ -32,8 +32,6 @@ public class ReservationMultiResponse {
 
         @JsonProperty("reservation_id")
         private Long reservationId;
-
-        private String reason;
     }
 
     @Getter

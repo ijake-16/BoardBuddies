@@ -88,7 +88,6 @@ public class ReservationService {
                 results.add(ReservationMultiResponse.ReservationResult.builder()
                         .date(date)
                         .status(status)
-                        .reason(reason)
                         .build());
                 failed++;
             }
@@ -328,10 +327,7 @@ public class ReservationService {
         int booked = 0;
         List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse> memberList = new ArrayList<>();
         List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse> waitingMemberList = new ArrayList<>();
-        com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo myReservationInfo = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo
-                .builder()
-                .exists(false)
-                .build();
+        com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo myReservationInfo = null;
 
         for (Reservation r : reservations) {
             com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse memberResponse = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse
@@ -352,9 +348,7 @@ public class ReservationService {
             if (r.getUser().getId().equals(userId)) {
                 myReservationInfo = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo
                         .builder()
-                        .exists(true)
                         .reservationId(r.getId())
-                        .createdAt(r.getCreatedAt().atZone(ZoneId.of("Asia/Seoul")))
                         .build();
             }
         }

@@ -29,12 +29,7 @@ public class ReservationDayDetailResponse {
     @Getter
     @Builder
     public static class MyReservationInfo {
-        private boolean exists;
-
         @JsonProperty("reservation_id")
         private Long reservationId;
-
-        @JsonProperty("created_at")
-        private ZonedDateTime createdAt;
     }
 }
