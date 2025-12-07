@@ -322,25 +322,30 @@ public class ReservationService {
             }
         }
 
-        // 3. 예약 목록 조회
-        List<Reservation> reservations = reservationRepository.findByCrewAndDateAndStatusNot(crew, date, "CANCELLED");
+        List<Reservation> reservations = reservationRepository.findAllByCrewAndDateAndStatusNotOrderByCreatedAtAsc(crew,
+                date, "CANCELLED");
 
         int booked = 0;
-        List<String> memberList = new ArrayList<>();
-        List<String> waitingMemberList = new ArrayList<>();
+        List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse> memberList = new ArrayList<>();
+        List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse> waitingMemberList = new ArrayList<>();
         com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo myReservationInfo = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo
                 .builder()
                 .exists(false)
                 .build();
 
         for (Reservation r : reservations) {
-            String memberName = r.getUser().getSchool() + " " + r.getUser().getName();
+            com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse memberResponse = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse
+                    .builder()
+                    .userId(r.getUser().getId())
+                    .name(r.getUser().getName())
+                    .profileImageUrl(r.getUser().getProfileImageUrl())
+                    .build();
 
             if ("confirmed".equals(r.getStatus())) {
                 booked++;
-                memberList.add(memberName);
+                memberList.add(memberResponse);
             } else if ("waiting".equals(r.getStatus())) {
-                waitingMemberList.add(memberName);
+                waitingMemberList.add(memberResponse);
             }
 
             // 내 예약 확인
@@ -354,17 +359,9 @@ public class ReservationService {
             }
         }
 
-        int remaining = Math.max(0, crew.getDailyCapacity() - booked);
-
-        return com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.builder()
-                .date(date)
-                .status(status)
-                .booked(booked)
-                .remaining(remaining)
-                .memberList(memberList)
-                .waitingMemberList(waitingMemberList)
-                .myReservation(myReservationInfo)
-                .build();
+        return com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.builder().date(date)
+                .status(status).booked(booked).waitingCount(waitingMemberList.size()).capacity(crew.getDailyCapacity())
+                .memberList(memberList).waitingMemberList(waitingMemberList).myReservation(myReservationInfo).build();
     }
 
     /**

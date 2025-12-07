@@ -33,6 +33,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         List<Reservation> findAllByCrewAndDateBetweenAndStatusNot(Crew crew, LocalDate startDate, LocalDate endDate,
                         String status);
 
+        List<Reservation> findAllByCrewAndDateAndStatusNotOrderByCreatedAtAsc(Crew crew, LocalDate date, String status);
+
         @Query("SELECT new com.boardbuddies.boardbuddiesserver.dto.crew.DailyReservationCount(r.date, COUNT(r)) " +
                         "FROM Reservation r " +
                         "WHERE r.crew = :crew " +

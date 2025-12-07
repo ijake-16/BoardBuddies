@@ -14,13 +14,14 @@ public class ReservationDayDetailResponse {
     private LocalDate date;
     private String status; // open, closed
     private int booked;
-    private int remaining;
+    private int waitingCount;
+    private int capacity;
 
     @JsonProperty("member_list")
-    private List<String> memberList;
+    private List<ReservationMemberResponse> memberList;
 
     @JsonProperty("waiting_member_list")
-    private List<String> waitingMemberList;
+    private List<ReservationMemberResponse> waitingMemberList;
 
     @JsonProperty("my_reservation")
     private MyReservationInfo myReservation;

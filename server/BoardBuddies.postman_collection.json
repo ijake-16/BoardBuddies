@@ -28,6 +28,16 @@
     {
       "name": "소셜 로그인 - 카카오",
       "request": {
+        "auth": {
+          "type": "oauth2",
+          "oauth2": [
+            {
+              "key": "addTokenTo",
+              "value": "header",
+              "type": "string"
+            }
+          ]
+        },
         "description": "신규 회원의 경우 DB에 저장하지 않고, 소셜 정보가 담긴 임시 토큰을 반환합니다.",
         "method": "POST",
         "header": [
@@ -874,7 +884,7 @@
       }
     },
     {
-      "name": "일자별 예약 상세 조회 (캘린더)",
+      "name": "일자별 예약 상세 조회 (캘린더 상세)",
       "request": {
         "method": "GET",
         "header": [
@@ -884,6 +894,7 @@
             "description": "액세스 토큰"
           }
         ],
+        "description": "특정 날짜의 예약 상세 정보를 조회합니다.\n\n**응답 필드 설명:**\n- `status`: 예약 가능 여부 (open/closed)\n- `booked`: 현재 확정된 예약 인원\n- `waiting_count`: 현재 대기 인원\n- `capacity`: 전체 수용 인원\n- `member_list`: 예약 확정자 명단 (이름, 프로필 사진)\n- `waiting_member_list`: 대기자 명단\n- `my_reservation`: 내 예약 정보 (존재 여부, ID 등)",
         "url": {
           "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations/day/2025-12-05",
           "protocol": "http",
