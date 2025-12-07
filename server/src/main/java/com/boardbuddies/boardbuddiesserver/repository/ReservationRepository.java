@@ -48,4 +48,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
         List<Reservation> findAllByCrewAndUserAndDateBetweenAndStatusNot(Crew crew, User user, LocalDate startDate,
                         LocalDate endDate, String status);
+
+        Long countByUserAndCrewAndStatus(User user, Crew crew, String status);
+
+        Long countByCrewAndDateAndStatusAndCreatedAtBefore(Crew crew, LocalDate date, String status,
+                        java.time.LocalDateTime createdAt);
 }

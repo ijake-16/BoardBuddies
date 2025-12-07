@@ -298,12 +298,11 @@ public class CrewService {
      * 
      * @param userId 현재 로그인한 사용자 ID
      * @param crewId 크루 ID
-     * @param year   년도
-     * @param month  월
+     * @param date   조회할 월의 아무 날짜 (예: 2023-10-15)
      * @return 크루 달력 응답 리스트
      */
     @Transactional(readOnly = true)
-    public CrewCalendarWrapperResponse getCrewCalendar(Long userId, Long crewId, int year, int month,
+    public CrewCalendarWrapperResponse getCrewCalendar(Long userId, Long crewId, LocalDate date,
             boolean showMySchedule) {
         // 크루 및 사용자 확인
         Crew crew = crewRepository.findById(crewId)
@@ -312,8 +311,8 @@ public class CrewService {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 조회 기간 설정 (해당 월의 1일 ~ 마지막 날)
-        LocalDate startDate = LocalDate.of(year, month, 1);
-        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        LocalDate startDate = date.withDayOfMonth(1);
+        LocalDate endDate = date.withDayOfMonth(date.lengthOfMonth());
 
         // 1. 일별 예약 수 집계 (DB에서 Count만 조회)
         List<DailyReservationCount> dailyCounts = reservationRepository.findDailyCountsByCrewAndDateBetween(
@@ -326,8 +325,8 @@ public class CrewService {
         List<CrewCalendarResponse> calendarResponses = new java.util.ArrayList<>();
 
         // 2. 1일부터 말일까지 응답 생성
-        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-            Long countLong = countMap.getOrDefault(date, 0L);
+        for (LocalDate d = startDate; !d.isAfter(endDate); d = d.plusDays(1)) {
+            Long countLong = countMap.getOrDefault(d, 0L);
             int count = countLong.intValue();
 
             // 혼잡도 상태 결정
@@ -341,7 +340,7 @@ public class CrewService {
             }
 
             calendarResponses.add(CrewCalendarResponse.builder()
-                    .date(date)
+                    .date(d)
                     .occupancyStatus(occupancyStatus)
                     .build());
         }
@@ -349,7 +348,7 @@ public class CrewService {
         // 3. 내 예약 정보 조회 (옵션)
         List<CrewMyMonthlyReservationResponse> myReservations = null;
         if (showMySchedule) {
-            myReservations = getMyMonthlyReservations(userId, crewId, year, month);
+            myReservations = getMyMonthlyReservations(userId, crewId, startDate, endDate);
         }
 
         return CrewCalendarWrapperResponse.builder()
@@ -359,36 +358,71 @@ public class CrewService {
     }
 
     /**
-     * 내 월별 예약 내역 조회
-     * 
-     * @param userId 사용자 ID
-     * @param crewId 크루 ID
-     * @param year   년도
-     * @param month  월
-     * @return 내 예약 목록 (날짜, 상태)
+     * 나의 달력 조회 (내 예약 + 이용 횟수 + 혼잡도)
      */
     @Transactional(readOnly = true)
-    public List<CrewMyMonthlyReservationResponse> getMyMonthlyReservations(Long userId, Long crewId, int year,
-            int month) {
+    public com.boardbuddies.boardbuddiesserver.dto.crew.MyCalendarResponse getMyCalendar(Long userId, Long crewId,
+            LocalDate date) {
         // 크루 및 사용자 확인
         Crew crew = crewRepository.findById(crewId)
                 .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 조회 기간 설정 (해당 월의 1일 ~ 마지막 날)
-        LocalDate startDate = LocalDate.of(year, month, 1);
-        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        // 조회 기간 설정
+        LocalDate startDate = date.withDayOfMonth(1);
+        LocalDate endDate = date.withDayOfMonth(date.lengthOfMonth());
+
+        // 1. 내 예약 목록 조회 (대기번호 포함)
+        List<CrewMyMonthlyReservationResponse> myReservations = getMyMonthlyReservations(userId, crewId, startDate,
+                endDate);
+
+        // 2. 이용 횟수 (확정된 예약 수)
+        int usageCount = reservationRepository.countByUserAndCrewAndStatus(user, crew, "confirmed").intValue();
+
+        return com.boardbuddies.boardbuddiesserver.dto.crew.MyCalendarResponse.builder()
+                .myReservations(myReservations)
+                .usageCount(usageCount)
+                .build();
+    }
+
+    /**
+     * 내 월별 예약 내역 조회
+     * 
+     * @param userId    사용자 ID
+     * @param crewId    크루 ID
+     * @param startDate 조회 시작 날짜
+     * @param endDate   조회 종료 날짜
+     * @return 내 예약 목록 (날짜, 상태)
+     */
+    @Transactional(readOnly = true)
+    public List<CrewMyMonthlyReservationResponse> getMyMonthlyReservations(Long userId, Long crewId,
+            LocalDate startDate,
+            LocalDate endDate) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
 
         // 내 예약 정보 조회
-        List<Reservation> myReservations = reservationRepository.findAllByCrewAndUserAndDateBetweenAndStatusNot(
+        List<Reservation> reservations = reservationRepository.findAllByCrewAndUserAndDateBetweenAndStatusNot(
                 crew, user, startDate, endDate, "CANCELLED");
 
-        return myReservations.stream()
-                .map(r -> CrewMyMonthlyReservationResponse.builder()
-                        .date(r.getDate())
-                        .status("confirmed".equalsIgnoreCase(r.getStatus()) ? "CONFIRMED" : "WAITING")
-                        .build())
+        return reservations.stream()
+                .map(r -> {
+                    Integer waitingOrder = null;
+                    if ("waiting".equals(r.getStatus())) {
+                        // 대기 번호 계산 (나보다 먼저 대기한 사람 수 + 1)
+                        long count = reservationRepository.countByCrewAndDateAndStatusAndCreatedAtBefore(
+                                crew, r.getDate(), "waiting", r.getCreatedAt());
+                        waitingOrder = (int) count + 1;
+                    }
+                    return CrewMyMonthlyReservationResponse.builder()
+                            .date(r.getDate())
+                            .status(r.getStatus())
+                            .waitingOrder(waitingOrder)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 }

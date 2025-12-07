@@ -23,4 +23,7 @@ public class CrewMyMonthlyReservationResponse {
      */
     @JsonProperty("status")
     private String status;
+
+    @JsonProperty("waiting_order")
+    private Integer waitingOrder;
 }

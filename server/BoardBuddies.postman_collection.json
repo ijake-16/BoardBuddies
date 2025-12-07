@@ -289,7 +289,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"crewName\": \"snowholic\",\n  \"crewPIN\": 1234,\n  \"univ\": \"숙명여자대학교\",\n  \"reservation_day\": \"SUNDAY\",\n  \"reservation_time\": \"20:00:00\",\n  \"manager_list\": [\"2312345\", \"2412345\"]\n}"
+          "raw": "{\n  \"crewName\": \"snowholic\",\n  \"crewPIN\": 1234,\n  \"univ\": \"숙명여자대학교\",\n  \"reservation_day\": \"SUNDAY\",\n  \"reservation_time\": \"20:00\",\n  \"manager_list\": []\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/crews",
@@ -600,9 +600,10 @@
       }
     },
     {
-      "name": "크루 달력 조회",
+      "name": "나의 달력 조회",
       "request": {
         "method": "GET",
+        "description": "나의 개인 달력 정보를 조회합니다.\n\n**응답 필드 설명:**\n- `my_reservations`: 나의 예약 목록\n  - `date`: 날짜\n  - `status`: 상태 (CONFIRMED, WAITING, ...)\n  - `waiting_order`: 대기 상태일 경우 대기 순번 (1부터 시작)\n- `usage_count`: 이번 달 확정된 예약 횟수 (시즌방 이용 횟수)",
         "header": [
           {
             "key": "Content-Type",
@@ -615,7 +616,47 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:8080/api/crews/{{crew_id}}/calendar?year=2025&month=12",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/calendar/my?date=2025-12-08",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "crews",
+            "{{crew_id}}",
+            "calendar",
+            "my"
+          ],
+          "query": [
+            {
+              "key": "date",
+              "value": "2025-12-08",
+              "description": "조회할 날짜 (해당 월의 데이터 반환)"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "크루 달력 조회",
+      "request": {
+        "method": "GET",
+        "description": "월별 달력 정보(날짜별 혼잡도)를 조회합니다.\n\n**응답 필드 설명:**\n- `calendar`: 날짜별 혼잡도 (LOW, MEDIUM, HIGH)\n- `my_reservations`: (선택적) 나의 예약 목록 - 지금은 `나의 달력 조회` API를 사용하는 것을 권장합니다.",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/calendar?date=2025-12-01",
           "protocol": "http",
           "host": [
             "localhost"
@@ -629,12 +670,9 @@
           ],
           "query": [
             {
-              "key": "year",
-              "value": "2025"
-            },
-            {
-              "key": "month",
-              "value": "12"
+              "key": "date",
+              "value": "2025-12-01",
+              "description": "조회할 날짜"
             },
             {
               "key": "showMySchedule",
@@ -795,7 +833,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"dates\": [\"2025-12-05\", \"2025-12-06\"]\n}"
+          "raw": "{\n  \"dates\": [\"2025-12-08\", \"2025-12-09\"]\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations",
@@ -830,7 +868,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"dates\": [\"2025-12-05\"]\n}"
+          "raw": "{\n  \"dates\": [\"2025-12-08\"]\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations/cancel",
@@ -861,7 +899,7 @@
           }
         ],
         "url": {
-          "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations?date=2025-12-05",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations?date=2025-12-08",
           "protocol": "http",
           "host": [
             "localhost"
@@ -876,7 +914,7 @@
           "query": [
             {
               "key": "date",
-              "value": "2025-12-05",
+              "value": "2025-12-08",
               "description": "조회할 날짜 (YYYY-MM-DD)"
             }
           ]
@@ -896,7 +934,7 @@
         ],
         "description": "특정 날짜의 예약 상세 정보를 조회합니다.\n\n**응답 필드 설명:**\n- `status`: 예약 가능 여부 (open/closed)\n- `booked`: 현재 확정된 예약 인원\n- `waiting_count`: 현재 대기 인원\n- `capacity`: 전체 수용 인원\n- `member_list`: 예약 확정자 명단 (이름, 프로필 사진)\n- `waiting_member_list`: 대기자 명단\n- `my_reservation`: 내 예약 정보 (존재 여부, ID 등)",
         "url": {
-          "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations/day/2025-12-05",
+          "raw": "http://localhost:8080/api/crews/{{crew_id}}/reservations/day/2025-12-08",
           "protocol": "http",
           "host": [
             "localhost"
@@ -908,7 +946,7 @@
             "{{crew_id}}",
             "reservations",
             "day",
-            "2025-12-05"
+            "2025-12-08"
           ]
         }
       }
