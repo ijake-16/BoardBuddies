@@ -433,4 +433,34 @@ public class ReservationService {
             }
         }
     }
+
+    /**
+     * 내 예약 내역 (이번주 + 다음주) 조회 - 메인 화면용
+     */
+    @Transactional(readOnly = true)
+    public List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationCalendarResponse> getMyCalendarReservations(
+            Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID must not be null");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 이번 주 월요일 ~ 다음 주 일요일
+        LocalDate now = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        LocalDate start = now.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        LocalDate end = start.plusWeeks(2).minusDays(1);
+
+        List<Reservation> reservations = reservationRepository.findAllByUserAndDateBetweenOrderByCreatedAtDesc(user,
+                start, end);
+
+        return reservations.stream()
+                .filter(r -> !"CANCELLED".equals(r.getStatus()))
+                .map(r -> com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationCalendarResponse.builder()
+                        .reservationId(r.getId())
+                        .date(r.getDate())
+                        .status(r.getStatus())
+                        .build())
+                .toList();
+    }
 }
