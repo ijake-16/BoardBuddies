@@ -600,6 +600,33 @@
       }
     },
     {
+      "name": "메인 화면 내 예약 조회 (이번주/다음주)",
+      "request": {
+        "method": "GET",
+        "description": "메인 화면용으로 이번주와 다음주의 내 예약 내역을 조회합니다.",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/crews/my-calendar",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "crews",
+            "my-calendar"
+          ]
+        }
+      }
+    },
+    {
       "name": "나의 달력 조회",
       "request": {
         "method": "GET",

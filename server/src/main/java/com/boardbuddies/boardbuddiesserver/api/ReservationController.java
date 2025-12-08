@@ -93,4 +93,20 @@ public class ReservationController {
                 return ResponseEntity.ok(
                                 ApiResponse.success(200, "예약 상세 조회 완료", response));
         }
+
+        /**
+         * 내 예약 내역 (이번주 + 다음주) 조회 - 메인 화면용
+         * 
+         * GET /api/crews/my-calendar
+         */
+        @GetMapping("/my-calendar")
+        public ResponseEntity<ApiResponse<java.util.List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationCalendarResponse>>> getMyCalendar(
+                        @CurrentUser Long userId) {
+
+                java.util.List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationCalendarResponse> response = reservationService
+                                .getMyCalendarReservations(userId);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(200, "내 예약 조회 완료", response));
+        }
 }
