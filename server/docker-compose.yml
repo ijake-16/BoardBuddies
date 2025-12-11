@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  app:
+    image: ${DOCKER_USERNAME}/boardbuddy-server:${TAG:-latest}
+    container_name: boardbuddy-server
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/boardbuddy
+      - SPRING_DATASOURCE_USERNAME=boardbuddyAdmin
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres:15-alpine
+    container_name: boardbuddy-db
+    environment:
+      - POSTGRES_DB=boardbuddy
+      - POSTGRES_USER=boardbuddyAdmin
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  db_data:
