@@ -208,4 +208,43 @@ public class AuthController {
             }
         }
     }
+
+    /**
+     * 로그아웃
+     * 
+     * @param authorization Authorization 헤더 (Bearer accessToken)
+     * @return 로그아웃 성공 응답
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @RequestHeader("Authorization") String authorization) {
+
+        try {
+            // Authorization 헤더 검증
+            if (authorization == null || authorization.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.error(400, "토큰이 없습니다."));
+            }
+
+            // Bearer 토큰 추출
+            String accessToken;
+            if (authorization.startsWith("Bearer ")) {
+                accessToken = authorization.substring(7);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error(401, "유효하지 않은 토큰입니다."));
+            }
+
+            // 로그아웃 처리
+            authService.logout(accessToken);
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "로그아웃 성공", null));
+
+        } catch (RuntimeException e) {
+            log.error("로그아웃 처리 중 에러 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+        }
+    }
 }

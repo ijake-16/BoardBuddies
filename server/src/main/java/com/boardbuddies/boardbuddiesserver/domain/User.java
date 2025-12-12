@@ -117,12 +117,6 @@ public class User {
     @Builder.Default
     private Boolean isRegistered = false;
 
-    /**
-     * 리프레시 토큰 (로그인 유지용)
-     */
-    @Column(length = 500)
-    private String refreshToken;
-
     // === 타임스탬프 ===
 
     @CreationTimestamp
@@ -147,13 +141,6 @@ public class User {
         this.gender = gender;
         this.phoneNumber = phoneNumber;
         this.isRegistered = true;
-    }
-
-    /**
-     * 리프레시 토큰 업데이트
-     */
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
     }
 
     /**

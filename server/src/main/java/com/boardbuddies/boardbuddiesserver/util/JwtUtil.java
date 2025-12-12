@@ -110,6 +110,14 @@ public class JwtUtil {
     }
 
     /**
+     * 토큰 만료 시간 조회
+     */
+    public Long getExpiration(String token) {
+        Claims claims = parseToken(token);
+        return claims.getExpiration().getTime();
+    }
+
+    /**
      * 토큰 파싱
      * 
      * @param token JWT 토큰

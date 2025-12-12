@@ -28,6 +28,7 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final com.boardbuddies.boardbuddiesserver.service.RedisTokenService redisTokenService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -48,6 +49,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = extractTokenFromRequest(request);
 
             if (token != null && jwtUtil.validateToken(token)) {
+                // 블랙리스트 확인
+                if (redisTokenService.isBlackListed(token)) {
+                    log.warn("블랙리스트에 등록된 토큰입니다.");
+                    throw new RuntimeException("로그아웃된 사용자입니다.");
+                }
+
                 // 토큰에서 사용자 ID 추출
                 Long userId = jwtUtil.getUserIdFromToken(token);
 

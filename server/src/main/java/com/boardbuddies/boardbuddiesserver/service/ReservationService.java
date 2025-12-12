@@ -8,8 +8,11 @@ import com.boardbuddies.boardbuddiesserver.repository.ReservationRepository;
 import com.boardbuddies.boardbuddiesserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,17 +29,18 @@ public class ReservationService {
     private final CrewRepository crewRepository;
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
+    private final RedissonClient redissonClient;
+    private final TransactionTemplate transactionTemplate;
 
     /**
      * 시즌방 예약 (일괄 신청)
      */
-    @Transactional
     public ReservationMultiResponse reserve(Long userId, Long crewId, ReservationRequest request) {
         if (userId == null || crewId == null) {
             throw new IllegalArgumentException("User ID and Crew ID must not be null");
         }
-        // 1. 크루 조회 (비관적 락 사용 - 동시성 제어)
-        Crew crew = crewRepository.findByIdWithLock(crewId)
+        // 1. 크루 조회 (DB 락 제거 -> 일반 조회)
+        Crew crew = crewRepository.findById(crewId)
                 .orElseThrow(() -> new RuntimeException("크루를 찾을 수 없습니다."));
 
         // 2. 사용자 조회 및 권한 검증
@@ -60,8 +64,8 @@ public class ReservationService {
         // 4. 날짜별 처리
         for (LocalDate date : request.getDates()) {
             try {
-                // 개별 날짜 검증 및 예약
-                Reservation reservation = processSingleReservation(user, crew, date);
+                // 개별 날짜 검증 및 예약 (분산 락 적용)
+                Reservation reservation = processSingleReservationWithLock(user, crew, date);
 
                 String status = "created";
                 if ("waiting".equals(reservation.getStatus())) {
@@ -85,6 +89,10 @@ public class ReservationService {
                 else if (reason.contains("이미 예약"))
                     status = "duplicated";
 
+                // 락 획득 실패 시 (너무 많은 요청 몰림)
+                else if (reason.contains("잠시 후"))
+                    status = "retry_lazily";
+
                 results.add(ReservationMultiResponse.ReservationResult.builder()
                         .date(date)
                         .status(status)
@@ -105,18 +113,41 @@ public class ReservationService {
                 .build();
     }
 
-    private Reservation processSingleReservation(User user, Crew crew, LocalDate date) {
+    private Reservation processSingleReservationWithLock(User user, Crew crew, LocalDate date) {
+        String lockKey = "lock:reservation:" + crew.getId() + ":" + date;
+        // 락 획득 시도
+        RLock lock = redissonClient.getLock(lockKey);
+
+        try {
+            // waitTime: 락 획득 대기 시간 (5초), leaseTime: 락 보유 시간 (3초 - 자동 해제)
+            boolean available = lock.tryLock(5, 3, java.util.concurrent.TimeUnit.SECONDS);
+            if (!available) {
+                throw new RuntimeException("접속량이 많아 처리가 지연되고 있습니다. 잠시 후 다시 시도해주세요.");
+            }
+
+            // 트랜잭션 템플릿을 사용하여 트랜잭션 보장
+            return transactionTemplate.execute(status -> processSingleReservationLogic(user, crew, date));
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 인터럽트 상태 복구
+            throw new RuntimeException("서버 오류가 발생했습니다.");
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
+    }
+
+    protected Reservation processSingleReservationLogic(User user, Crew crew, LocalDate date) {
         // 1. 과거 날짜 제외
         if (date.isBefore(LocalDate.now())) {
             throw new RuntimeException("과거 날짜는 예약할 수 없습니다.");
         }
 
         // 2. 본인 중복 체크
-        // 해당 날짜에 이미 내 예약이 있는지 (상태가 confirmed/waiting 인 것들)
         List<Reservation> myReservations = reservationRepository.findAllByUserAndDateBetweenOrderByCreatedAtDesc(
                 user, date, date);
         if (!myReservations.isEmpty()) {
-            // 취소된 예약 제외하고 체크
             boolean exists = myReservations.stream()
                     .anyMatch(r -> !"CANCELLED".equals(r.getStatus()));
             if (exists) {
@@ -141,7 +172,6 @@ public class ReservationService {
                 .build();
 
         reservationRepository.save(reservation);
-
         return reservation;
     }
 

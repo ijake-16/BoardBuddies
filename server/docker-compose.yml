@@ -26,6 +26,21 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     restart: always
+    networks:
+      - boardbuddy-network
+
+  redis:
+    image: redis:alpine
+    container_name: boardbuddy-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - boardbuddy-network
 
 volumes:
   db_data:
+
+
+networks:
+  boardbuddy-network:
+    driver: bridge
