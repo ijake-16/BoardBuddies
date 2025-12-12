@@ -14,7 +14,7 @@
           "raw": "{{base_url}}/api/test/health",
           "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
           "port": "8080",
           "path": [
@@ -53,11 +53,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/auth/social/kakao",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "auth",
@@ -84,11 +82,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/auth/social/naver",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "auth",
@@ -120,11 +116,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/auth/signup/complete",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "auth",
@@ -146,11 +140,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/auth/social/kakao",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "auth",
@@ -176,11 +168,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/auth/social/kakao",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "auth",
@@ -206,11 +196,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/auth/social/google",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "auth",
@@ -234,11 +222,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/auth/refresh",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "auth",
@@ -260,11 +246,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/auth/logout",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "auth",
@@ -287,11 +271,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/users/me",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "users",
@@ -321,11 +303,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews"
@@ -354,11 +334,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews"
@@ -383,11 +361,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/crews",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews"
@@ -416,11 +392,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/applications",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -443,11 +417,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/applications",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -478,11 +450,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/applications/{{application_id}}/approve",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -515,11 +485,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/applications/{{application_id}}/approve",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -551,11 +519,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/applications",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -585,11 +551,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews"
@@ -614,11 +578,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -641,11 +603,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/crews/my-calendar",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -672,11 +632,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/calendar/my?date=2026-01-01",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -712,11 +670,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/calendar?date=2026-01-01",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -759,11 +715,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -793,11 +747,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -826,11 +778,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -852,11 +802,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/users/me/reservations",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "users",
@@ -892,11 +840,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/reservations",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -927,11 +873,9 @@
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/reservations/cancel",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -955,11 +899,9 @@
         ],
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/reservations?date=2026-01-01",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
@@ -990,11 +932,9 @@
         "description": "특정 날짜의 예약 상세 정보를 조회합니다.\n\n**응답 필드 설명:**\n- `status`: 예약 가능 여부 (open/closed)\n- `booked`: 현재 확정된 예약 인원\n- `waiting_count`: 현재 대기 인원\n- `capacity`: 전체 수용 인원\n- `member_list`: 예약 확정자 명단 (이름, 프로필 사진)\n- `waiting_member_list`: 대기자 명단\n- `my_reservation`: 내 예약 정보 (존재 여부, ID 등)",
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}/reservations/detail?date=2026-01-01",
-          "protocol": "http",
           "host": [
-            "localhost"
+            "{{base_url}}"
           ],
-          "port": "8080",
           "path": [
             "api",
             "crews",
