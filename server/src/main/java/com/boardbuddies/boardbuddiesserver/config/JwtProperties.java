@@ -13,20 +13,19 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
-    
+
     /**
      * JWT 서명 비밀키
      */
     private String secret;
-    
-    /**
-     * 액세스 토큰 만료 시간 (밀리초)
-     */
-    private Long accessTokenExpiration;
-    
-    /**
-     * 리프레시 토큰 만료 시간 (밀리초)
-     */
-    private Long refreshTokenExpiration;
-}
 
+    /**
+     * 액세스 토큰 만료 시간 (밀리초) - 기본값 1시간
+     */
+    private Long accessTokenExpiration = 3600000L;
+
+    /**
+     * 리프레시 토큰 만료 시간 (밀리초) - 기본값 14일
+     */
+    private Long refreshTokenExpiration = 1209600000L;
+}

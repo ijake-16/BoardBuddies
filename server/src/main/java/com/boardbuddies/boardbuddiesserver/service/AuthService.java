@@ -21,6 +21,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final SocialLoginService socialLoginService;
     private final JwtUtil jwtUtil;
+    private final RedisTokenService redisTokenService;
+    private final com.boardbuddies.boardbuddiesserver.config.JwtProperties jwtProperties;
 
     /**
      * 소셜 로그인 처리
@@ -44,8 +46,8 @@ public class AuthService {
             String accessToken = jwtUtil.generateAccessToken(user.getId());
             String refreshToken = jwtUtil.generateRefreshToken(user.getId());
 
-            // 리프레시 토큰 업데이트
-            user.updateRefreshToken(refreshToken);
+            // 리프레시 토큰 Redis 저장
+            redisTokenService.saveRefreshToken(user.getId(), refreshToken, jwtProperties.getRefreshTokenExpiration());
 
             return SocialLoginResponse.builder()
                     .type(AuthType.Login)
@@ -133,8 +135,8 @@ public class AuthService {
         String accessToken = jwtUtil.generateAccessToken(user.getId());
         String refreshToken = jwtUtil.generateRefreshToken(user.getId());
 
-        // 리프레시 토큰 저장
-        user.updateRefreshToken(refreshToken);
+        // 리프레시 토큰 Redis 저장
+        redisTokenService.saveRefreshToken(user.getId(), refreshToken, jwtProperties.getRefreshTokenExpiration());
 
         return SocialLoginResponse.builder()
                 .type(AuthType.Signup)
@@ -169,8 +171,11 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // DB에 저장된 리프레시 토큰과 비교
-        if (!refreshToken.equals(user.getRefreshToken())) {
+        // DB 조회 대신 Redis 조회
+        String savedRefreshToken = redisTokenService.getRefreshToken(userId);
+
+        // Redis에 저장된 리프레시 토큰과 비교
+        if (!refreshToken.equals(savedRefreshToken)) {
             throw new RuntimeException("유효하지 않은 리프레시 토큰입니다.");
         }
 
@@ -178,8 +183,8 @@ public class AuthService {
         String newAccessToken = jwtUtil.generateAccessToken(user.getId());
         String newRefreshToken = jwtUtil.generateRefreshToken(user.getId());
 
-        // 새로운 리프레시 토큰 저장
-        user.updateRefreshToken(newRefreshToken);
+        // 새로운 리프레시 토큰 저장 (기존 삭제 후 저장과 동일 효과)
+        redisTokenService.saveRefreshToken(user.getId(), newRefreshToken, jwtProperties.getRefreshTokenExpiration());
 
         log.info("토큰 재발급 완료: userId={}", user.getId());
 
@@ -188,5 +193,32 @@ public class AuthService {
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
+    }
+
+    /**
+     * 로그아웃 처리
+     * 
+     * @param accessToken 액세스 토큰
+     */
+    public void logout(String accessToken) {
+        // 토큰 유효성 검증은 필터 또는 앞단에서 이미 수행되었지만 안전을 위해 확인
+        if (!jwtUtil.validateToken(accessToken)) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.");
+        }
+
+        Long userId = jwtUtil.getUserIdFromToken(accessToken);
+
+        // 1. Refresh Token 삭제
+        redisTokenService.deleteRefreshToken(userId);
+
+        // 2. Access Token 블랙리스트 등록
+        // 남은 유효 시간 계산
+        long expiration = jwtUtil.getExpiration(accessToken);
+        long now = System.currentTimeMillis();
+        long ttl = expiration - now;
+
+        if (ttl > 0) {
+            redisTokenService.setBlackList(accessToken, ttl);
+        }
     }
 }
