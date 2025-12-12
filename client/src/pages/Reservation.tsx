@@ -57,74 +57,63 @@ export default function Reservation({ onBack }: ReservationProps) {
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
             {/* Header */}
             <header className="px-6 pt-12 pb-4 flex items-center justify-between z-10">
-                <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 hover:text-zinc-900">
-                    <ChevronLeftIcon className="w-6 h-6" />
-                </Button>
+                <div className="w-10 flex justify-start">
+                    <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 hover:text-zinc-900">
+                        <ChevronLeftIcon className="w-6 h-6" />
+                    </Button>
+                </div>
+                <h1 className="flex-1 text-center text-lg font-bold text-zinc-900">예약하기</h1>
+                <div className="w-10" />
             </header>
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto px-6 pb-[120px] flex flex-col items-center">
 
-                {/* Page Title */}
-                <div className="w-full mb-6">
-                    <h1 className="text-3xl font-black italic text-zinc-900 font-['Joti_One']">December</h1>
-                    <p className="text-sm font-medium text-zinc-900">2025</p>
-                </div>
 
-                {/* Grey Container */}
-                <div className="w-full bg-[#F4F4F5] rounded-[30px] p-4 mb-8">
-                    {/* Header Pill */}
-                    <div className="w-full bg-white rounded-2xl py-3 shadow-sm mb-4 flex justify-center items-center">
-                        <h2 className="text-base font-bold text-zinc-900">예약 달력</h2>
-                    </div>
+                <Calendar
+                    className="mb-8 p-4" // Matches previous padding: p-4 vs p-6 default. Overriding p-6 with p-4 if needed? Tailwind might conflict. `p-6` is default. `p-4` was used. Let's stick to `p-6` default for consistency, or explicitly `p-4`. `p-4` is later in class string so should win.
+                    month="December"
+                    year={2025}
+                    startDayOfWeek={1}
+                    totalDays={31}
+                    availableDays={availableDays}
+                    selectedDays={selectedDays}
+                    hideHeader={false}
+                    renderDay={(day) => {
+                        const isReserved = reservations.includes(day);
+                        const isSelected = selectedDays.includes(day);
+                        const isAvailable = availableDays.includes(day);
 
-                    {/* Calendar Card */}
-                    <div className="w-full bg-white rounded-[30px] p-6 shadow-sm">
-                        <Calendar
-                            month="December"
-                            year={2025}
-                            startDayOfWeek={1} // Dec 1 2025 is Monday
-                            totalDays={31}
-                            availableDays={availableDays}
-                            selectedDays={selectedDays}
-                            hideHeader={true}
-                            renderDay={(day) => {
-                                const isReserved = reservations.includes(day);
-                                const isSelected = selectedDays.includes(day);
-                                const isAvailable = availableDays.includes(day);
+                        if (isReserved) {
+                            return (
+                                <button
+                                    onClick={() => toggleDay(day)}
+                                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm bg-[#162660] hover:bg-[#43A047] transition-colors relative"
+                                >
+                                    {day}
+                                    <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
+                                        <CheckIcon className="w-3 h-3 text-[#162660]" />
+                                    </div>
+                                </button>
+                            );
+                        }
 
-                                if (isReserved) {
-                                    return (
-                                        <button
-                                            onClick={() => toggleDay(day)}
-                                            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm bg-[#162660] hover:bg-[#43A047] transition-colors relative"
-                                        >
-                                            {day}
-                                            <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
-                                                <CheckIcon className="w-3 h-3 text-[#162660]" />
-                                            </div>
-                                        </button>
-                                    );
-                                }
-
-                                return (
-                                    <button
-                                        onClick={() => toggleDay(day)}
-                                        disabled={!isAvailable}
-                                        className={`
-                                            w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all
-                                            ${isSelected ? 'bg-[#F6C555] text-black shadow-sm' : ''}
-                                            ${!isSelected && isAvailable ? 'text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800' : ''}
-                                            ${!isSelected && !isAvailable ? 'text-zinc-300 dark:text-zinc-700 cursor-default' : ''}
-                                        `}
-                                    >
-                                        {day}
-                                    </button>
-                                );
-                            }}
-                        />
-                    </div>
-                </div>
+                        return (
+                            <button
+                                onClick={() => toggleDay(day)}
+                                disabled={!isAvailable}
+                                className={`
+                                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all
+                                    ${isSelected ? 'bg-[#F6C555] text-black shadow-sm' : ''}
+                                    ${!isSelected && isAvailable ? 'text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800' : ''}
+                                    ${!isSelected && !isAvailable ? 'text-zinc-300 dark:text-zinc-700 cursor-default' : ''}
+                                `}
+                            >
+                                {day}
+                            </button>
+                        );
+                    }}
+                />
 
                 {/* Apply Button */}
                 <div className="w-full flex justify-center mt-auto">

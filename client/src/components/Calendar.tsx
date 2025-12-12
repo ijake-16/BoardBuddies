@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Button } from './Button';
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 
 interface CalendarProps {
     month: string;
@@ -27,7 +28,10 @@ export const Calendar = ({
     expandable = false,
     hideHeader = false,
     maxWeeks,
-}: CalendarProps) => {
+    headerRight,
+    headerTop,
+    className,
+}: CalendarProps & { headerRight?: React.ReactNode, headerTop?: React.ReactNode, className?: string }) => {
     const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
     const [focusedWeekIndex, setFocusedWeekIndex] = useState<number | null>(null);
 
@@ -79,86 +83,117 @@ export const Calendar = ({
     };
 
     return (
-        <div className="flex flex-col h-full">
-            {/* Month Title */}
-            {!hideHeader && (
-                <div className="mb-6 flex items-center justify-center relative">
-                    <div className="text-center">
-                        <h1 className="text-lg font-bold text-zinc-900">{month}</h1>
-                        <p className="text-xs text-zinc-400 font-medium">{year}</p>
-                    </div>
+        <div className={`flex flex-col w-full bg-[#F4F4F5] rounded-[30px] p-6 ${className || ''}`}>
+            {/* Optional Header Top Content */}
+            {headerTop && (
+                <div className="mb-4 w-full">
+                    {headerTop}
                 </div>
             )}
 
-            {/* Calendar Grid Header */}
-            <div className="grid grid-cols-7 gap-x-2 mb-6">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                    <div key={day} className="text-center text-zinc-400 text-sm font-bold">
-                        {day}
+            {/* Top Control Row */}
+            {!hideHeader && (
+                <div className="flex justify-between items-center mb-4 px-1">
+                    <div className="bg-white px-5 py-1 rounded-full shadow-sm text-base font-bold text-zinc-900">
+                        {year}
                     </div>
-                ))}
-            </div>
+                    {headerRight}
+                </div>
+            )}
 
-            {/* Weeks Rows */}
-            <div className="flex flex-col">
-                {weeks.map((week, weekIndex) => {
-                    // Determine if this row should be visible
-                    // In month view: All visible
-                    // In week view: Only the focused week is visible
-                    const isFocused = focusedWeekIndex === weekIndex;
-                    const isHidden = viewMode === 'week' && !isFocused;
+            {/* Month Header Bar */}
+            {!hideHeader && (
+                <div className="w-full bg-white rounded-2xl py-1 shadow-sm mb-4 flex items-center px-4">
+                    <Button variant="ghost" size="small" className="text-zinc-900">
+                        <ChevronLeftIcon className="w-5 h-5" />
+                    </Button>
+                    <h2 className="flex-1 text-center text-base font-bold text-zinc-900">
+                        {month}
+                    </h2>
+                    <Button variant="ghost" size="small" className="text-zinc-900">
+                        <ChevronRightIcon className="w-5 h-5" />
+                    </Button>
+                </div>
+            )}
 
-                    return (
-                        <div
-                            key={weekIndex}
-                            className={`
-                                grid grid-cols-7 gap-x-2 transition-all duration-500 ease-in-out overflow-hidden
-                                ${isHidden ? 'max-h-0 opacity-0 mb-0' : 'max-h-[60px] opacity-100 mb-8'}
-                            `}
-                        >
-                            {week.map((day, dayIndex) => {
-                                if (day === null) {
-                                    return <div key={`empty-${weekIndex}-${dayIndex}`} />;
-                                }
+            {/* Calendar Card */}
+            <div className="w-full bg-white rounded-[30px] p-6 shadow-sm">
+                <div className="flex flex-col h-full">
 
-                                const isAvailable = availableDays.includes(day);
-                                const isSelected = selectedDays.includes(day);
+                    {/* Calendar Grid Header */}
+                    <div className="grid grid-cols-7 gap-x-2 pb-4 border-b border-zinc-100">
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                            <div key={day} className="text-center text-zinc-400 text-sm font-bold">
+                                {day}
+                            </div>
+                        ))}
+                    </div>
 
-                                if (renderDay) {
-                                    return (
-                                        <div key={day} className="flex items-center justify-center aspect-square" onClick={() => handleDayClick(day, weekIndex)}>
-                                            {renderDay(day)}
-                                        </div>
-                                    )
-                                }
+                    {/* Weeks Rows */}
+                    <div className="flex flex-col">
+                        {weeks.map((week, weekIndex) => {
+                            // Determine if this row should be visible
+                            // In month view: All visible
+                            // In week view: Only the focused week is visible
+                            const isFocused = focusedWeekIndex === weekIndex;
+                            const isHidden = viewMode === 'week' && !isFocused;
+                            const isLastWeek = weekIndex === weeks.length - 1;
 
-                                return (
-                                    <div key={day} className="flex items-center justify-center aspect-square">
-                                        <button
-                                            onClick={() => handleDayClick(day, weekIndex)}
-                                            disabled={!isAvailable && !expandable}
-                                            className={`
-                                                w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all
-                                                ${isSelected ? 'bg-[#F6C555] text-black shadow-sm' : ''}
-                                                ${!isSelected && isAvailable ? 'text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800' : ''}
-                                                ${!isSelected && !isAvailable ? 'text-zinc-300 dark:text-zinc-700 cursor-default' : ''}
-                                            `}
-                                        >
-                                            {day}
-                                        </button>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    );
-                })}
-            </div>
+                            return (
+                                <div
+                                    key={weekIndex}
+                                    className={`
+                                        grid grid-cols-7 gap-x-2 transition-all duration-500 ease-in-out overflow-hidden
+                                        ${isHidden ? 'max-h-0 opacity-0 py-0' : 'min-h-[80px] opacity-100 py-1'}
+                                        ${!isLastWeek && !isHidden ? 'border-b border-zinc-100' : ''}
+                                    `}
+                                >
+                                    {week.map((day, dayIndex) => {
+                                        if (day === null) {
+                                            return <div key={`empty-${weekIndex}-${dayIndex}`} className="h-full" />;
+                                        }
 
-            {/* Back to Month Button (Bottom) */}
-            <div className={`mt-auto flex justify-center transition-opacity duration-300 ${viewMode === 'week' ? 'opacity-100' : 'opacity-0 pointer-events-none h-0'}`}>
-                <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-400 hover:text-zinc-600 text-xs">
-                    Back to Month
-                </Button>
+                                        const isAvailable = availableDays.includes(day);
+                                        const isSelected = selectedDays.includes(day);
+
+                                        if (renderDay) {
+                                            return (
+                                                <div key={day} className="flex flex-col items-center justify-start h-full pt-1" onClick={() => handleDayClick(day, weekIndex)}>
+                                                    {renderDay(day)}
+                                                </div>
+                                            )
+                                        }
+
+                                        return (
+                                            <div key={day} className="flex flex-col items-center justify-start h-full pt-1">
+                                                <button
+                                                    onClick={() => handleDayClick(day, weekIndex)}
+                                                    disabled={!isAvailable && !expandable}
+                                                    className={`
+                                                        w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all
+                                                        ${isSelected ? 'bg-[#F6C555] text-black shadow-sm' : ''}
+                                                        ${!isSelected && isAvailable ? 'text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800' : ''}
+                                                        ${!isSelected && !isAvailable ? 'text-zinc-300 dark:text-zinc-700 cursor-default' : ''}
+                                                        ${viewMode === 'week' ? 'mt-4' : ''} 
+                                                    `}
+                                                >
+                                                    {day}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Back to Month Button (Bottom) */}
+                    <div className={`mt-auto flex justify-center transition-opacity duration-300 ${viewMode === 'week' ? 'opacity-100' : 'opacity-0 pointer-events-none h-0'}`}>
+                        <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-400 hover:text-zinc-600 text-xs">
+                            Back to Month
+                        </Button>
+                    </div>
+                </div>
             </div>
         </div>
     );
