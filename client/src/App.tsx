@@ -31,7 +31,13 @@ function App() {
             initialView={statsInitialView}
           />
         ) : currentView === 'my_reservations' ? (
-          <MyReservations onBack={() => setCurrentView('home')} />
+          <MyReservations
+            onBack={() => setCurrentView('home')}
+            onCrewClick={() => {
+              setStatsInitialView('crew');
+              setCurrentView('stats');
+            }}
+          />
         ) : currentView === 'crew_detail' ? (
           <CrewDetail
             onBack={() => setCurrentView('home')}
@@ -48,8 +54,7 @@ function App() {
           <Home
             onMakeReservationClick={() => setCurrentView('reservation')}
             onCheckScheduleClick={() => {
-              setStatsInitialView('my');
-              setCurrentView('stats');
+              setCurrentView('my_reservations');
             }}
             onCalendarClick={() => {
               setStatsInitialView('crew');
@@ -66,7 +71,14 @@ function App() {
         {currentView !== 'login' && (
           <LowerMenuBar
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={(tab) => {
+              setActiveTab(tab);
+              if (tab === 'home') setCurrentView('home');
+              if (tab === 'calendar') setCurrentView('my_reservations');
+              if (tab === 'edit') setCurrentView('reservation');
+              if (tab === 'heart') setCurrentView('crew_detail');
+              if (tab === 'user') setCurrentView('user_info');
+            }}
           />
         )}
       </div>

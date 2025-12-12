@@ -5,6 +5,7 @@ import { Calendar } from '../components/Calendar';
 
 interface MyReservationsProps {
     onBack: () => void;
+    onCrewClick?: () => void;
 }
 
 const ChevronLeftIcon = ({ className }: { className?: string }) => (
@@ -21,110 +22,180 @@ const CheckIcon = ({ className }: { className?: string }) => (
 
 
 
-export default function MyReservations({ onBack }: MyReservationsProps) {
-    // Mock reservations
-    const [reservations, setReservations] = useState<number[]>([16, 20]);
-    const [withdrawDay, setWithdrawDay] = useState<number | null>(null);
+export default function MyReservations({ onBack, onCrewClick }: MyReservationsProps) {
+    const [selectedDay, setSelectedDay] = useState<number | null>(3); // Default to Today (3)
+
+    // Mock Data based on screenshots
+    const confirmedDays = [13, 14, 25, 26];
+    const pendingDays = [27];
+    const today = 3;
 
     const handleDayClick = (day: number) => {
-        if (reservations.includes(day)) {
-            setWithdrawDay(day);
-        }
-    };
-
-    const confirmWithdraw = () => {
-        if (withdrawDay !== null) {
-            setReservations(prev => prev.filter(d => d !== withdrawDay));
-            setWithdrawDay(null);
-        }
+        setSelectedDay(day);
     };
 
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
             {/* Header */}
             <header className="px-6 pt-12 pb-4 flex items-center justify-between z-10">
-                <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 hover:text-zinc-900">
-                    <ChevronLeftIcon className="w-6 h-6" />
-                </Button>
+                <div className="w-20 flex justify-start"> {/* Fixed width wrapper */}
+                    <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-900 hover:bg-transparent">
+                        <ChevronLeftIcon className="w-6 h-6" />
+                    </Button>
+                </div>
+                <h1 className="flex-1 text-center text-lg font-bold text-zinc-900">
+                    나의 달력
+                </h1>
+                <div className="w-20 flex justify-end"> {/* Fixed width wrapper */}
+                    <Button
+                        variant="ghost"
+                        onClick={onCrewClick}
+                        className="text-xs text-zinc-400 hover:text-zinc-600 font-medium px-0"
+                    >
+                        그루 달력 <ChevronLeftIcon className="w-4 h-4 rotate-180" />
+                    </Button>
+                </div>
             </header>
 
             <main className="flex-1 overflow-y-auto px-6 pb-[120px] flex flex-col items-center">
 
-                {/* Page Title */}
-                <div className="w-full mb-6">
-                    <h1 className="text-3xl font-black italic text-zinc-900 font-['Joti_One']">December</h1>
-                    <p className="text-sm font-medium text-zinc-900">2025</p>
-                </div>
+                <Calendar
+                    className="mb-8"
+                    month="December"
+                    year={2025}
+                    startDayOfWeek={1}
+                    totalDays={31}
+                    expandable={false}
+                    hideHeader={false}
+                    onDayClick={handleDayClick}
+                    headerRight={
+                        <div className="bg-[#EDF2FF] px-4 py-2 rounded-full flex gap-3 items-center shadow-sm">
+                            <span className="text-xs font-bold text-zinc-900">시즌방 이용 횟수 :</span>
+                            <span className="text-xs font-bold text-zinc-900">13박</span>
+                        </div>
+                    }
+                    renderDay={(day) => {
+                        const isSelected = selectedDay === day;
+                        const isConfirmed = confirmedDays.includes(day);
+                        const isPending = pendingDays.includes(day);
+                        const isToday = day === today;
 
-                {/* Grey Container */}
-                <div className="w-full bg-[#F4F4F5] rounded-[30px] p-4 mb-8">
-                    {/* Header Pill */}
-                    <div className="w-full bg-white rounded-2xl py-3 shadow-sm mb-4 flex justify-center items-center">
-                        <h2 className="text-base font-bold text-zinc-900">내 예약</h2>
-                    </div>
+                        let baseClasses = "flex justify-center text-sm font-bold transition-all duration-200 cursor-pointer";
+                        let sizeClasses = isSelected ? "w-full h-full items-start pt-2" : "w-9 h-9 items-center";
 
-                    {/* Calendar Card */}
-                    <div className="w-full bg-white rounded-[30px] p-6 shadow-sm">
-                        <Calendar
-                            month="December"
-                            year={2025}
-                            startDayOfWeek={1}
-                            totalDays={31}
-                            hideHeader={true}
-                            renderDay={(day) => {
-                                const isReserved = reservations.includes(day);
-                                if (isReserved) {
-                                    return (
-                                        <button
-                                            onClick={() => handleDayClick(day)}
-                                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm bg-[#4CAF50] hover:bg-[#43A047] transition-colors relative"
-                                        >
-                                            {day}
-                                            <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
-                                                <CheckIcon className="w-3 h-3 text-[#4CAF50]" />
-                                            </div>
-                                        </button>
-                                    );
-                                }
-                                // Default rendering for non-reserved days
+                        if (isSelected) {
+                            if (isConfirmed) {
                                 return (
-                                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium text-zinc-300">
+                                    <div className={`${baseClasses} ${sizeClasses} bg-[#1E3A8A] text-white rounded-[10px] shadow-sm`}>
                                         {day}
                                     </div>
                                 );
-                            }}
-                        />
-                    </div>
-                </div>
-            </main>
+                            }
+                            if (isPending) {
+                                return (
+                                    <div className={`${baseClasses} ${sizeClasses} bg-[#1E3A8A]/60 text-white rounded-[10px] shadow-sm`}>
+                                        {day}
+                                    </div>
+                                );
+                            }
+                            // Default Selected (Black Box)
+                            return (
+                                <div className={`${baseClasses} ${sizeClasses} bg-zinc-900 text-white rounded-[10px] shadow-lg scale-105`}>
+                                    {day}
+                                </div>
+                            );
+                        }
 
-            {/* Withdrawal Modal */}
-            {withdrawDay !== null && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-6">
-                    <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-xs shadow-xl animate-in fade-in zoom-in duration-200">
-                        <h3 className="text-xl font-bold mb-2">예약 취소</h3>
-                        <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-                            <span className="font-bold text-zinc-900 dark:text-zinc-100">12월 {withdrawDay}일</span> 예약을 취소하시겠습니까?
-                        </p>
-                        <div className="flex gap-3">
-                            <Button
-                                variant="secondary"
-                                onClick={() => setWithdrawDay(null)}
-                                className="flex-1 bg-zinc-200 hover:bg-zinc-300 text-zinc-700 border-transparent"
-                            >
-                                돌아가기
-                            </Button>
-                            <Button
-                                variant="primary"
-                                onClick={confirmWithdraw}
-                                className="flex-1 bg-red-500 hover:bg-red-600 border-red-500 hover:border-red-600 text-white"
-                            >
-                                취소하기
-                            </Button>
-                        </div>
+                        // Unselected States
+                        if (isConfirmed) {
+                            return (
+                                <div className={`${baseClasses} ${sizeClasses} bg-[#1E3A8A] text-white rounded-full`}>
+                                    {day}
+                                </div>
+                            );
+                        }
+                        if (isPending) {
+                            return (
+                                <div className={`${baseClasses} ${sizeClasses} bg-[#9CA3AF] text-white rounded-full`}>
+                                    {day}
+                                </div>
+                            );
+                        }
+                        if (isToday) {
+                            return (
+                                <div className={`${baseClasses} ${sizeClasses} bg-[#F4F4F5] text-zinc-900 rounded-[10px]`}>
+                                    {day}
+                                </div>
+                            );
+                        }
+
+                        // Default
+                        return (
+                            <div className={`${baseClasses} ${sizeClasses} text-zinc-500 hover:bg-zinc-100 rounded-full`}>
+                                {day}
+                            </div>
+                        );
+                    }}
+                />
+
+                {/* Legend */}
+                <div className="w-full flex justify-end gap-3 mb-10">
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-[#1E3A8A]" />
+                        <span className="text-[10px] text-zinc-500 font-medium">확정</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-[#9CA3AF]" />
+                        <span className="text-[10px] text-zinc-500 font-medium">대기</span>
                     </div>
                 </div>
-            )}
+
+                {/* Bottom Action Section */}
+                <div className="w-full mt-auto">
+                    {(() => {
+                        const isConfirmed = selectedDay && confirmedDays.includes(selectedDay);
+                        const isPending = selectedDay && pendingDays.includes(selectedDay);
+
+                        // Case: Selected Reservation (Confirmed/Pending)
+                        if (isConfirmed || isPending) {
+                            return (
+                                <div className="w-full bg-[#EDF2FF] rounded-[24px] p-5 flex items-center justify-between shadow-sm">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className={`w-2.5 h-2.5 rounded-full ${isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#9CA3AF]'}`} />
+                                        <span className="text-zinc-900 font-bold text-base">
+                                            12/{String(selectedDay).padStart(2, '0')} 예약 {isConfirmed ? '확정' : '대기'}
+                                        </span>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        className="bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-full px-4 h-9 text-sm font-medium shadow-sm transition-colors"
+                                    >
+                                        예약 취소
+                                    </Button>
+                                </div>
+                            );
+                        }
+
+                        // Case: No Reservation (Default)
+                        return (
+                            <>
+                                <div className="text-center mb-6">
+                                    <p className="text-sm text-zinc-500 leading-relaxed">
+                                        12/{selectedDay ? String(selectedDay).padStart(2, '0') : '--'} 예약내역이 없습니다.<br />
+                                        예약하시겠습니까?
+                                    </p>
+                                </div>
+                                <Button
+                                    className="w-full h-14 bg-[#162660] hover:bg-[#1E3A8A] rounded-[20px] text-white text-lg font-bold shadow-md transition-all active:scale-[0.98]"
+                                >
+                                    예약하기
+                                </Button>
+                            </>
+                        );
+                    })()}
+                </div>
+
+            </main>
         </div>
     );
 }
