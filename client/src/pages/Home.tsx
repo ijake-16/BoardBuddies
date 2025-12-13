@@ -63,7 +63,7 @@ export default function Home({
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F8F9FA] relative">
             {/* Header */}
-            <header className="px-6 pt-12 pb-4 flex items-center justify-between z-10">
+            <header className="px-4 pt-12 pb-4 flex items-center justify-between z-10">
                 <div className="flex items-center gap-2">
                     <h1 className="text-[20px] font-black italic text-zinc-900 font-['Joti_One']">BoardBuddy</h1>
                     {/* Shark Image removed due to missing file */}
@@ -82,7 +82,7 @@ export default function Home({
             <main className="flex-1 overflow-y-auto pb-[110px]">
 
                 {/* Team Info */}
-                <div className="px-6 mb-8">
+                <div className="px-4 mb-8">
                     {hasCrew ? (
                         <>
                             <div className="text-sm text-zinc-500 font-medium mb-1">홍익대학교</div>
@@ -121,7 +121,7 @@ export default function Home({
                 {hasCrew && (
                     <>
                         {/* Action Cards */}
-                        <div className="px-8 mb-8 grid grid-cols-2 gap-6">
+                        <div className="px-4 mb-8 grid grid-cols-2 gap-6">
                             {/* Reservation Card */}
                             <button
                                 onClick={onMakeReservationClick}
@@ -148,7 +148,7 @@ export default function Home({
                         </div>
 
                         {/* Calendar Section */}
-                        <div className="px-8 mb-8">
+                        <div className="px-4 mb-8">
                             <div
                                 onClick={onCalendarClick}
                                 className="bg-[#F3E5D8] rounded-[20px] p-3 shadow-sm cursor-pointer hover:brightness-95 transition-all"

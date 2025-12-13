@@ -37,7 +37,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
             {/* Header */}
-            <header className="px-6 pt-12 pb-4 flex items-center justify-between z-10">
+            <header className="px-4 pt-12 pb-4 flex items-center justify-between z-10">
                 <div className="w-20 flex justify-start"> {/* Fixed width wrapper */}
                     <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-900 hover:bg-transparent">
                         <ChevronLeftIcon className="w-6 h-6" />
@@ -57,7 +57,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                 </div>
             </header>
 
-            <main className="flex-1 overflow-y-auto px-6 pb-[120px] flex flex-col items-center">
+            <main className="flex-1 overflow-y-auto px-4 pb-[120px] flex flex-col items-center">
 
                 <Calendar
                     className="mb-8"

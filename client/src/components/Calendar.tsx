@@ -83,7 +83,7 @@ export const Calendar = ({
     };
 
     return (
-        <div className={`flex flex-col w-full bg-[#F4F4F5] rounded-[30px] p-6 ${className || ''}`}>
+        <div className={`flex flex-col w-full bg-[#F4F4F5] rounded-[20px] p-2 ${className || ''}`}>
             {/* Optional Header Top Content */}
             {headerTop && (
                 <div className="mb-4 w-full">

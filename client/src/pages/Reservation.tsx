@@ -56,7 +56,7 @@ export default function Reservation({ onBack }: ReservationProps) {
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
             {/* Header */}
-            <header className="px-6 pt-12 pb-4 flex items-center justify-between z-10">
+            <header className="px-4 pt-12 pb-4 flex items-center justify-between z-10">
                 <div className="w-10 flex justify-start">
                     <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 hover:text-zinc-900">
                         <ChevronLeftIcon className="w-6 h-6" />
@@ -67,7 +67,7 @@ export default function Reservation({ onBack }: ReservationProps) {
             </header>
 
             {/* Content */}
-            <main className="flex-1 overflow-y-auto px-6 pb-[120px] flex flex-col items-center">
+            <main className="flex-1 overflow-y-auto px-4 pb-[120px] flex flex-col items-center">
 
 
                 <Calendar
