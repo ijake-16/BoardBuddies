@@ -362,11 +362,10 @@ public class CrewService {
      * 
      * @param userId 현재 로그인한 사용자 ID
      * @param crewId 크루 ID
-     * @param search 검색어 (이름 또는 학번, 선택)
      * @return 일반 부원 목록
      */
     @Transactional(readOnly = true)
-    public List<ManagerResponse> getMembers(Long userId, Long crewId, String search) {
+    public List<ManagerResponse> getMembers(Long userId, Long crewId) {
         Crew crew = crewRepository.findById(crewId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
 
@@ -379,23 +378,7 @@ public class CrewService {
             throw new AccessDeniedException("부원 목록 조회 권한이 없습니다.");
         }
 
-        List<User> members = userRepository.findAllByCrewAndRole(crew, Role.MEMBER);
-        
-        // 검색 필터 적용 (이름 또는 학번)
-        if (search != null && !search.isBlank()) {
-            String searchLower = search.toLowerCase();
-            members = members.stream()
-                    .filter(m -> {
-                        boolean nameMatch = m.getName() != null && 
-                                m.getName().toLowerCase().contains(searchLower);
-                        boolean studentIdMatch = m.getStudentId() != null && 
-                                m.getStudentId().toLowerCase().contains(searchLower);
-                        return nameMatch || studentIdMatch;
-                    })
-                    .collect(Collectors.toList());
-        }
-
-        return members.stream()
+        return userRepository.findAllByCrewAndRole(crew, Role.MEMBER).stream()
                 .map(ManagerResponse::from)
                 .collect(Collectors.toList());
     }
@@ -475,6 +458,45 @@ public class CrewService {
         // MANAGER → MEMBER 강등
         targetUser.joinCrew(crew, Role.MEMBER);
         log.info("운영진 삭제 완료: crewId={}, userId={}", crewId, targetUserId);
+    }
+
+    /**
+     * 부원 삭제 (크루에서 제거)
+     * 
+     * @param userId       현재 로그인한 사용자 ID (MANAGER 이상)
+     * @param crewId       크루 ID
+     * @param targetUserId 삭제할 부원의 user ID
+     */
+    @Transactional
+    public void removeMember(Long userId, Long crewId, Long targetUserId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User manager = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (해당 크루의 MANAGER 이상)
+        if (!manager.getCrew().equals(crew) ||
+                (manager.getRole() != Role.PRESIDENT && manager.getRole() != Role.MANAGER)) {
+            throw new AccessDeniedException("부원 삭제 권한이 없습니다.");
+        }
+
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+        // 해당 크루 소속인지 확인
+        if (!targetUser.getCrew().equals(crew)) {
+            throw new IllegalArgumentException("해당 사용자는 이 크루의 부원이 아닙니다.");
+        }
+
+        // 운영진은 삭제 불가 (운영진 삭제는 별도 API 사용)
+        if (targetUser.getRole() == Role.MANAGER || targetUser.getRole() == Role.PRESIDENT) {
+            throw new IllegalArgumentException("운영진은 부원 삭제 API로 삭제할 수 없습니다.");
+        }
+
+        // 크루에서 제거
+        targetUser.leaveCrew();
+        log.info("부원 삭제 완료: crewId={}, targetUserId={}, studentId={}", crewId, targetUserId, targetUser.getStudentId());
     }
 
     /**

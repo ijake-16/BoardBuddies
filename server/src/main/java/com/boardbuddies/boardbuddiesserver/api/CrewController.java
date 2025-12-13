@@ -561,21 +561,19 @@ public class CrewController {
     /**
      * 일반 부원 목록 조회 (MANAGER 이상)
      * 
-     * GET /api/crews/{crewId}/members?search=검색어
+     * GET /api/crews/{crewId}/members
      * 
      * @param crewId 크루 ID
      * @param userId 현재 로그인한 사용자 ID (JWT에서 자동 추출)
-     * @param search 검색어 (이름 또는 학번, 선택)
      * @return 일반 부원 목록 (MEMBER만)
      */
     @GetMapping("/{crewId}/members")
     public ResponseEntity<ApiResponse<List<ManagerResponse>>> getMembers(
             @PathVariable Long crewId,
-            @CurrentUser Long userId,
-            @RequestParam(required = false) String search) {
+            @CurrentUser Long userId) {
 
         try {
-            List<ManagerResponse> members = crewService.getMembers(userId, crewId, search);
+            List<ManagerResponse> members = crewService.getMembers(userId, crewId);
             return ResponseEntity.ok(
                     ApiResponse.success(200, "일반 부원 목록 조회 성공", members));
 
@@ -661,6 +659,43 @@ public class CrewController {
                     .body(ApiResponse.error(400, e.getMessage()));
         } catch (Exception e) {
             log.error("운영진 삭제 중 에러 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+        }
+    }
+
+    /**
+     * 부원 삭제 (MANAGER 이상)
+     * 
+     * DELETE /api/crews/{crewId}/members/{targetUserId}
+     * 
+     * @param crewId       크루 ID
+     * @param targetUserId 삭제할 부원의 user ID
+     * @param userId       현재 로그인한 사용자 ID (JWT에서 자동 추출)
+     * @return 성공 응답
+     */
+    @DeleteMapping("/{crewId}/members/{targetUserId}")
+    public ResponseEntity<ApiResponse<Void>> removeMember(
+            @PathVariable Long crewId,
+            @PathVariable Long targetUserId,
+            @CurrentUser Long userId) {
+
+        try {
+            crewService.removeMember(userId, crewId, targetUserId);
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "부원 삭제 성공"));
+
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, e.getMessage()));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, e.getMessage()));
+        } catch (Exception e) {
+            log.error("부원 삭제 중 에러 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(500, "서버 에러"));
         }
