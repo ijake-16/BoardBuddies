@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from './Button';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 
@@ -14,6 +14,7 @@ interface CalendarProps {
     expandable?: boolean;
     hideHeader?: boolean;
     maxWeeks?: number;
+    isCollapsed?: boolean;
 }
 
 export const Calendar = ({
@@ -31,6 +32,7 @@ export const Calendar = ({
     headerRight,
     headerTop,
     className,
+    isCollapsed,
 }: CalendarProps & { headerRight?: React.ReactNode, headerTop?: React.ReactNode, className?: string }) => {
     const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
     const [focusedWeekIndex, setFocusedWeekIndex] = useState<number | null>(null);
@@ -68,6 +70,26 @@ export const Calendar = ({
 
         return weeksArray;
     }, [startDayOfWeek, totalDays, maxWeeks]);
+
+    // Handle external collapse state changes
+    useEffect(() => {
+        if (isCollapsed !== undefined) {
+            if (isCollapsed) {
+                setViewMode('week');
+                // Auto-focus the week containing the selected day
+                if (selectedDays.length > 0) {
+                    const day = selectedDays[0];
+                    const index = weeks.findIndex(w => w.includes(day));
+                    if (index !== -1) setFocusedWeekIndex(index);
+                } else if (focusedWeekIndex === null) {
+                    // Default to first week if nothing select/focused
+                    setFocusedWeekIndex(0);
+                }
+            } else {
+                setViewMode('month');
+            }
+        }
+    }, [isCollapsed, selectedDays, weeks, focusedWeekIndex]);
 
     const handleDayClick = (day: number, weekIndex: number) => {
         if (expandable && viewMode === 'month') {
@@ -187,12 +209,14 @@ export const Calendar = ({
                         })}
                     </div>
 
-                    {/* Back to Month Button (Bottom) */}
-                    <div className={`mt-auto flex justify-center transition-opacity duration-300 ${viewMode === 'week' ? 'opacity-100' : 'opacity-0 pointer-events-none h-0'}`}>
-                        <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-400 hover:text-zinc-600 text-xs">
-                            Back to Month
-                        </Button>
-                    </div>
+                    {/* Back to Month Button (Bottom) - Only show if expandable is true */}
+                    {expandable && (
+                        <div className={`mt-auto flex justify-center transition-opacity duration-300 ${viewMode === 'week' ? 'opacity-100' : 'opacity-0 pointer-events-none h-0'}`}>
+                            <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-400 hover:text-zinc-600 text-xs">
+                                Back to Month
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

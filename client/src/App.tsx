@@ -29,6 +29,7 @@ function App() {
           <ReservationStats
             onBack={() => setCurrentView('home')}
             initialView={statsInitialView}
+            onMyCalendarClick={() => setCurrentView('my_reservations')}
           />
         ) : currentView === 'my_reservations' ? (
           <MyReservations

@@ -80,59 +80,34 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                         const isPending = pendingDays.includes(day);
                         const isToday = day === today;
 
-                        let baseClasses = "flex justify-center text-sm font-bold transition-all duration-200 cursor-pointer";
-                        let sizeClasses = isSelected ? "w-full h-full items-start pt-2" : "w-9 h-9 items-center";
+                        // Base Container Classes
+                        let containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 cursor-pointer text-sm font-bold rounded-[10px]";
 
                         if (isSelected) {
-                            if (isConfirmed) {
-                                return (
-                                    <div className={`${baseClasses} ${sizeClasses} bg-[#1E3A8A] text-white rounded-[10px] shadow-sm`}>
-                                        {day}
-                                    </div>
-                                );
-                            }
-                            if (isPending) {
-                                return (
-                                    <div className={`${baseClasses} ${sizeClasses} bg-[#1E3A8A]/60 text-white rounded-[10px] shadow-sm`}>
-                                        {day}
-                                    </div>
-                                );
-                            }
-                            // Default Selected (Black Box)
-                            return (
-                                <div className={`${baseClasses} ${sizeClasses} bg-zinc-900 text-white rounded-[10px] shadow-lg scale-105`}>
+                            containerClasses += " bg-[#333333] text-white shadow-lg scale-105";
+                        } else if (isToday) {
+                            containerClasses += " bg-[#F4F4F5] text-zinc-900";
+                        } else {
+                            containerClasses += " text-zinc-500 hover:bg-zinc-100/50";
+                        }
+
+                        // Content (Number or Circle)
+                        let numberElement = <span>{day}</span>;
+
+                        if (isConfirmed || isPending) {
+                            const bg = isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#9CA3AF]';
+                            const textColor = 'text-white';
+                            // Using w-7 h-7 -mt-1 to look exactly like ReservationStats overlay style
+                            numberElement = (
+                                <div className={`w-7 h-7 -mt-1 rounded-full ${bg} ${textColor} flex items-center justify-center text-xs shadow-sm`}>
                                     {day}
                                 </div>
                             );
                         }
 
-                        // Unselected States
-                        if (isConfirmed) {
-                            return (
-                                <div className={`${baseClasses} ${sizeClasses} bg-[#1E3A8A] text-white rounded-full`}>
-                                    {day}
-                                </div>
-                            );
-                        }
-                        if (isPending) {
-                            return (
-                                <div className={`${baseClasses} ${sizeClasses} bg-[#9CA3AF] text-white rounded-full`}>
-                                    {day}
-                                </div>
-                            );
-                        }
-                        if (isToday) {
-                            return (
-                                <div className={`${baseClasses} ${sizeClasses} bg-[#F4F4F5] text-zinc-900 rounded-[10px]`}>
-                                    {day}
-                                </div>
-                            );
-                        }
-
-                        // Default
                         return (
-                            <div className={`${baseClasses} ${sizeClasses} text-zinc-500 hover:bg-zinc-100 rounded-full`}>
-                                {day}
+                            <div className={containerClasses}>
+                                {numberElement}
                             </div>
                         );
                     }}
