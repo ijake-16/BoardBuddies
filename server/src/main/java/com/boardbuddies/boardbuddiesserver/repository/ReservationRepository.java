@@ -53,4 +53,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
         Long countByCrewAndDateAndStatusAndCreatedAtBefore(Crew crew, LocalDate date, String status,
                         java.time.LocalDateTime createdAt);
+
+        /**
+         * 크루별 회원 사용 통계 조회 (confirmed 상태만)
+         */
+        @Query("SELECT new com.boardbuddies.boardbuddiesserver.dto.crew.MemberUsageResponse(" +
+                        "r.user.id, r.user.name, COUNT(r)) " +
+                        "FROM Reservation r " +
+                        "WHERE r.crew = :crew AND r.status = 'confirmed' " +
+                        "GROUP BY r.user.id, r.user.name " +
+                        "ORDER BY r.user.name")
+        List<com.boardbuddies.boardbuddiesserver.dto.crew.MemberUsageResponse> findUsageCountsByCrew(
+                        @Param("crew") Crew crew);
 }
