@@ -7,12 +7,11 @@ import { Calendar } from '../components/Calendar';
 interface ReservationStatsProps {
     onBack: () => void;
     onMyCalendarClick?: () => void;
-    initialView?: 'crew' | 'my';
 }
 
 
 
-export default function ReservationStats({ onBack, onMyCalendarClick, initialView = 'crew' }: ReservationStatsProps) {
+export default function ReservationStats({ onBack, onMyCalendarClick }: ReservationStatsProps) {
     const [selectedDay, setSelectedDay] = useState<number>(5);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMySchedule, setShowMySchedule] = useState(false);
