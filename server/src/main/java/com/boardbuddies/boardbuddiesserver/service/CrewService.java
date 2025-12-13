@@ -323,6 +323,161 @@ public class CrewService {
     }
 
     /**
+     * 운영진 목록 조회 (PRESIDENT + MANAGER)
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @return 운영진 목록
+     */
+    @Transactional(readOnly = true)
+    public List<ManagerResponse> getManagers(Long userId, Long crewId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (해당 크루의 MANAGER 이상)
+        if (!user.getCrew().equals(crew) ||
+                (user.getRole() != Role.PRESIDENT && user.getRole() != Role.MANAGER)) {
+            throw new AccessDeniedException("운영진 목록 조회 권한이 없습니다.");
+        }
+
+        List<ManagerResponse> managers = new java.util.ArrayList<>();
+
+        // 회장 추가
+        userRepository.findByCrewAndRole(crew, Role.PRESIDENT)
+                .ifPresent(president -> managers.add(ManagerResponse.from(president)));
+
+        // 매니저 추가
+        userRepository.findAllByCrewAndRole(crew, Role.MANAGER).stream()
+                .map(ManagerResponse::from)
+                .forEach(managers::add);
+
+        return managers;
+    }
+
+    /**
+     * 일반 부원 목록 조회 (MEMBER only)
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @param search 검색어 (이름 또는 학번, 선택)
+     * @return 일반 부원 목록
+     */
+    @Transactional(readOnly = true)
+    public List<ManagerResponse> getMembers(Long userId, Long crewId, String search) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (해당 크루의 MANAGER 이상)
+        if (!user.getCrew().equals(crew) ||
+                (user.getRole() != Role.PRESIDENT && user.getRole() != Role.MANAGER)) {
+            throw new AccessDeniedException("부원 목록 조회 권한이 없습니다.");
+        }
+
+        List<User> members = userRepository.findAllByCrewAndRole(crew, Role.MEMBER);
+        
+        // 검색 필터 적용 (이름 또는 학번)
+        if (search != null && !search.isBlank()) {
+            String searchLower = search.toLowerCase();
+            members = members.stream()
+                    .filter(m -> {
+                        boolean nameMatch = m.getName() != null && 
+                                m.getName().toLowerCase().contains(searchLower);
+                        boolean studentIdMatch = m.getStudentId() != null && 
+                                m.getStudentId().toLowerCase().contains(searchLower);
+                        return nameMatch || studentIdMatch;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        return members.stream()
+                .map(ManagerResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 운영진 추가 (MEMBER → MANAGER)
+     * 
+     * @param userId       현재 로그인한 사용자 ID (PRESIDENT만 가능)
+     * @param crewId       크루 ID
+     * @param targetUserId 추가할 부원의 user ID
+     */
+    @Transactional
+    public void addManager(Long userId, Long crewId, Long targetUserId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User president = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (PRESIDENT만 가능)
+        if (!president.getCrew().equals(crew) || president.getRole() != Role.PRESIDENT) {
+            throw new AccessDeniedException("운영진 추가는 회장만 가능합니다.");
+        }
+
+        // 대상 사용자 조회
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+        // 해당 크루 소속인지 확인
+        if (!targetUser.getCrew().equals(crew)) {
+            throw new IllegalArgumentException("해당 사용자는 이 크루의 부원이 아닙니다.");
+        }
+
+        // 이미 운영진인지 확인
+        if (targetUser.getRole() == Role.MANAGER || targetUser.getRole() == Role.PRESIDENT) {
+            throw new IllegalArgumentException("이미 운영진입니다.");
+        }
+
+        // MEMBER → MANAGER 승격
+        targetUser.updateRole(Role.MANAGER);
+        log.info("운영진 추가 완료: crewId={}, targetUserId={}, studentId={}", crewId, targetUserId, targetUser.getStudentId());
+    }
+
+    /**
+     * 운영진 삭제 (MANAGER → MEMBER)
+     * 
+     * @param userId       현재 로그인한 사용자 ID (PRESIDENT만 가능)
+     * @param crewId       크루 ID
+     * @param targetUserId 삭제할 운영진의 user ID
+     */
+    @Transactional
+    public void removeManager(Long userId, Long crewId, Long targetUserId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User president = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (PRESIDENT만 가능)
+        if (!president.getCrew().equals(crew) || president.getRole() != Role.PRESIDENT) {
+            throw new AccessDeniedException("운영진 삭제는 회장만 가능합니다.");
+        }
+
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+        // 해당 크루 소속인지 확인
+        if (!targetUser.getCrew().equals(crew)) {
+            throw new IllegalArgumentException("해당 사용자는 이 크루의 소속이 아닙니다.");
+        }
+
+        // MANAGER만 삭제 가능 (회장은 삭제 불가)
+        if (targetUser.getRole() != Role.MANAGER) {
+            throw new IllegalArgumentException("운영진(MANAGER)만 삭제할 수 있습니다.");
+        }
+
+        // MANAGER → MEMBER 강등
+        targetUser.joinCrew(crew, Role.MEMBER);
+        log.info("운영진 삭제 완료: crewId={}, userId={}", crewId, targetUserId);
+    }
+
+    /**
      * 운영진 지정
      * 
      * @param crew              크루
