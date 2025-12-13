@@ -365,6 +365,61 @@ public class CrewService {
     }
 
     /**
+     * 주간 간략 크루 달력 조회
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @param date   조회할 날짜 (해당 주 포함)
+     * @return 주간 달력 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<CrewCalendarResponse> getCrewBriefCalendar(Long userId, Long crewId, LocalDate date) {
+        // 크루 및 사용자 확인
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
+        userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 해당 주의 월요일 ~ 일요일 계산
+        LocalDate startDate = date
+                .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        LocalDate endDate = date.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
+
+        // 1. 일별 예약 수 집계 (DB에서 Count만 조회)
+        List<DailyReservationCount> dailyCounts = reservationRepository.findDailyCountsByCrewAndDateBetween(
+                crew, startDate, endDate);
+
+        // 날짜별 Count 매핑
+        java.util.Map<LocalDate, Long> countMap = dailyCounts.stream()
+                .collect(Collectors.toMap(DailyReservationCount::getDate, DailyReservationCount::getCount));
+
+        List<CrewCalendarResponse> calendarResponses = new java.util.ArrayList<>();
+
+        // 2. 시작일부터 종료일까지 응답 생성
+        for (LocalDate d = startDate; !d.isAfter(endDate); d = d.plusDays(1)) {
+            Long countLong = countMap.getOrDefault(d, 0L);
+            int count = countLong.intValue();
+
+            // 혼잡도 상태 결정
+            String occupancyStatus;
+            if (count < 5) {
+                occupancyStatus = "LOW";
+            } else if (count < 10) {
+                occupancyStatus = "MEDIUM";
+            } else {
+                occupancyStatus = "HIGH";
+            }
+
+            calendarResponses.add(CrewCalendarResponse.builder()
+                    .date(d)
+                    .occupancyStatus(occupancyStatus)
+                    .build());
+        }
+
+        return calendarResponses;
+    }
+
+    /**
      * 나의 달력 조회 (내 예약 + 이용 횟수 + 혼잡도)
      */
     @Transactional(readOnly = true)

@@ -280,6 +280,44 @@ public class CrewController {
     }
 
     /**
+     * 주간 간략 크루 달력 조회
+     * 
+     * GET /api/crews/{crewId}/calendar/week?date=2025-12-13
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @param date   조회할 날짜 (기본값: 오늘)
+     * @return 주간 달력 응답
+     */
+    @GetMapping("/{crewId}/calendar/week")
+    public ResponseEntity<ApiResponse<List<CrewCalendarResponse>>> getCrewBriefCalendar(
+            @CurrentUser Long userId,
+            @PathVariable Long crewId,
+            @RequestParam(required = false) LocalDate date) {
+
+        if (date == null) {
+            date = LocalDate.now();
+        }
+
+        try {
+            List<CrewCalendarResponse> response = crewService.getCrewBriefCalendar(userId, crewId, date);
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "주간 달력 조회 성공", response));
+        } catch (RuntimeException e) {
+            log.error("주간 달력 조회 중 에러 발생", e);
+            String errorMessage = e.getMessage();
+
+            if (errorMessage != null && errorMessage.contains("크루를 찾을 수 없습니다")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(404, errorMessage));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ApiResponse.error(500, "서버 에러"));
+            }
+        }
+    }
+
+    /**
      * 나의 달력 조회 (내 예약 + 이용 횟수 + 혼잡도)
      * 
      * GET /api/crews/{crewId}/calendar/my?date=2025-12-01
