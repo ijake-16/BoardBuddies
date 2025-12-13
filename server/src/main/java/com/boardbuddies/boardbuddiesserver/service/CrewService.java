@@ -268,16 +268,12 @@ public class CrewService {
     /**
      * 부원별 시즌방 사용 통계 조회
      * 
-     * @param userId    현재 로그인한 사용자 ID
-     * @param crewId    크루 ID
-     * @param search    이름 검색어 (선택)
-     * @param sortBy    정렬 기준 (name, usageCount)
-     * @param sortOrder 정렬 순서 (asc, desc)
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
      * @return 부원별 사용 횟수 리스트
      */
     @Transactional(readOnly = true)
-    public List<MemberUsageResponse> getMemberUsageStatistics(
-            Long userId, Long crewId, String search, String sortBy, String sortOrder) {
+    public List<MemberUsageResponse> getMemberUsageStatistics(Long userId, Long crewId) {
         if (userId == null || crewId == null) {
             throw new IllegalArgumentException("User ID and Crew ID must not be null");
         }
@@ -294,32 +290,7 @@ public class CrewService {
             throw new AccessDeniedException("부원 사용 통계 조회 권한이 없습니다.");
         }
 
-        List<MemberUsageResponse> results = reservationRepository.findUsageCountsByCrew(crew);
-
-        // 이름 검색 필터 적용
-        if (search != null && !search.isBlank()) {
-            String searchLower = search.toLowerCase();
-            results = results.stream()
-                    .filter(r -> r.getName() != null && r.getName().toLowerCase().contains(searchLower))
-                    .collect(Collectors.toList());
-        }
-
-        // 정렬 적용
-        java.util.Comparator<MemberUsageResponse> comparator;
-        if ("usageCount".equalsIgnoreCase(sortBy)) {
-            comparator = java.util.Comparator.comparing(MemberUsageResponse::getUsageCount);
-        } else {
-            // 기본: 이름순
-            comparator = java.util.Comparator.comparing(MemberUsageResponse::getName,
-                    java.util.Comparator.nullsLast(String::compareTo));
-        }
-
-        if ("desc".equalsIgnoreCase(sortOrder)) {
-            comparator = comparator.reversed();
-        }
-
-        results.sort(comparator);
-        return results;
+        return reservationRepository.findUsageCountsByCrew(crew);
     }
 
     /**

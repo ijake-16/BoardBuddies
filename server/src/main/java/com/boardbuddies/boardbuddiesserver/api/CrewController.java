@@ -329,27 +329,20 @@ public class CrewController {
     /**
      * 부원별 시즌방 사용 통계 조회
      * 
-     * GET
-     * /api/crews/{crewId}/usage-statistics?search=이름&sortBy=usageCount&sortOrder=desc
+     * GET /api/crews/{crewId}/usage-statistics
      * 
-     * @param userId    현재 로그인한 사용자 ID
-     * @param crewId    크루 ID
-     * @param search    이름 검색어 (선택)
-     * @param sortBy    정렬 기준: name(기본), usageCount
-     * @param sortOrder 정렬 순서: asc(기본), desc
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
      * @return 부원별 사용 횟수 리스트
      */
     @GetMapping("/{crewId}/usage-statistics")
     public ResponseEntity<ApiResponse<java.util.List<MemberUsageResponse>>> getMemberUsageStatistics(
             @CurrentUser Long userId,
-            @PathVariable Long crewId,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false, defaultValue = "name") String sortBy,
-            @RequestParam(required = false, defaultValue = "asc") String sortOrder) {
+            @PathVariable Long crewId) {
 
         try {
             java.util.List<MemberUsageResponse> response = crewService
-                    .getMemberUsageStatistics(userId, crewId, search, sortBy, sortOrder);
+                    .getMemberUsageStatistics(userId, crewId);
 
             return ResponseEntity.ok(
                     ApiResponse.success(200, "부원 사용 통계 조회 성공", response));
