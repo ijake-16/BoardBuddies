@@ -2,6 +2,7 @@ package com.boardbuddies.boardbuddiesserver.service;
 
 import com.boardbuddies.boardbuddiesserver.domain.Crew;
 import com.boardbuddies.boardbuddiesserver.domain.User;
+import com.boardbuddies.boardbuddiesserver.dto.crew.CrewUpdateRequest;
 import com.boardbuddies.boardbuddiesserver.dto.crew.CrewCalendarResponse;
 import com.boardbuddies.boardbuddiesserver.dto.crew.DailyReservationCount;
 import com.boardbuddies.boardbuddiesserver.repository.CrewRepository;
@@ -15,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -170,8 +170,8 @@ class CrewServiceTest {
         Long crewId = 1L;
         String newName = "New Name";
 
-        com.boardbuddies.boardbuddiesserver.dto.crew.CrewUpdateRequest request = new com.boardbuddies.boardbuddiesserver.dto.crew.CrewUpdateRequest(
-                newName, null, null, null, null, null);
+        CrewUpdateRequest request = new CrewUpdateRequest(
+                newName, null, null, null, null, null, null);
 
         Crew crew = Crew.builder().id(crewId).name("Old Name").build();
         User user = User.builder().id(userId).build();
@@ -223,7 +223,7 @@ class CrewServiceTest {
         String newName = "New Name";
 
         com.boardbuddies.boardbuddiesserver.dto.crew.CrewUpdateRequest request = new com.boardbuddies.boardbuddiesserver.dto.crew.CrewUpdateRequest(
-                newName, null, null, null, null, null);
+                newName, null, null, null, null, null, null);
 
         Crew crew = Crew.builder().id(crewId).build();
         User user = User.builder().id(userId).build();
@@ -247,7 +247,7 @@ class CrewServiceTest {
         Long crewId = 1L;
 
         com.boardbuddies.boardbuddiesserver.dto.crew.CrewUpdateRequest request = new com.boardbuddies.boardbuddiesserver.dto.crew.CrewUpdateRequest(
-                null, null, 1234, "MONDAY", "10:00", 20);
+                null, null, 1234, "MONDAY", "10:00", 20, null);
 
         Crew crew = Crew.builder().id(crewId).build();
         User user = User.builder().id(userId).build();

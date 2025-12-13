@@ -211,6 +211,14 @@ public class CrewService {
             crew.updateDailyCapacity(request.getDailyCapacity());
             reservationService.promoteWaitingUsers(crew);
         }
+        // 시즌방 제한 여부 수정
+        if (request.getIsCapacityLimited() != null) {
+            crew.updateCapacityLimit(request.getIsCapacityLimited());
+            // 제한 해제 시 대기 중인 사용자들을 모두 승격
+            if (!request.getIsCapacityLimited()) {
+                reservationService.promoteWaitingUsers(crew);
+            }
+        }
 
         log.info("크루 정보 수정 완료: crewId={}, updatedBy={}", crewId, userId);
     }

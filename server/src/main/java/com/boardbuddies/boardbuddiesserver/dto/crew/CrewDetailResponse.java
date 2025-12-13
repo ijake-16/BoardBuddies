@@ -92,6 +92,12 @@ public class CrewDetailResponse {
     @JsonProperty("profile_image_url")
     private String profileImageUrl;
 
+    /**
+     * 시즌방 제한 여부
+     */
+    @JsonProperty("isCapacityLimited")
+    private Boolean isCapacityLimited;
+
     public static CrewDetailResponse from(Crew crew) {
         return CrewDetailResponse.builder()
                 .crewId(crew.getId())
@@ -104,6 +110,7 @@ public class CrewDetailResponse {
                 .createdAt(crew.getCreatedAt())
                 .updatedAt(crew.getUpdatedAt())
                 .profileImageUrl(crew.getProfileImageUrl())
+                .isCapacityLimited(crew.getIsCapacityLimited())
                 .build();
     }
 
@@ -129,6 +136,7 @@ public class CrewDetailResponse {
                 .presidentName(presidentName)
                 .memberCount(memberCount)
                 .profileImageUrl(crew.getProfileImageUrl())
+                .isCapacityLimited(crew.getIsCapacityLimited())
                 .build();
     }
 }

@@ -155,11 +155,11 @@ public class ReservationService {
             }
         }
 
-        // 3. 용량(Capacity) 체크
+        // 3. 용량(Capacity) 체크 - 제한 설정된 경우에만
         Long currentCount = reservationRepository.countByCrewAndDateAndStatusNot(crew, date, "CANCELLED");
         String status = "confirmed";
 
-        if (currentCount >= crew.getDailyCapacity()) {
+        if (crew.getIsCapacityLimited() && currentCount >= crew.getDailyCapacity()) {
             status = "waiting";
         }
 

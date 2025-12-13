@@ -749,7 +749,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"crewName\": \"snoooowholic\",\n  \"manager_list\": [],\n  \"crewPIN\": 5678,\n  \"reservation_day\": \"SATURDAY\",\n  \"reservation_time\": \"18:00\"\n}"
+          "raw": "{\n  \"crewName\": \"snoooowholic\",\n  \"manager_list\": [],\n  \"crewPIN\": 5678,\n  \"reservation_day\": \"SATURDAY\",\n  \"reservation_time\": \"18:00\",\n  \"dailyCapacity\": 15,\n  \"isCapacityLimited\": true\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}",
