@@ -76,3 +76,6 @@ Temporary Items
 
 ### Uploads ###
 uploads/
+
+## 테스트 데이터 ##
+data.sql
