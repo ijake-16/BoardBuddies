@@ -5,6 +5,8 @@ import com.boardbuddies.boardbuddiesserver.dto.crew.*;
 import com.boardbuddies.boardbuddiesserver.repository.CrewRepository;
 import com.boardbuddies.boardbuddiesserver.repository.ReservationRepository;
 import com.boardbuddies.boardbuddiesserver.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class CrewService {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationService reservationService;
+    private final FileStorageService fileStorageService;
 
     /**
      * 크루 생성
@@ -141,7 +144,9 @@ public class CrewService {
     }
 
     /**
-     * 크루 정보 수정
+     * 크루 정보 수정 (Integrated)
+     * - Name, Managers: PRESIDENT only
+     * - Policy (PIN, Capacity, Time/Day): PRESIDENT or MANAGER
      * 
      * @param userId  현재 로그인한 사용자 ID
      * @param crewId  크루 ID
@@ -152,63 +157,59 @@ public class CrewService {
         if (userId == null || crewId == null) {
             throw new IllegalArgumentException("User ID and Crew ID must not be null");
         }
-        // 크루 조회
-        Crew crew = crewRepository.findById(crewId)
-                .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
+        Crew crew = crewRepository.findById(crewId).orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        // 사용자 조회 및 권한 확인 (MANAGER 또는 PRESIDENT)
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        if (!user.getCrew().equals(crew) ||
-                (user.getRole() != Role.MANAGER && user.getRole() != Role.PRESIDENT)) {
-            throw new RuntimeException("수정 권한이 없습니다.");
+        // 기본 권한 확인 (운영진 이상)
+        if (!user.getCrew().equals(crew) || (user.getRole() != Role.PRESIDENT && user.getRole() != Role.MANAGER)) {
+            throw new AccessDeniedException("수정 권한이 없습니다.");
         }
 
-        // 크루명 수정
-        if (request.getCrewName() != null && !request.getCrewName().isBlank()) {
+        // 1. 크루 이름 수정 (PRESIDENT only)
+        if (request.getCrewName() != null) {
+            if (user.getRole() != Role.PRESIDENT) {
+                throw new AccessDeniedException("크루 이름 수정은 회장만 가능합니다.");
+            }
             crew.updateName(request.getCrewName());
         }
 
-        // PIN 수정
-        if (request.getCrewPIN() != null) {
-            crew.updateCrewPIN(request.getCrewPIN());
-        }
-
-        // 예약 요일 수정
-        if (request.getReservationDay() != null && !request.getReservationDay().isBlank()) {
-            DayOfWeek dayOfWeek = DayOfWeek.valueOf(request.getReservationDay());
-            crew.updateReservationDay(dayOfWeek);
-        }
-
-        // 예약 시간 수정
-        if (request.getReservationTime() != null && !request.getReservationTime().isBlank()) {
-            LocalTime time = LocalTime.parse(request.getReservationTime());
-            crew.updateReservationTime(time);
-        }
-
-        // 일별 수용 인원 수정
-        if (request.getDailyCapacity() != null) {
-            crew.updateDailyCapacity(request.getDailyCapacity());
-            // 수용 인원 증가 시 대기열 승격 시도
-            reservationService.promoteWaitingUsers(crew);
-        }
-
-        // 운영진 목록 수정
+        // 2. 운영진 목록 수정 (PRESIDENT only)
         if (request.getManagerList() != null) {
+            if (user.getRole() != Role.PRESIDENT) {
+                throw new AccessDeniedException("운영진 수정은 회장만 가능합니다.");
+            }
+
             // 기존 운영진 제거 (PRESIDENT 제외)
             List<User> existingManagers = userRepository.findAllByCrewAndRole(crew, Role.MANAGER);
-
             for (User manager : existingManagers) {
                 manager.leaveCrew();
             }
 
             // 회장 찾기
             User president = userRepository.findByCrewAndRole(crew, Role.PRESIDENT)
-                    .orElseThrow(() -> new RuntimeException("크루 회장을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new EntityNotFoundException("크루 회장을 찾을 수 없습니다."));
 
-            // 새로운 운영진 지정
             assignManagers(crew, president, request.getManagerList());
+        }
+
+        // 3. 정책 수정 (PIN, 요일, 시간, 인원) - PRESIDENT or MANAGER (Already checked above)
+        // PIN 수정
+        if (request.getCrewPIN() != null) {
+            crew.updateCrewPIN(request.getCrewPIN());
+        }
+        // 예약 요일 수정
+        if (request.getReservationDay() != null && !request.getReservationDay().isBlank()) {
+            DayOfWeek dayOfWeek = DayOfWeek.valueOf(request.getReservationDay());
+            crew.updateReservationDay(dayOfWeek);
+        }
+        // 시간 수정
+        if (request.getReservationTime() != null) {
+            crew.updateReservationTime(LocalTime.parse(request.getReservationTime()));
+        }
+        // 인원 수정
+        if (request.getDailyCapacity() != null) {
+            crew.updateDailyCapacity(request.getDailyCapacity());
+            reservationService.promoteWaitingUsers(crew);
         }
 
         log.info("크루 정보 수정 완료: crewId={}, updatedBy={}", crewId, userId);
@@ -286,7 +287,7 @@ public class CrewService {
             // 회원가입 완료 여부 확인
             if (!user.getIsRegistered()) {
                 log.warn("사용자 {}는 회원가입이 완료되지 않았습니다.", studentId);
-                throw new RuntimeException("학번 " + studentId + "는 회원가입이 완료되지 않았습니다. 회원가입 후 운영진으로 지정할 수 있습니다.");
+                throw new IllegalArgumentException("학번 " + studentId + "는 회원가입이 완료되지 않았습니다. 회원가입 후 운영진으로 지정할 수 있습니다.");
             }
 
             // 운영진으로 지정 (Role.MANAGER)
@@ -298,6 +299,48 @@ public class CrewService {
         }
 
         return managers;
+    }
+
+    /**
+     * 크루 프로필 이미지 수정
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @param file   업로드할 이미지 파일 (null이면 초기화)
+     */
+    @Transactional
+    public void updateCrewProfileImage(Long userId, Long crewId, org.springframework.web.multipart.MultipartFile file) {
+        if (userId == null || crewId == null) {
+            throw new IllegalArgumentException("User ID and Crew ID must not be null");
+        }
+        // 크루 조회
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        // 사용자 조회 및 권한 확인 (PRESIDENT만 가능)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        if (!user.getCrew().equals(crew) ||
+                (user.getRole() != Role.MANAGER && user.getRole() != Role.PRESIDENT)) {
+            throw new AccessDeniedException("프로필 이미지 수정 권한이 없습니다.");
+        }
+
+        String profileImageUrl = null;
+
+        // 파일이 있으면 업로드
+        if (file != null && !file.isEmpty()) {
+            String fileName = fileStorageService.storeFile(file);
+            // URL 생성 (예: /uploads/fileName)
+            // 실제 배포 시에는 도메인을 포함하거나 S3 URL을 사용해야 함
+            // 로컬 테스트의 경우 WebMvcConfig 설정에 따라 접근 가능
+            profileImageUrl = "/uploads/" + fileName;
+        }
+
+        // 이미지 URL 업데이트 (null이면 삭제/초기화됨)
+        crew.updateProfileImage(profileImageUrl);
+
+        log.info("크루 프로필 이미지 수정 완료: crewId={}, updatedBy={}, url={}", crewId, userId, profileImageUrl);
     }
 
     /**

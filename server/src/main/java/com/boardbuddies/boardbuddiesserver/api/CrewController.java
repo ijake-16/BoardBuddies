@@ -87,28 +87,75 @@ public class CrewController {
      */
     @PatchMapping("/{crewId}")
     public ResponseEntity<ApiResponse<Void>> updateCrew(
-            @CurrentUser Long userId,
             @PathVariable Long crewId,
-            @Valid @RequestBody CrewUpdateRequest request) {
-
+            @CurrentUser Long userId,
+            @RequestBody CrewUpdateRequest request) {
         try {
             crewService.updateCrew(userId, crewId, request);
             return ResponseEntity.ok(
                     ApiResponse.success(200, "크루 정보 수정 성공", null));
-        } catch (RuntimeException e) {
-            log.error("크루 정보 수정 중 에러 발생", e);
 
+        } catch (Exception e) {
+            log.error("크루 정보 수정 중 에러 발생", e);
+            return handleUpdateError(e);
+        }
+    }
+
+    private ResponseEntity<ApiResponse<Void>> handleUpdateError(Exception e) {
+        if (e instanceof org.springframework.security.access.AccessDeniedException) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, e.getMessage()));
+        } else if (e instanceof jakarta.persistence.EntityNotFoundException) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, e.getMessage()));
+        } else if (e instanceof IllegalArgumentException) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, e.getMessage()));
+        }
+
+        // Fallback for generic RuntimeExceptions that might still use message matching
+        // (legacy)
+        String errorMessage = e.getMessage();
+        if (errorMessage != null && errorMessage.contains("권한이 없습니다")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, errorMessage));
+        } else if (errorMessage != null && errorMessage.contains("크루를 찾을 수 없습니다")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, errorMessage));
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(500, "서버 에러"));
+    }
+
+    /**
+     * 크루 프로필 이미지 수정
+     * 
+     * POST /api/crews/{crewId}/profile-image
+     * 
+     * @param crewId 크루 ID
+     * @param userId 현재 로그인한 사용자 ID
+     * @param file   이미지 파일 (optional, 없으면 초기화)
+     * @return 성공 응답
+     */
+    @PostMapping("/{crewId}/profile-image")
+    public ResponseEntity<ApiResponse<Void>> updateProfileImage(
+            @PathVariable Long crewId,
+            @CurrentUser Long userId,
+            @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file) {
+        try {
+            crewService.updateCrewProfileImage(userId, crewId, file);
+
+            String message = (file != null && !file.isEmpty()) ? "프로필 이미지 수정 성공" : "프로필 이미지 초기화 성공";
+            return ResponseEntity.ok(ApiResponse.success(200, message));
+
+        } catch (RuntimeException e) {
+            log.error("크루 프로필 이미지 수정 중 에러 발생", e);
             String errorMessage = e.getMessage();
-            if (errorMessage != null && errorMessage.contains("수정 권한이 없습니다")) {
+
+            if (errorMessage != null && errorMessage.contains("권한이 없습니다")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(ApiResponse.error(403, "수정 권한이 없습니다."));
-            } else if (errorMessage != null && errorMessage.contains("크루를 찾을 수 없습니다")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(404, "해당 크루를 찾을 수 없습니다."));
-            } else if (errorMessage != null
-                    && (errorMessage.contains("사용자를 찾을 수 없습니다") || errorMessage.contains("학번"))) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(404, "존재하지 않는 회원을 운영진으로 추가할 수 없습니다."));
+                        .body(ApiResponse.error(403, errorMessage));
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(ApiResponse.error(500, "서버 에러"));

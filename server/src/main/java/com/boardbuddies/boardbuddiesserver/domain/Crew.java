@@ -68,6 +68,12 @@ public class Crew {
     @Builder.Default
     private Integer dailyCapacity = 20;
 
+    /**
+     * 크루 프로필 이미지 URL
+     */
+    @Column(length = 500)
+    private String profileImageUrl;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -118,5 +124,12 @@ public class Crew {
      */
     public void updateDailyCapacity(Integer dailyCapacity) {
         this.dailyCapacity = dailyCapacity;
+    }
+
+    /**
+     * 크루 프로필 이미지 수정
+     */
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

@@ -89,6 +89,24 @@ public class CrewDetailResponse {
     @JsonProperty("member_count")
     private Integer memberCount;
 
+    @JsonProperty("profile_image_url")
+    private String profileImageUrl;
+
+    public static CrewDetailResponse from(Crew crew) {
+        return CrewDetailResponse.builder()
+                .crewId(crew.getId())
+                .name(crew.getName())
+                .univ(crew.getUniv())
+                .reservationDay(crew.getReservationDay())
+                .reservationTime(crew.getReservationTime())
+                .dailyCapacity(crew.getDailyCapacity())
+                .status(crew.getStatus())
+                .createdAt(crew.getCreatedAt())
+                .updatedAt(crew.getUpdatedAt())
+                .profileImageUrl(crew.getProfileImageUrl())
+                .build();
+    }
+
     /**
      * Crew 엔티티로부터 DTO 생성
      * 
@@ -110,6 +128,7 @@ public class CrewDetailResponse {
                 .updatedAt(crew.getUpdatedAt())
                 .presidentName(presidentName)
                 .memberCount(memberCount)
+                .profileImageUrl(crew.getProfileImageUrl())
                 .build();
     }
 }
