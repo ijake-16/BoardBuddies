@@ -130,7 +130,14 @@ public class CrewService {
         Crew crew = crewRepository.findById(crewId)
                 .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
 
-        return CrewDetailResponse.from(crew);
+        // 조회: 회장 정보
+        User president = userRepository.findByCrewAndRole(crew, Role.PRESIDENT)
+                .orElseThrow(() -> new RuntimeException("크루 회장을 찾을 수 없습니다."));
+
+        // 조회: 부원 수 (회장 포함)
+        int memberCount = (int) userRepository.countByCrew(crew);
+
+        return CrewDetailResponse.from(crew, president.getName(), memberCount);
     }
 
     /**

@@ -66,4 +66,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * 크루와 역할로 모든 사용자 조회
      */
     List<User> findAllByCrewAndRole(Crew crew, Role role);
+
+    /**
+     * 크루에 속한 회원 수 조회
+     */
+    long countByCrew(Crew crew);
 }
