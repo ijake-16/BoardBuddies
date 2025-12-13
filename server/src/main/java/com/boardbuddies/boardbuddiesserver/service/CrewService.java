@@ -5,6 +5,8 @@ import com.boardbuddies.boardbuddiesserver.dto.crew.*;
 import com.boardbuddies.boardbuddiesserver.repository.CrewRepository;
 import com.boardbuddies.boardbuddiesserver.repository.ReservationRepository;
 import com.boardbuddies.boardbuddiesserver.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class CrewService {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationService reservationService;
+    private final FileStorageService fileStorageService;
 
     /**
      * 크루 생성
@@ -130,11 +133,20 @@ public class CrewService {
         Crew crew = crewRepository.findById(crewId)
                 .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
 
-        return CrewDetailResponse.from(crew);
+        // 조회: 회장 정보
+        User president = userRepository.findByCrewAndRole(crew, Role.PRESIDENT)
+                .orElseThrow(() -> new RuntimeException("크루 회장을 찾을 수 없습니다."));
+
+        // 조회: 부원 수 (회장 포함)
+        int memberCount = (int) userRepository.countByCrew(crew);
+
+        return CrewDetailResponse.from(crew, president.getName(), memberCount);
     }
 
     /**
-     * 크루 정보 수정
+     * 크루 정보 수정 (Integrated)
+     * - Name, Managers: PRESIDENT only
+     * - Policy (PIN, Capacity, Time/Day): PRESIDENT or MANAGER
      * 
      * @param userId  현재 로그인한 사용자 ID
      * @param crewId  크루 ID
@@ -145,63 +157,67 @@ public class CrewService {
         if (userId == null || crewId == null) {
             throw new IllegalArgumentException("User ID and Crew ID must not be null");
         }
-        // 크루 조회
-        Crew crew = crewRepository.findById(crewId)
-                .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
+        Crew crew = crewRepository.findById(crewId).orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        // 사용자 조회 및 권한 확인 (MANAGER 또는 PRESIDENT)
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        if (!user.getCrew().equals(crew) ||
-                (user.getRole() != Role.MANAGER && user.getRole() != Role.PRESIDENT)) {
-            throw new RuntimeException("수정 권한이 없습니다.");
+        // 기본 권한 확인 (운영진 이상)
+        if (!user.getCrew().equals(crew) || (user.getRole() != Role.PRESIDENT && user.getRole() != Role.MANAGER)) {
+            throw new AccessDeniedException("수정 권한이 없습니다.");
         }
 
-        // 크루명 수정
-        if (request.getCrewName() != null && !request.getCrewName().isBlank()) {
+        // 1. 크루 이름 수정 (PRESIDENT only)
+        if (request.getCrewName() != null) {
+            if (user.getRole() != Role.PRESIDENT) {
+                throw new AccessDeniedException("크루 이름 수정은 회장만 가능합니다.");
+            }
             crew.updateName(request.getCrewName());
         }
 
-        // PIN 수정
-        if (request.getCrewPIN() != null) {
-            crew.updateCrewPIN(request.getCrewPIN());
-        }
-
-        // 예약 요일 수정
-        if (request.getReservationDay() != null && !request.getReservationDay().isBlank()) {
-            DayOfWeek dayOfWeek = DayOfWeek.valueOf(request.getReservationDay());
-            crew.updateReservationDay(dayOfWeek);
-        }
-
-        // 예약 시간 수정
-        if (request.getReservationTime() != null && !request.getReservationTime().isBlank()) {
-            LocalTime time = LocalTime.parse(request.getReservationTime());
-            crew.updateReservationTime(time);
-        }
-
-        // 일별 수용 인원 수정
-        if (request.getDailyCapacity() != null) {
-            crew.updateDailyCapacity(request.getDailyCapacity());
-            // 수용 인원 증가 시 대기열 승격 시도
-            reservationService.promoteWaitingUsers(crew);
-        }
-
-        // 운영진 목록 수정
+        // 2. 운영진 목록 수정 (PRESIDENT only)
         if (request.getManagerList() != null) {
+            if (user.getRole() != Role.PRESIDENT) {
+                throw new AccessDeniedException("운영진 수정은 회장만 가능합니다.");
+            }
+
             // 기존 운영진 제거 (PRESIDENT 제외)
             List<User> existingManagers = userRepository.findAllByCrewAndRole(crew, Role.MANAGER);
-
             for (User manager : existingManagers) {
                 manager.leaveCrew();
             }
 
             // 회장 찾기
             User president = userRepository.findByCrewAndRole(crew, Role.PRESIDENT)
-                    .orElseThrow(() -> new RuntimeException("크루 회장을 찾을 수 없습니다."));
+                    .orElseThrow(() -> new EntityNotFoundException("크루 회장을 찾을 수 없습니다."));
 
-            // 새로운 운영진 지정
             assignManagers(crew, president, request.getManagerList());
+        }
+
+        // 3. 정책 수정 (PIN, 요일, 시간, 인원) - PRESIDENT or MANAGER (Already checked above)
+        // PIN 수정
+        if (request.getCrewPIN() != null) {
+            crew.updateCrewPIN(request.getCrewPIN());
+        }
+        // 예약 요일 수정
+        if (request.getReservationDay() != null && !request.getReservationDay().isBlank()) {
+            DayOfWeek dayOfWeek = DayOfWeek.valueOf(request.getReservationDay());
+            crew.updateReservationDay(dayOfWeek);
+        }
+        // 시간 수정
+        if (request.getReservationTime() != null) {
+            crew.updateReservationTime(LocalTime.parse(request.getReservationTime()));
+        }
+        // 인원 수정
+        if (request.getDailyCapacity() != null) {
+            crew.updateDailyCapacity(request.getDailyCapacity());
+            reservationService.promoteWaitingUsers(crew);
+        }
+        // 시즌방 제한 여부 수정
+        if (request.getIsCapacityLimited() != null) {
+            crew.updateCapacityLimit(request.getIsCapacityLimited());
+            // 제한 해제 시 대기 중인 사용자들을 모두 승격
+            if (!request.getIsCapacityLimited()) {
+                reservationService.promoteWaitingUsers(crew);
+            }
         }
 
         log.info("크루 정보 수정 완료: crewId={}, updatedBy={}", crewId, userId);
@@ -250,6 +266,211 @@ public class CrewService {
     }
 
     /**
+     * 부원별 시즌방 사용 통계 조회
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @return 부원별 사용 횟수 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<MemberUsageResponse> getMemberUsageStatistics(Long userId, Long crewId) {
+        if (userId == null || crewId == null) {
+            throw new IllegalArgumentException("User ID and Crew ID must not be null");
+        }
+
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (PRESIDENT or MANAGER)
+        if (!user.getCrew().equals(crew) ||
+                (user.getRole() != Role.PRESIDENT && user.getRole() != Role.MANAGER)) {
+            throw new AccessDeniedException("부원 사용 통계 조회 권한이 없습니다.");
+        }
+
+        return reservationRepository.findUsageCountsByCrew(crew);
+    }
+
+    /**
+     * 운영진 목록 조회 (PRESIDENT + MANAGER)
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @return 운영진 목록
+     */
+    @Transactional(readOnly = true)
+    public List<ManagerResponse> getManagers(Long userId, Long crewId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (해당 크루의 MANAGER 이상)
+        if (!user.getCrew().equals(crew) ||
+                (user.getRole() != Role.PRESIDENT && user.getRole() != Role.MANAGER)) {
+            throw new AccessDeniedException("운영진 목록 조회 권한이 없습니다.");
+        }
+
+        List<ManagerResponse> managers = new java.util.ArrayList<>();
+
+        // 회장 추가
+        userRepository.findByCrewAndRole(crew, Role.PRESIDENT)
+                .ifPresent(president -> managers.add(ManagerResponse.from(president)));
+
+        // 매니저 추가
+        userRepository.findAllByCrewAndRole(crew, Role.MANAGER).stream()
+                .map(ManagerResponse::from)
+                .forEach(managers::add);
+
+        return managers;
+    }
+
+    /**
+     * 일반 부원 목록 조회 (MEMBER only)
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @return 일반 부원 목록
+     */
+    @Transactional(readOnly = true)
+    public List<ManagerResponse> getMembers(Long userId, Long crewId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (해당 크루의 MANAGER 이상)
+        if (!user.getCrew().equals(crew) ||
+                (user.getRole() != Role.PRESIDENT && user.getRole() != Role.MANAGER)) {
+            throw new AccessDeniedException("부원 목록 조회 권한이 없습니다.");
+        }
+
+        return userRepository.findAllByCrewAndRole(crew, Role.MEMBER).stream()
+                .map(ManagerResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 운영진 추가 (MEMBER → MANAGER)
+     * 
+     * @param userId       현재 로그인한 사용자 ID (PRESIDENT만 가능)
+     * @param crewId       크루 ID
+     * @param targetUserId 추가할 부원의 user ID
+     */
+    @Transactional
+    public void addManager(Long userId, Long crewId, Long targetUserId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User president = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (PRESIDENT만 가능)
+        if (!president.getCrew().equals(crew) || president.getRole() != Role.PRESIDENT) {
+            throw new AccessDeniedException("운영진 추가는 회장만 가능합니다.");
+        }
+
+        // 대상 사용자 조회
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+        // 해당 크루 소속인지 확인
+        if (!targetUser.getCrew().equals(crew)) {
+            throw new IllegalArgumentException("해당 사용자는 이 크루의 부원이 아닙니다.");
+        }
+
+        // 이미 운영진인지 확인
+        if (targetUser.getRole() == Role.MANAGER || targetUser.getRole() == Role.PRESIDENT) {
+            throw new IllegalArgumentException("이미 운영진입니다.");
+        }
+
+        // MEMBER → MANAGER 승격
+        targetUser.updateRole(Role.MANAGER);
+        log.info("운영진 추가 완료: crewId={}, targetUserId={}, studentId={}", crewId, targetUserId, targetUser.getStudentId());
+    }
+
+    /**
+     * 운영진 삭제 (MANAGER → MEMBER)
+     * 
+     * @param userId       현재 로그인한 사용자 ID (PRESIDENT만 가능)
+     * @param crewId       크루 ID
+     * @param targetUserId 삭제할 운영진의 user ID
+     */
+    @Transactional
+    public void removeManager(Long userId, Long crewId, Long targetUserId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User president = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (PRESIDENT만 가능)
+        if (!president.getCrew().equals(crew) || president.getRole() != Role.PRESIDENT) {
+            throw new AccessDeniedException("운영진 삭제는 회장만 가능합니다.");
+        }
+
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+        // 해당 크루 소속인지 확인
+        if (!targetUser.getCrew().equals(crew)) {
+            throw new IllegalArgumentException("해당 사용자는 이 크루의 소속이 아닙니다.");
+        }
+
+        // MANAGER만 삭제 가능 (회장은 삭제 불가)
+        if (targetUser.getRole() != Role.MANAGER) {
+            throw new IllegalArgumentException("운영진(MANAGER)만 삭제할 수 있습니다.");
+        }
+
+        // MANAGER → MEMBER 강등
+        targetUser.joinCrew(crew, Role.MEMBER);
+        log.info("운영진 삭제 완료: crewId={}, userId={}", crewId, targetUserId);
+    }
+
+    /**
+     * 부원 삭제 (크루에서 제거)
+     * 
+     * @param userId       현재 로그인한 사용자 ID (MANAGER 이상)
+     * @param crewId       크루 ID
+     * @param targetUserId 삭제할 부원의 user ID
+     */
+    @Transactional
+    public void removeMember(Long userId, Long crewId, Long targetUserId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User manager = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (해당 크루의 MANAGER 이상)
+        if (!manager.getCrew().equals(crew) ||
+                (manager.getRole() != Role.PRESIDENT && manager.getRole() != Role.MANAGER)) {
+            throw new AccessDeniedException("부원 삭제 권한이 없습니다.");
+        }
+
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+        // 해당 크루 소속인지 확인
+        if (!targetUser.getCrew().equals(crew)) {
+            throw new IllegalArgumentException("해당 사용자는 이 크루의 부원이 아닙니다.");
+        }
+
+        // 운영진은 삭제 불가 (운영진 삭제는 별도 API 사용)
+        if (targetUser.getRole() == Role.MANAGER || targetUser.getRole() == Role.PRESIDENT) {
+            throw new IllegalArgumentException("운영진은 부원 삭제 API로 삭제할 수 없습니다.");
+        }
+
+        // 크루에서 제거
+        targetUser.leaveCrew();
+        log.info("부원 삭제 완료: crewId={}, targetUserId={}, studentId={}", crewId, targetUserId, targetUser.getStudentId());
+    }
+
+    /**
      * 운영진 지정
      * 
      * @param crew              크루
@@ -279,7 +500,7 @@ public class CrewService {
             // 회원가입 완료 여부 확인
             if (!user.getIsRegistered()) {
                 log.warn("사용자 {}는 회원가입이 완료되지 않았습니다.", studentId);
-                throw new RuntimeException("학번 " + studentId + "는 회원가입이 완료되지 않았습니다. 회원가입 후 운영진으로 지정할 수 있습니다.");
+                throw new IllegalArgumentException("학번 " + studentId + "는 회원가입이 완료되지 않았습니다. 회원가입 후 운영진으로 지정할 수 있습니다.");
             }
 
             // 운영진으로 지정 (Role.MANAGER)
@@ -291,6 +512,48 @@ public class CrewService {
         }
 
         return managers;
+    }
+
+    /**
+     * 크루 프로필 이미지 수정
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @param file   업로드할 이미지 파일 (null이면 초기화)
+     */
+    @Transactional
+    public void updateCrewProfileImage(Long userId, Long crewId, org.springframework.web.multipart.MultipartFile file) {
+        if (userId == null || crewId == null) {
+            throw new IllegalArgumentException("User ID and Crew ID must not be null");
+        }
+        // 크루 조회
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        // 사용자 조회 및 권한 확인 (PRESIDENT만 가능)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        if (!user.getCrew().equals(crew) ||
+                (user.getRole() != Role.MANAGER && user.getRole() != Role.PRESIDENT)) {
+            throw new AccessDeniedException("프로필 이미지 수정 권한이 없습니다.");
+        }
+
+        String profileImageUrl = null;
+
+        // 파일이 있으면 업로드
+        if (file != null && !file.isEmpty()) {
+            String fileName = fileStorageService.storeFile(file);
+            // URL 생성 (예: /uploads/fileName)
+            // 실제 배포 시에는 도메인을 포함하거나 S3 URL을 사용해야 함
+            // 로컬 테스트의 경우 WebMvcConfig 설정에 따라 접근 가능
+            profileImageUrl = "/uploads/" + fileName;
+        }
+
+        // 이미지 URL 업데이트 (null이면 삭제/초기화됨)
+        crew.updateProfileImage(profileImageUrl);
+
+        log.info("크루 프로필 이미지 수정 완료: crewId={}, updatedBy={}, url={}", crewId, userId, profileImageUrl);
     }
 
     /**
@@ -355,6 +618,61 @@ public class CrewService {
                 .calendar(calendarResponses)
                 .myReservations(myReservations)
                 .build();
+    }
+
+    /**
+     * 주간 간략 크루 달력 조회
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @param date   조회할 날짜 (해당 주 포함)
+     * @return 주간 달력 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<CrewCalendarResponse> getCrewBriefCalendar(Long userId, Long crewId, LocalDate date) {
+        // 크루 및 사용자 확인
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
+        userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 해당 주의 월요일 ~ 일요일 계산
+        LocalDate startDate = date
+                .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
+        LocalDate endDate = date.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY));
+
+        // 1. 일별 예약 수 집계 (DB에서 Count만 조회)
+        List<DailyReservationCount> dailyCounts = reservationRepository.findDailyCountsByCrewAndDateBetween(
+                crew, startDate, endDate);
+
+        // 날짜별 Count 매핑
+        java.util.Map<LocalDate, Long> countMap = dailyCounts.stream()
+                .collect(Collectors.toMap(DailyReservationCount::getDate, DailyReservationCount::getCount));
+
+        List<CrewCalendarResponse> calendarResponses = new java.util.ArrayList<>();
+
+        // 2. 시작일부터 종료일까지 응답 생성
+        for (LocalDate d = startDate; !d.isAfter(endDate); d = d.plusDays(1)) {
+            Long countLong = countMap.getOrDefault(d, 0L);
+            int count = countLong.intValue();
+
+            // 혼잡도 상태 결정
+            String occupancyStatus;
+            if (count < 5) {
+                occupancyStatus = "LOW";
+            } else if (count < 10) {
+                occupancyStatus = "MEDIUM";
+            } else {
+                occupancyStatus = "HIGH";
+            }
+
+            calendarResponses.add(CrewCalendarResponse.builder()
+                    .date(d)
+                    .occupancyStatus(occupancyStatus)
+                    .build());
+        }
+
+        return calendarResponses;
     }
 
     /**

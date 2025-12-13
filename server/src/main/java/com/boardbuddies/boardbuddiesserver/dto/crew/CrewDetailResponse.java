@@ -78,11 +78,26 @@ public class CrewDetailResponse {
     private LocalDateTime updatedAt;
 
     /**
-     * Crew 엔티티로부터 DTO 생성
-     * 
-     * @param crew 크루 엔티티
-     * @return 크루 상세 응답 DTO
+     * 회장 이름
      */
+    @JsonProperty("president_name")
+    private String presidentName;
+
+    /**
+     * 현재 부원 수 (회장 포함)
+     */
+    @JsonProperty("member_count")
+    private Integer memberCount;
+
+    @JsonProperty("profile_image_url")
+    private String profileImageUrl;
+
+    /**
+     * 시즌방 제한 여부
+     */
+    @JsonProperty("isCapacityLimited")
+    private Boolean isCapacityLimited;
+
     public static CrewDetailResponse from(Crew crew) {
         return CrewDetailResponse.builder()
                 .crewId(crew.getId())
@@ -94,6 +109,34 @@ public class CrewDetailResponse {
                 .status(crew.getStatus())
                 .createdAt(crew.getCreatedAt())
                 .updatedAt(crew.getUpdatedAt())
+                .profileImageUrl(crew.getProfileImageUrl())
+                .isCapacityLimited(crew.getIsCapacityLimited())
+                .build();
+    }
+
+    /**
+     * Crew 엔티티로부터 DTO 생성
+     * 
+     * @param crew          크루 엔티티
+     * @param presidentName 회장 이름
+     * @param memberCount   부원 수
+     * @return 크루 상세 응답 DTO
+     */
+    public static CrewDetailResponse from(Crew crew, String presidentName, Integer memberCount) {
+        return CrewDetailResponse.builder()
+                .crewId(crew.getId())
+                .name(crew.getName())
+                .univ(crew.getUniv())
+                .reservationDay(crew.getReservationDay())
+                .reservationTime(crew.getReservationTime())
+                .dailyCapacity(crew.getDailyCapacity())
+                .status(crew.getStatus())
+                .createdAt(crew.getCreatedAt())
+                .updatedAt(crew.getUpdatedAt())
+                .presidentName(presidentName)
+                .memberCount(memberCount)
+                .profileImageUrl(crew.getProfileImageUrl())
+                .isCapacityLimited(crew.getIsCapacityLimited())
                 .build();
     }
 }

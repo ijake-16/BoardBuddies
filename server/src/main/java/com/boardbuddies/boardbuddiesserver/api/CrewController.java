@@ -87,28 +87,75 @@ public class CrewController {
      */
     @PatchMapping("/{crewId}")
     public ResponseEntity<ApiResponse<Void>> updateCrew(
-            @CurrentUser Long userId,
             @PathVariable Long crewId,
-            @Valid @RequestBody CrewUpdateRequest request) {
-
+            @CurrentUser Long userId,
+            @RequestBody CrewUpdateRequest request) {
         try {
             crewService.updateCrew(userId, crewId, request);
             return ResponseEntity.ok(
                     ApiResponse.success(200, "크루 정보 수정 성공", null));
-        } catch (RuntimeException e) {
-            log.error("크루 정보 수정 중 에러 발생", e);
 
+        } catch (Exception e) {
+            log.error("크루 정보 수정 중 에러 발생", e);
+            return handleUpdateError(e);
+        }
+    }
+
+    private ResponseEntity<ApiResponse<Void>> handleUpdateError(Exception e) {
+        if (e instanceof org.springframework.security.access.AccessDeniedException) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, e.getMessage()));
+        } else if (e instanceof jakarta.persistence.EntityNotFoundException) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, e.getMessage()));
+        } else if (e instanceof IllegalArgumentException) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, e.getMessage()));
+        }
+
+        // Fallback for generic RuntimeExceptions that might still use message matching
+        // (legacy)
+        String errorMessage = e.getMessage();
+        if (errorMessage != null && errorMessage.contains("권한이 없습니다")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, errorMessage));
+        } else if (errorMessage != null && errorMessage.contains("크루를 찾을 수 없습니다")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, errorMessage));
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(500, "서버 에러"));
+    }
+
+    /**
+     * 크루 프로필 이미지 수정
+     * 
+     * POST /api/crews/{crewId}/profile-image
+     * 
+     * @param crewId 크루 ID
+     * @param userId 현재 로그인한 사용자 ID
+     * @param file   이미지 파일 (optional, 없으면 초기화)
+     * @return 성공 응답
+     */
+    @PostMapping("/{crewId}/profile-image")
+    public ResponseEntity<ApiResponse<Void>> updateProfileImage(
+            @PathVariable Long crewId,
+            @CurrentUser Long userId,
+            @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file) {
+        try {
+            crewService.updateCrewProfileImage(userId, crewId, file);
+
+            String message = (file != null && !file.isEmpty()) ? "프로필 이미지 수정 성공" : "프로필 이미지 초기화 성공";
+            return ResponseEntity.ok(ApiResponse.success(200, message));
+
+        } catch (RuntimeException e) {
+            log.error("크루 프로필 이미지 수정 중 에러 발생", e);
             String errorMessage = e.getMessage();
-            if (errorMessage != null && errorMessage.contains("수정 권한이 없습니다")) {
+
+            if (errorMessage != null && errorMessage.contains("권한이 없습니다")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(ApiResponse.error(403, "수정 권한이 없습니다."));
-            } else if (errorMessage != null && errorMessage.contains("크루를 찾을 수 없습니다")) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(404, "해당 크루를 찾을 수 없습니다."));
-            } else if (errorMessage != null
-                    && (errorMessage.contains("사용자를 찾을 수 없습니다") || errorMessage.contains("학번"))) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error(404, "존재하지 않는 회원을 운영진으로 추가할 수 없습니다."));
+                        .body(ApiResponse.error(403, errorMessage));
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(ApiResponse.error(500, "서버 에러"));
@@ -280,6 +327,77 @@ public class CrewController {
     }
 
     /**
+     * 부원별 시즌방 사용 통계 조회
+     * 
+     * GET /api/crews/{crewId}/usage-statistics
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @return 부원별 사용 횟수 리스트
+     */
+    @GetMapping("/{crewId}/usage-statistics")
+    public ResponseEntity<ApiResponse<java.util.List<MemberUsageResponse>>> getMemberUsageStatistics(
+            @CurrentUser Long userId,
+            @PathVariable Long crewId) {
+
+        try {
+            java.util.List<MemberUsageResponse> response = crewService
+                    .getMemberUsageStatistics(userId, crewId);
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "부원 사용 통계 조회 성공", response));
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, e.getMessage()));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, e.getMessage()));
+        } catch (Exception e) {
+            log.error("부원 사용 통계 조회 중 에러 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+        }
+    }
+
+    /**
+     * 주간 간략 크루 달력 조회
+     * 
+     * GET /api/crews/{crewId}/calendar/week?date=2025-12-13
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @param crewId 크루 ID
+     * @param date   조회할 날짜 (기본값: 오늘)
+     * @return 주간 달력 응답
+     */
+    @GetMapping("/{crewId}/calendar/week")
+    public ResponseEntity<ApiResponse<List<CrewCalendarResponse>>> getCrewBriefCalendar(
+            @CurrentUser Long userId,
+            @PathVariable Long crewId,
+            @RequestParam(required = false) LocalDate date) {
+
+        if (date == null) {
+            date = LocalDate.now();
+        }
+
+        try {
+            List<CrewCalendarResponse> response = crewService.getCrewBriefCalendar(userId, crewId, date);
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "주간 달력 조회 성공", response));
+        } catch (RuntimeException e) {
+            log.error("주간 달력 조회 중 에러 발생", e);
+            String errorMessage = e.getMessage();
+
+            if (errorMessage != null && errorMessage.contains("크루를 찾을 수 없습니다")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error(404, errorMessage));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ApiResponse.error(500, "서버 에러"));
+            }
+        }
+    }
+
+    /**
      * 나의 달력 조회 (내 예약 + 이용 횟수 + 혼잡도)
      * 
      * GET /api/crews/{crewId}/calendar/my?date=2025-12-01
@@ -396,6 +514,183 @@ public class CrewController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(ApiResponse.error(500, "서버 에러"));
             }
+        }
+    }
+
+    // ==================== 운영진 관리 API ====================
+
+    /**
+     * 운영진 목록 조회 (MANAGER 이상)
+     * 
+     * GET /api/crews/{crewId}/managers
+     * 
+     * @param crewId 크루 ID
+     * @param userId 현재 로그인한 사용자 ID (JWT에서 자동 추출)
+     * @return 운영진 목록 (회장 + 매니저)
+     */
+    @GetMapping("/{crewId}/managers")
+    public ResponseEntity<ApiResponse<List<ManagerResponse>>> getManagers(
+            @PathVariable Long crewId,
+            @CurrentUser Long userId) {
+
+        try {
+            List<ManagerResponse> managers = crewService.getManagers(userId, crewId);
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "운영진 목록 조회 성공", managers));
+
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, e.getMessage()));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, e.getMessage()));
+        } catch (Exception e) {
+            log.error("운영진 목록 조회 중 에러 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+        }
+    }
+
+    /**
+     * 일반 부원 목록 조회 (MANAGER 이상)
+     * 
+     * GET /api/crews/{crewId}/members
+     * 
+     * @param crewId 크루 ID
+     * @param userId 현재 로그인한 사용자 ID (JWT에서 자동 추출)
+     * @return 일반 부원 목록 (MEMBER만)
+     */
+    @GetMapping("/{crewId}/members")
+    public ResponseEntity<ApiResponse<List<ManagerResponse>>> getMembers(
+            @PathVariable Long crewId,
+            @CurrentUser Long userId) {
+
+        try {
+            List<ManagerResponse> members = crewService.getMembers(userId, crewId);
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "일반 부원 목록 조회 성공", members));
+
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, e.getMessage()));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, e.getMessage()));
+        } catch (Exception e) {
+            log.error("일반 부원 목록 조회 중 에러 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+        }
+    }
+
+    /**
+     * 운영진 추가 (PRESIDENT만)
+     * 
+     * POST /api/crews/{crewId}/managers/{userId}
+     * 
+     * @param crewId       크루 ID
+     * @param targetUserId 추가할 부원의 user ID
+     * @param userId       현재 로그인한 사용자 ID (JWT에서 자동 추출)
+     * @return 성공 응답
+     */
+    @PostMapping("/{crewId}/managers/{targetUserId}")
+    public ResponseEntity<ApiResponse<Void>> addManager(
+            @PathVariable Long crewId,
+            @PathVariable Long targetUserId,
+            @CurrentUser Long userId) {
+
+        try {
+            crewService.addManager(userId, crewId, targetUserId);
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "운영진 추가 성공"));
+
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, e.getMessage()));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, e.getMessage()));
+        } catch (Exception e) {
+            log.error("운영진 추가 중 에러 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+        }
+    }
+
+    /**
+     * 운영진 삭제 (PRESIDENT만)
+     * 
+     * DELETE /api/crews/{crewId}/managers/{userId}
+     * 
+     * @param crewId       크루 ID
+     * @param targetUserId 삭제할 운영진의 user ID
+     * @param userId       현재 로그인한 사용자 ID (JWT에서 자동 추출)
+     * @return 성공 응답
+     */
+    @DeleteMapping("/{crewId}/managers/{targetUserId}")
+    public ResponseEntity<ApiResponse<Void>> removeManager(
+            @PathVariable Long crewId,
+            @PathVariable Long targetUserId,
+            @CurrentUser Long userId) {
+
+        try {
+            crewService.removeManager(userId, crewId, targetUserId);
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "운영진 삭제 성공"));
+
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, e.getMessage()));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, e.getMessage()));
+        } catch (Exception e) {
+            log.error("운영진 삭제 중 에러 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+        }
+    }
+
+    /**
+     * 부원 삭제 (MANAGER 이상)
+     * 
+     * DELETE /api/crews/{crewId}/members/{targetUserId}
+     * 
+     * @param crewId       크루 ID
+     * @param targetUserId 삭제할 부원의 user ID
+     * @param userId       현재 로그인한 사용자 ID (JWT에서 자동 추출)
+     * @return 성공 응답
+     */
+    @DeleteMapping("/{crewId}/members/{targetUserId}")
+    public ResponseEntity<ApiResponse<Void>> removeMember(
+            @PathVariable Long crewId,
+            @PathVariable Long targetUserId,
+            @CurrentUser Long userId) {
+
+        try {
+            crewService.removeMember(userId, crewId, targetUserId);
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "부원 삭제 성공"));
+
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, e.getMessage()));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, e.getMessage()));
+        } catch (Exception e) {
+            log.error("부원 삭제 중 에러 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
         }
     }
 }

@@ -695,6 +695,91 @@
       }
     },
     {
+      "name": "주간 간략 크루 달력 조회",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/crews/{{crew_id}}/calendar/week?date=2025-12-13",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "crews",
+            "{{crew_id}}",
+            "calendar",
+            "week"
+          ],
+          "query": [
+            {
+              "key": "date",
+              "value": "2025-12-13",
+              "description": "조회할 날짜 (선택)"
+            }
+          ]
+        },
+        "description": "특정 날짜가 포함된 주의 간략한 크루 달력(월~일, 혼잡도)을 조회합니다."
+      }
+    },
+    {
+      "name": "부원 사용 통계 조회",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "액세스 토큰 (MANAGER 이상 권한 필요)"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/crews/{{crew_id}}/usage-statistics?search=&sortBy=name&sortOrder=asc",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "crews",
+            "{{crew_id}}",
+            "usage-statistics"
+          ],
+          "query": [
+            {
+              "key": "search",
+              "value": "",
+              "description": "이름 검색 (선택)"
+            },
+            {
+              "key": "sortBy",
+              "value": "name",
+              "description": "정렬 기준: name(기본) 또는 usageCount"
+            },
+            {
+              "key": "sortOrder",
+              "value": "asc",
+              "description": "정렬 순서: asc(기본) 또는 desc"
+            }
+          ]
+        },
+        "description": "부원별 시즌방 사용 횟수를 조회합니다. confirmed 상태 예약만 집계됩니다. 이름 검색 및 정렬 옵션 지원."
+      }
+    },
+    {
       "name": "크루 정보 수정",
       "request": {
         "method": "PATCH",
@@ -711,7 +796,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"crewName\": \"snoooowholic\",\n  \"manager_list\": [],\n  \"crewPIN\": 5678,\n  \"reservation_day\": \"SATURDAY\",\n  \"reservation_time\": \"18:00\"\n}"
+          "raw": "{\n  \"crewName\": \"snoooowholic\",\n  \"manager_list\": [],\n  \"crewPIN\": 5678,\n  \"reservation_day\": \"SATURDAY\",\n  \"reservation_time\": \"18:00\",\n  \"dailyCapacity\": 15,\n  \"isCapacityLimited\": true\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/crews/{{crew_id}}",

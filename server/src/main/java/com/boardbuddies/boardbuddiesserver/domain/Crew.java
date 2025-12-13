@@ -68,6 +68,19 @@ public class Crew {
     @Builder.Default
     private Integer dailyCapacity = 20;
 
+    /**
+     * 크루 프로필 이미지 URL
+     */
+    @Column(length = 500)
+    private String profileImageUrl;
+
+    /**
+     * 시즌방 인원 제한 여부 (기본값: true = 제한함)
+     */
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isCapacityLimited = true;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -118,5 +131,19 @@ public class Crew {
      */
     public void updateDailyCapacity(Integer dailyCapacity) {
         this.dailyCapacity = dailyCapacity;
+    }
+
+    /**
+     * 크루 프로필 이미지 수정
+     */
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    /**
+     * 시즌방 인원 제한 여부 수정
+     */
+    public void updateCapacityLimit(Boolean isCapacityLimited) {
+        this.isCapacityLimited = isCapacityLimited;
     }
 }

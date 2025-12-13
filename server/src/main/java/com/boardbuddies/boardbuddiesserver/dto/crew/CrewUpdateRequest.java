@@ -62,4 +62,11 @@ public class CrewUpdateRequest {
     @Min(value = 1, message = "일별 수용 인원은 1명 이상이어야 합니다.")
     @JsonProperty("dailyCapacity")
     private Integer dailyCapacity;
+
+    /**
+     * 시즌방 제한 여부 (선택사항)
+     * true: 제한함, false: 제한 안함 (무제한)
+     */
+    @JsonProperty("isCapacityLimited")
+    private Boolean isCapacityLimited;
 }

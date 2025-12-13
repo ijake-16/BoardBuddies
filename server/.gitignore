@@ -73,3 +73,9 @@ Temporary Items
 ### macOS Patch ###
 # iCloud generated files
 *.icloud
+
+### Uploads ###
+uploads/
+
+## 테스트 데이터 ##
+data.sql

@@ -18,6 +18,8 @@ services:
       - db
       - redis
     restart: always
+    volumes:
+      - ./uploads:/app/uploads
     networks:
       - boardbuddy-network
 
