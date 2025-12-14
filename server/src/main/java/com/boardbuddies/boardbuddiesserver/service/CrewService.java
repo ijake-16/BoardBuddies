@@ -695,8 +695,8 @@ public class CrewService {
         List<CrewMyMonthlyReservationResponse> myReservations = getMyMonthlyReservations(userId, crewId, startDate,
                 endDate);
 
-        // 2. 이용 횟수 (확정된 예약 수)
-        int usageCount = reservationRepository.countByUserAndCrewAndStatus(user, crew, "confirmed").intValue();
+        // 2. 이용 횟수 (확정된 일반 예약 수만, 게스트 예약 제외)
+        int usageCount = reservationRepository.countByUserAndCrewAndStatusAndGuestIsNull(user, crew, "confirmed").intValue();
 
         return com.boardbuddies.boardbuddiesserver.dto.crew.MyCalendarResponse.builder()
                 .myReservations(myReservations)
@@ -722,8 +722,8 @@ public class CrewService {
         Crew crew = crewRepository.findById(crewId)
                 .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
 
-        // 내 예약 정보 조회
-        List<Reservation> reservations = reservationRepository.findAllByCrewAndUserAndDateBetweenAndStatusNot(
+        // 일반 예약만 조회 (게스트 예약 제외)
+        List<Reservation> reservations = reservationRepository.findAllByCrewAndUserAndDateBetweenAndStatusNotAndGuestIsNull(
                 crew, user, startDate, endDate, "CANCELLED");
 
         return reservations.stream()

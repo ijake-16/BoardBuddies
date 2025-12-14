@@ -82,11 +82,12 @@ public class UserController {
                         ApiResponse.error(400, "종료일은 시작일보다 빠를 수 없습니다."));
             }
 
-            reservations = reservationRepository.findAllByUserAndDateBetweenOrderByCreatedAtDesc(user, startDate,
+            // 일반 예약만 조회 (게스트 예약 제외)
+            reservations = reservationRepository.findAllByUserAndGuestIsNullAndDateBetweenOrderByCreatedAtDesc(user, startDate,
                     endDate);
         } else {
-            // 기본 조회 (전체 또는 최근 N건 - 여기서는 전체로 구현하되 필요시 제한 가능)
-            reservations = reservationRepository.findAllByUserOrderByCreatedAtDesc(user);
+            // 일반 예약만 조회 (게스트 예약 제외)
+            reservations = reservationRepository.findAllByUserAndGuestIsNullOrderByCreatedAtDesc(user);
         }
 
         List<ReservationResponse> response = reservations.stream()
