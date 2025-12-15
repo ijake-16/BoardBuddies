@@ -65,7 +65,7 @@ function App() {
         )}
 
 
-        {currentView !== 'login' && (
+        {(currentView !== 'login' && currentView !== 'user_info') && (
           <LowerMenuBar
             activeTab={activeTab}
             onTabChange={(tab) => {
