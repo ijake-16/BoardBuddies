@@ -1,4 +1,5 @@
 
+import { useEffect } from 'react';
 import kakaoLogin from '../assets/login/kakao.png';
 import naver1 from '../assets/login/naver1.png';
 import naver2 from '../assets/login/naver2.png';
@@ -6,10 +7,69 @@ import naverFrame from '../assets/login/naverframe.png';
 
 interface LoginLandingProps {
     onLogin: () => void;
+    onSignupNeeded: () => void;
     onDebugUserInfo?: () => void;
 }
 
-export default function LoginLanding({ onLogin, onDebugUserInfo }: LoginLandingProps) {
+export default function LoginLanding({ onLogin, onSignupNeeded, onDebugUserInfo }: LoginLandingProps) {
+    useEffect(() => {
+        if (window.Kakao && !window.Kakao.isInitialized()) {
+            const kakaoKey = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY;
+            if (kakaoKey && kakaoKey !== 'YOUR_KAKAO_JAVASCRIPT_KEY') {
+                window.Kakao.init(kakaoKey);
+            } else {
+                // Fallback or just log
+                console.warn("Kakao Key not found in env. Please set VITE_KAKAO_JAVASCRIPT_KEY in .env");
+                // Attempt init with placeholder if user hardcodes it here in dev
+                // window.Kakao.init('YOUR_ACTUAL_KEY_IF_HARDCODED'); 
+            }
+        }
+    }, []);
+
+    const handleKakaoLogin = () => {
+        if (!window.Kakao || !window.Kakao.isInitialized()) {
+            alert('Kakao SDK not initialized. Please check your Kakao Key.');
+            return;
+        }
+
+        window.Kakao.Auth.login({
+            success: async (authObj: any) => {
+                try {
+                    const response = await fetch('/api/auth/social/kakao', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${authObj.access_token}`,
+                        },
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        if (data.message && data.message.includes("추가 정보를 입력해주세요")) {
+                            // New User: Temporary token for signup
+                            localStorage.setItem('tempAccessToken', data.data.tempAccessToken);
+                            onSignupNeeded();
+                        } else {
+                            // Existing User: Login success
+                            localStorage.setItem('accessToken', data.data.accessToken);
+                            localStorage.setItem('refreshToken', data.data.refreshToken);
+                            onLogin();
+                        }
+                    } else {
+                        console.error('Server Login Failed:', data);
+                        alert(`Login failed: ${data.message || 'Unknown error'}`);
+                    }
+                } catch (error) {
+                    console.error('Network Error:', error);
+                    alert('An network error occurred during login.');
+                }
+            },
+            fail: (err: any) => {
+                console.error('Kakao Login Failed:', err);
+                alert('Kakao Login Failed');
+            },
+        });
+    };
     return (
         <div className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col relative overflow-hidden">
             {/* Background Graphic */}
@@ -43,7 +103,7 @@ export default function LoginLanding({ onLogin, onDebugUserInfo }: LoginLandingP
                     )}
 
                     <button
-                        onClick={onLogin}
+                        onClick={handleKakaoLogin}
                         className="w-full hover:opacity-90 transition-opacity"
                     >
                         <img src={kakaoLogin} alt="Kakao Login" className="w-full h-auto" />

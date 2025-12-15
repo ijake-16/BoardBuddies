@@ -21,6 +21,7 @@ function App() {
         {currentView === 'login' ? (
           <LoginLanding
             onLogin={() => setCurrentView('home')}
+            onSignupNeeded={() => setCurrentView('user_info')}
             onDebugUserInfo={() => setCurrentView('user_info')}
           />
         ) : currentView === 'reservation' ? (
