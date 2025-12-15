@@ -432,6 +432,49 @@ public class CrewService {
     }
 
     /**
+     * 회장 변경 (PRESIDENT → 다른 부원)
+     *
+     * @param userId       현재 로그인한 사용자 ID (현 회장)
+     * @param crewId       크루 ID
+     * @param targetUserId 새 회장으로 지정할 부원의 user ID
+     */
+    @Transactional
+    public void changePresident(Long userId, Long crewId, Long targetUserId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 크루를 찾을 수 없습니다."));
+
+        User currentPresident = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 권한 확인 (현재 회장만 가능)
+        if (!currentPresident.getCrew().equals(crew) || currentPresident.getRole() != Role.PRESIDENT) {
+            throw new AccessDeniedException("회장 변경은 회장만 가능합니다.");
+        }
+
+        // 자기 자신을 대상자로 지정한 경우
+        if (userId.equals(targetUserId)) {
+            throw new IllegalArgumentException("자기 자신에게는 회장을 위임할 수 없습니다.");
+        }
+
+        // 새 회장 대상 사용자 조회
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
+
+        // 동일 크루 소속인지 확인
+        if (!targetUser.getCrew().equals(crew)) {
+            throw new IllegalArgumentException("해당 사용자는 이 크루의 부원이 아닙니다.");
+        }
+
+        // 현재 회장을 MANAGER로 강등
+        currentPresident.updateRole(Role.MANAGER);
+
+        // 대상 사용자를 PRESIDENT로 승격
+        targetUser.updateRole(Role.PRESIDENT);
+
+        log.info("회장 변경 완료: crewId={}, oldPresidentId={}, newPresidentId={}", crewId, userId, targetUserId);
+    }
+
+    /**
      * 부원 삭제 (크루에서 제거)
      * 
      * @param userId       현재 로그인한 사용자 ID (MANAGER 이상)

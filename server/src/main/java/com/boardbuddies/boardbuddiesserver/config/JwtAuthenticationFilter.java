@@ -1,5 +1,7 @@
 package com.boardbuddies.boardbuddiesserver.config;
 
+import com.boardbuddies.boardbuddiesserver.dto.common.ApiResponse;
+import com.boardbuddies.boardbuddiesserver.exception.JwtTokenExpiredException;
 import com.boardbuddies.boardbuddiesserver.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,6 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -69,6 +73,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 log.debug("JWT 인증 성공: userId={}", userId);
             }
+        } catch (JwtTokenExpiredException e) {
+            log.warn("만료된 JWT 토큰입니다.", e);
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
+            return;
         } catch (Exception e) {
             log.error("JWT 인증 처리 중 에러 발생", e);
         }
@@ -87,5 +95,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return null;
+    }
+
+    /**
+     * 에러 응답 작성
+     */
+    private void writeErrorResponse(HttpServletResponse response, int status, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json;charset=UTF-8");
+
+        ApiResponse<Void> body = ApiResponse.error(status, message);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writeValue(response.getWriter(), body);
     }
 }

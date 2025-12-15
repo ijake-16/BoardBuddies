@@ -1,6 +1,7 @@
 package com.boardbuddies.boardbuddiesserver.util;
 
 import com.boardbuddies.boardbuddiesserver.config.JwtProperties;
+import com.boardbuddies.boardbuddiesserver.exception.JwtTokenExpiredException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -132,7 +133,7 @@ public class JwtUtil {
                     .getPayload();
         } catch (ExpiredJwtException e) {
             log.error("만료된 JWT 토큰입니다.", e);
-            throw new RuntimeException("만료된 토큰입니다.");
+            throw new JwtTokenExpiredException("만료된 JWT 토큰입니다.", e);
         } catch (UnsupportedJwtException e) {
             log.error("지원되지 않는 JWT 토큰입니다.", e);
             throw new RuntimeException("유효하지 않은 토큰입니다.");
@@ -158,6 +159,9 @@ public class JwtUtil {
         try {
             parseToken(token);
             return true;
+        } catch (JwtTokenExpiredException e) {
+            // 만료 토큰은 상위에서 처리할 수 있도록 그대로 전달
+            throw e;
         } catch (RuntimeException e) {
             return false;
         }
