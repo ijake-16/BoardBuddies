@@ -18,6 +18,11 @@ import java.util.Optional;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
         List<Reservation> findAllByUserOrderByCreatedAtDesc(User user);
 
+        /**
+         * 특정 사용자의 모든 예약 삭제
+         */
+        void deleteAllByUser(User user);
+
         List<Reservation> findAllByUserAndDateBetweenOrderByCreatedAtDesc(User user, LocalDate startDate,
                         LocalDate endDate);
 
@@ -153,4 +158,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                         "ORDER BY r.user.name")
         List<com.boardbuddies.boardbuddiesserver.dto.crew.MemberUsageResponse> findUsageCountsByCrew(
                         @Param("crew") Crew crew);
+
+        /**
+         * 특정 게스트 목록과 연관된 모든 예약 삭제
+         */
+        void deleteAllByGuestIn(List<Guest> guests);
 }

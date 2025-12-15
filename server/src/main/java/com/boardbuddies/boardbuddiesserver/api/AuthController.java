@@ -193,7 +193,7 @@ public class AuthController {
             log.error("토큰 재발급 처리 중 에러 발생", e);
 
             String errorMessage = e.getMessage();
-            if (errorMessage != null && errorMessage.contains("만료된 토큰")) {
+            if (errorMessage != null && errorMessage.contains("만료된 JWT 토큰")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(ApiResponse.error(401, "만료된 리프레시 토큰입니다."));
             } else if (errorMessage != null && errorMessage.contains("유효하지 않은")) {
@@ -243,6 +243,15 @@ public class AuthController {
 
         } catch (RuntimeException e) {
             log.error("로그아웃 처리 중 에러 발생", e);
+
+            String errorMessage = e.getMessage();
+            // 만료된 JWT 토큰으로 로그아웃 요청한 경우
+            if (errorMessage != null && errorMessage.contains("만료된 JWT 토큰")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error(401, "만료된 JWT 토큰입니다."));
+            }
+
+            // 기타 예외
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(500, "서버 에러"));
         }
