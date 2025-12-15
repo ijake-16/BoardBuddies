@@ -26,6 +26,13 @@ public class Reservation {
     @JoinColumn(name = "crew_id", nullable = false)
     private Crew crew;
 
+    /**
+     * 게스트 예약인 경우 게스트 정보 (일반 예약인 경우 null)
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "guest_id")
+    private Guest guest;
+
     @Column(nullable = false)
     private LocalDate date;
 

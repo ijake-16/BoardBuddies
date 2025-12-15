@@ -19,4 +19,10 @@ public class ReservationRequest {
     private Long crewId;
 
     private List<LocalDate> dates;
+
+    /**
+     * 게스트 예약인 경우 게스트 ID (일반 예약인 경우 null)
+     */
+    @JsonProperty("guest_id")
+    private Long guestId;
 }

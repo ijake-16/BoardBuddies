@@ -4,6 +4,7 @@ import com.boardbuddies.boardbuddiesserver.domain.*;
 import com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMultiResponse;
 import com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationRequest;
 import com.boardbuddies.boardbuddiesserver.repository.CrewRepository;
+import com.boardbuddies.boardbuddiesserver.repository.GuestRepository;
 import com.boardbuddies.boardbuddiesserver.repository.ReservationRepository;
 import com.boardbuddies.boardbuddiesserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class ReservationService {
 
     private final CrewRepository crewRepository;
     private final UserRepository userRepository;
+    private final GuestRepository guestRepository;
     private final ReservationRepository reservationRepository;
     private final RedissonClient redissonClient;
     private final TransactionTemplate transactionTemplate;
@@ -54,6 +56,18 @@ public class ReservationService {
             throw new RuntimeException("승인된 회원만 예약할 수 있습니다.");
         }
 
+        // 2-1. 게스트 예약인 경우 게스트 조회 및 검증
+        Guest guest = null;
+        if (request.getGuestId() != null) {
+            guest = guestRepository.findById(request.getGuestId())
+                    .orElseThrow(() -> new RuntimeException("게스트를 찾을 수 없습니다."));
+            
+            // 게스트가 해당 부원이 등록한 것인지 확인
+            if (!guest.getRegisteredBy().getId().equals(userId)) {
+                throw new RuntimeException("본인이 등록한 게스트만 예약할 수 있습니다.");
+            }
+        }
+
         // 3. 오픈 시각 검증
         validateOpenTime(crew, request.getDates());
 
@@ -65,7 +79,7 @@ public class ReservationService {
         for (LocalDate date : request.getDates()) {
             try {
                 // 개별 날짜 검증 및 예약 (분산 락 적용)
-                Reservation reservation = processSingleReservationWithLock(user, crew, date);
+                Reservation reservation = processSingleReservationWithLock(user, crew, date, guest);
 
                 String status = "created";
                 if ("waiting".equals(reservation.getStatus())) {
@@ -113,7 +127,7 @@ public class ReservationService {
                 .build();
     }
 
-    private Reservation processSingleReservationWithLock(User user, Crew crew, LocalDate date) {
+    private Reservation processSingleReservationWithLock(User user, Crew crew, LocalDate date, Guest guest) {
         String lockKey = "lock:reservation:" + crew.getId() + ":" + date;
         // 락 획득 시도
         RLock lock = redissonClient.getLock(lockKey);
@@ -126,7 +140,7 @@ public class ReservationService {
             }
 
             // 트랜잭션 템플릿을 사용하여 트랜잭션 보장
-            return transactionTemplate.execute(status -> processSingleReservationLogic(user, crew, date));
+            return transactionTemplate.execute(status -> processSingleReservationLogic(user, crew, date, guest));
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // 인터럽트 상태 복구
@@ -138,20 +152,31 @@ public class ReservationService {
         }
     }
 
-    protected Reservation processSingleReservationLogic(User user, Crew crew, LocalDate date) {
+    protected Reservation processSingleReservationLogic(User user, Crew crew, LocalDate date, Guest guest) {
         // 1. 과거 날짜 제외
         if (date.isBefore(LocalDate.now())) {
             throw new RuntimeException("과거 날짜는 예약할 수 없습니다.");
         }
 
-        // 2. 본인 중복 체크
-        List<Reservation> myReservations = reservationRepository.findAllByUserAndDateBetweenOrderByCreatedAtDesc(
-                user, date, date);
-        if (!myReservations.isEmpty()) {
-            boolean exists = myReservations.stream()
-                    .anyMatch(r -> !"CANCELLED".equals(r.getStatus()));
+        // 2. 중복 체크 (게스트 예약인 경우 게스트 기준, 일반 예약인 경우 사용자 기준)
+        if (guest != null) {
+            // 게스트 예약 중복 체크
+            List<Reservation> guestReservations = reservationRepository.findByCrewAndDateAndStatusNot(crew, date, "CANCELLED");
+            boolean exists = guestReservations.stream()
+                    .anyMatch(r -> r.getGuest() != null && r.getGuest().getId().equals(guest.getId()) && !"CANCELLED".equals(r.getStatus()));
             if (exists) {
-                throw new RuntimeException("이미 해당 날짜에 예약이 존재합니다.");
+                throw new RuntimeException("이미 해당 날짜에 게스트 예약이 존재합니다.");
+            }
+        } else {
+            // 일반 예약 중복 체크
+            List<Reservation> myReservations = reservationRepository.findAllByUserAndDateBetweenOrderByCreatedAtDesc(
+                    user, date, date);
+            if (!myReservations.isEmpty()) {
+                boolean exists = myReservations.stream()
+                        .anyMatch(r -> !"CANCELLED".equals(r.getStatus()));
+                if (exists) {
+                    throw new RuntimeException("이미 해당 날짜에 예약이 존재합니다.");
+                }
             }
         }
 
@@ -167,6 +192,7 @@ public class ReservationService {
         Reservation reservation = Reservation.builder()
                 .user(user)
                 .crew(crew)
+                .guest(guest)
                 .date(date)
                 .status(status)
                 .build();
@@ -191,17 +217,39 @@ public class ReservationService {
         User user = Objects.requireNonNull(userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
 
+        // 2-1. 게스트 예약 취소인 경우 게스트 조회 및 검증
+        Guest guest = null;
+        if (request.getGuestId() != null) {
+            guest = guestRepository.findById(request.getGuestId())
+                    .orElseThrow(() -> new RuntimeException("게스트를 찾을 수 없습니다."));
+            
+            // 게스트가 해당 부원이 등록한 것인지 확인
+            if (!guest.getRegisteredBy().getId().equals(userId)) {
+                throw new RuntimeException("본인이 등록한 게스트만 취소할 수 있습니다.");
+            }
+        }
+        // guestId가 없으면 일반 예약 취소 (게스트 예약은 취소 불가)
+
         // 3. 날짜별 취소 처리
         for (LocalDate date : request.getDates()) {
-            cancelSingleReservation(user, crew, date);
+            cancelSingleReservation(user, crew, date, guest);
         }
     }
 
-    private void cancelSingleReservation(User user, Crew crew, LocalDate date) {
-        // 내 예약 조회 (취소되지 않은 것)
-        Reservation myReservation = reservationRepository.findByUserAndCrewAndDateAndStatusNot(
-                user, crew, date, "CANCELLED")
-                .orElseThrow(() -> new RuntimeException("해당 날짜에 예약이 없습니다."));
+    private void cancelSingleReservation(User user, Crew crew, LocalDate date, Guest guest) {
+        // 예약 조회
+        Reservation myReservation;
+        if (guest != null) {
+            // 게스트 예약 취소: guestId가 필수로 있어야 함
+            myReservation = reservationRepository.findByGuestAndCrewAndDateAndStatusNot(
+                    guest, crew, date, "CANCELLED")
+                    .orElseThrow(() -> new RuntimeException("해당 날짜에 게스트 예약이 없습니다."));
+        } else {
+            // 일반 예약 취소: guest가 null인 예약만 취소 (게스트 예약은 제외)
+            myReservation = reservationRepository.findByUserAndCrewAndDateAndStatusNotAndGuestIsNull(
+                    user, crew, date, "CANCELLED")
+                    .orElseThrow(() -> new RuntimeException("해당 날짜에 일반 예약이 없습니다. 게스트 예약을 취소하려면 guest_id를 포함해주세요."));
+        }
 
         String oldStatus = myReservation.getStatus();
 
@@ -285,19 +333,28 @@ public class ReservationService {
             throw new RuntimeException("해당 크루의 회원이 아닙니다.");
         }
 
-        // 해당 날짜의 모든 예약 조회 (취소 제외)
-        List<Reservation> reservations = reservationRepository.findByCrewAndDateAndStatusNot(crew, date, "CANCELLED");
+        // 해당 날짜의 모든 예약 조회 (취소 제외) - Fetch Join으로 N+1 문제 방지
+        List<Reservation> reservations = reservationRepository.findByCrewAndDateAndStatusNotWithFetch(crew, date, "CANCELLED");
 
         List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary> confirmedList = new ArrayList<>();
         List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary> waitingList = new ArrayList<>();
 
         for (Reservation r : reservations) {
-            com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary summary = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary
+            com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary.UserSummaryBuilder summaryBuilder = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary
                     .builder()
                     .userId(r.getUser().getId())
-                    .name(r.getUser().getName())
-                    .role(r.getUser().getRole())
-                    .build();
+                    .role(r.getUser().getRole());
+            
+            // 게스트 예약인 경우 게스트 이름을 name에 표시, 예약한 부원 이름은 registeredByName에 표시
+            if (r.getGuest() != null) {
+                summaryBuilder.name(r.getGuest().getName())  // 게스트 이름
+                        .guestId(r.getGuest().getId())
+                        .registeredByName(r.getUser().getName());  // 예약한 부원 이름
+            } else {
+                summaryBuilder.name(r.getUser().getName());  // 일반 예약은 부원 이름
+            }
+            
+            com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary summary = summaryBuilder.build();
 
             if ("confirmed".equals(r.getStatus())) {
                 confirmedList.add(summary);
@@ -351,7 +408,8 @@ public class ReservationService {
             }
         }
 
-        List<Reservation> reservations = reservationRepository.findAllByCrewAndDateAndStatusNotOrderByCreatedAtAsc(crew,
+        // Fetch Join으로 N+1 문제 방지
+        List<Reservation> reservations = reservationRepository.findAllByCrewAndDateAndStatusNotOrderByCreatedAtAscWithFetch(crew,
                 date, "CANCELLED");
 
         int booked = 0;
@@ -360,12 +418,21 @@ public class ReservationService {
         com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo myReservationInfo = null;
 
         for (Reservation r : reservations) {
-            com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse memberResponse = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse
+            com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse.ReservationMemberResponseBuilder memberResponseBuilder = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse
                     .builder()
                     .userId(r.getUser().getId())
-                    .name(r.getUser().getName())
-                    .profileImageUrl(r.getUser().getProfileImageUrl())
-                    .build();
+                    .profileImageUrl(r.getUser().getProfileImageUrl());
+            
+            // 게스트 예약인 경우 게스트 이름을 name에 표시, 예약한 부원 이름은 registeredByName에 표시
+            if (r.getGuest() != null) {
+                memberResponseBuilder.name(r.getGuest().getName())  // 게스트 이름
+                        .guestId(r.getGuest().getId())
+                        .registeredByName(r.getUser().getName());  // 예약한 부원 이름
+            } else {
+                memberResponseBuilder.name(r.getUser().getName());  // 일반 예약은 부원 이름
+            }
+            
+            com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse memberResponse = memberResponseBuilder.build();
 
             if ("confirmed".equals(r.getStatus())) {
                 booked++;
@@ -374,8 +441,9 @@ public class ReservationService {
                 waitingMemberList.add(memberResponse);
             }
 
-            // 내 예약 확인
-            if (r.getUser().getId().equals(userId)) {
+            // 내 예약 확인 (일반 예약 또는 본인이 등록한 게스트 예약)
+            if (r.getUser().getId().equals(userId) || 
+                (r.getGuest() != null && r.getGuest().getRegisteredBy().getId().equals(userId))) {
                 myReservationInfo = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo
                         .builder()
                         .reservationId(r.getId())
@@ -481,7 +549,8 @@ public class ReservationService {
         LocalDate start = now.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
         LocalDate end = start.plusWeeks(2).minusDays(1);
 
-        List<Reservation> reservations = reservationRepository.findAllByUserAndDateBetweenOrderByCreatedAtDesc(user,
+        // 일반 예약만 조회 (게스트 예약 제외)
+        List<Reservation> reservations = reservationRepository.findAllByUserAndGuestIsNullAndDateBetweenOrderByCreatedAtDesc(user,
                 start, end);
 
         return reservations.stream()
