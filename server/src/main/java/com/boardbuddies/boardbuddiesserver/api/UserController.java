@@ -1,6 +1,7 @@
 package com.boardbuddies.boardbuddiesserver.api;
 
 import com.boardbuddies.boardbuddiesserver.config.CurrentUser;
+import com.boardbuddies.boardbuddiesserver.domain.Role;
 import com.boardbuddies.boardbuddiesserver.domain.User;
 import com.boardbuddies.boardbuddiesserver.dto.common.ApiResponse;
 import com.boardbuddies.boardbuddiesserver.dto.user.UserResponse;
@@ -114,6 +115,11 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> deleteMyAccount(@CurrentUser Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 동아리 회장은 탈퇴 불가
+        if (user.getRole() == Role.PRESIDENT) {
+            throw new RuntimeException("동아리 회장은 회원 탈퇴를 할 수 없습니다. 회장을 변경한 후 다시 시도해주세요.");
+        }
 
         // 1. 해당 사용자가 등록한 게스트 조회
         List<Guest> guests = guestRepository.findAllByRegisteredByOrderByCreatedAtDesc(user);

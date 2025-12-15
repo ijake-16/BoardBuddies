@@ -693,4 +693,44 @@ public class CrewController {
                     .body(ApiResponse.error(500, "서버 에러"));
         }
     }
+
+    /**
+     * 동아리 회장 변경 (PRESIDENT만 가능)
+     *
+     * - 현재 회장이 운영진(MANAGER)이나 일반 부원(MEMBER) 중 한 명을 새 회장으로 임명
+     * - 기존 회장은 자동으로 운영진(MANAGER)으로 변경
+     *
+     * POST /api/crews/{crewId}/president/{targetUserId}
+     *
+     * @param crewId       크루 ID
+     * @param targetUserId 새 회장으로 지정할 사용자 ID
+     * @param userId       현재 로그인한 사용자 ID (JWT에서 자동 추출, 현 회장)
+     * @return 성공 응답
+     */
+    @PostMapping("/{crewId}/president/{targetUserId}")
+    public ResponseEntity<ApiResponse<Void>> changePresident(
+            @PathVariable Long crewId,
+            @PathVariable Long targetUserId,
+            @CurrentUser Long userId) {
+
+        try {
+            crewService.changePresident(userId, crewId, targetUserId);
+            return ResponseEntity.ok(
+                    ApiResponse.success(200, "회장 변경 성공"));
+
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error(403, e.getMessage()));
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(404, e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(400, e.getMessage()));
+        } catch (Exception e) {
+            log.error("회장 변경 중 에러 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(500, "서버 에러"));
+        }
+    }
 }
