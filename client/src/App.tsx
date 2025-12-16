@@ -7,11 +7,12 @@ import MyReservations from './pages/MyReservations';
 import LoginLanding from './pages/LoginLanding';
 import CrewDetail from './pages/CrewDetail';
 import UserInfoInput from './pages/UserInfoInput';
+import CrewMember from './pages/CrewMember';
 import SearchCrew from './pages/SearchCrew';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
-  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info'>('login');
+  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending'>('login');
   const [hasCrew, setHasCrew] = useState(false);
 
 
@@ -44,7 +45,10 @@ function App() {
             onCalendarClick={() => {
               setCurrentView('stats');
             }}
+            onMemberClick={() => setCurrentView('crew_member')}
           />
+        ) : currentView === 'crew_member' ? (
+          <CrewMember onBack={() => setCurrentView('crew_detail')} />
         ) : currentView === 'search_crew' ? (
           <SearchCrew onBack={() => setCurrentView('home')} />
         ) : currentView === 'user_info' ? (
