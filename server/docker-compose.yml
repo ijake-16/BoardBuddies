@@ -26,6 +26,8 @@ services:
   db:
     image: postgres:15-alpine
     container_name: boardbuddy-db
+    ports:
+      - "5432:5432"
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USERNAME}
