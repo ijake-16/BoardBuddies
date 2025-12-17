@@ -1,7 +1,9 @@
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
-
-
+import { useState, useEffect } from 'react';
+import { getUserInfo } from '../services/user';
+import { getCrewInfo } from '../services/crew';
+import { UserDetail, CrewDetail } from '../types/api';
 
 // Icons
 
@@ -57,9 +59,38 @@ export default function Home({
     onCalendarClick,
     onTeamClick,
     onSearchClick,
-    hasCrew = true,
+    hasCrew: initialHasCrew = true,
     onJoinCrew
 }: HomeProps) {
+    const [userInfo, setUserInfo] = useState<UserDetail | null>(null);
+    const [crewDetail, setCrewDetail] = useState<CrewDetail | null>(null);
+    // Use prop as initial, but can be updated by data
+    const [hasCrew, setHasCrew] = useState(initialHasCrew);
+    const [isDebugNoCrew, setIsDebugNoCrew] = useState(false);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getUserInfo();
+                setUserInfo(data);
+                if (data.crew) {
+                    setHasCrew(true);
+                    try {
+                        const cDetail = await getCrewInfo(data.crew.crewId);
+                        setCrewDetail(cDetail);
+                    } catch (e) {
+                        console.error("Failed to fetch crew detail", e);
+                    }
+                } else {
+                    setHasCrew(false);
+                }
+            } catch (err) {
+                console.error("Failed to fetch user info", err);
+            }
+        };
+        fetchData();
+    }, []);
+
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F8F9FA] relative">
             {/* Header */}
@@ -69,6 +100,18 @@ export default function Home({
                     {/* Shark Image removed due to missing file */}
                 </div>
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => {
+                            console.log('Toggling debug mode. Current:', isDebugNoCrew, 'HasCrew:', hasCrew);
+                            setIsDebugNoCrew(prev => !prev);
+                        }}
+                        className={`text-[10px] px-2 py-1 rounded border mr-2 transition-colors ${isDebugNoCrew
+                                ? 'bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200'
+                                : 'bg-red-100 text-red-600 border-red-200 hover:bg-red-200'
+                            }`}
+                    >
+                        {isDebugNoCrew ? 'Show My Crew' : 'Simulate No Crew'}
+                    </button>
                     <Button variant="ghost" size="icon" onClick={onSearchClick} className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <BellIcon className="w-[24px] h-[24px]" />
                     </Button>
@@ -83,14 +126,14 @@ export default function Home({
 
                 {/* Team Info */}
                 <div className="px-4 mb-8">
-                    {hasCrew ? (
+                    {!isDebugNoCrew && hasCrew && userInfo?.crew ? (
                         <>
-                            <div className="text-sm text-zinc-500 font-medium mb-1">홍익대학교</div>
+                            <div className="text-sm text-zinc-500 font-medium mb-1">{crewDetail?.univ || userInfo.school}</div>
                             <div
                                 onClick={onTeamClick}
                                 className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
                             >
-                                <h2 className="text-2xl font-bold">Team 401</h2>
+                                <h2 className="text-2xl font-bold">{userInfo.crew.crewName}</h2>
                                 <CircleArrowRightIcon className="w-5 h-5 text-[#FCD34D]" />
                             </div>
                         </>
