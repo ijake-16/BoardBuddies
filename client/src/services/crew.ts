@@ -25,3 +25,7 @@ export const manageApplicant = async (crewId: number, applicationId: number, dec
     // decision: 1 for approve, 0 for reject
     await apiClient.post(`/crews/${crewId}/applications/${applicationId}/approve`, { decision });
 };
+
+export const applyToCrew = async (crewId: number, crewPIN: string): Promise<void> => {
+    await apiClient.post(`/crews/${crewId}/applications`, { crewPIN });
+};

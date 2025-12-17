@@ -66,6 +66,7 @@ export default function Home({
     const [crewDetail, setCrewDetail] = useState<CrewDetail | null>(null);
     // Use prop as initial, but can be updated by data
     const [hasCrew, setHasCrew] = useState(initialHasCrew);
+    const [isDebugNoCrew, setIsDebugNoCrew] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -80,6 +81,8 @@ export default function Home({
                     } catch (e) {
                         console.error("Failed to fetch crew detail", e);
                     }
+                } else {
+                    setHasCrew(false);
                 }
             } catch (err) {
                 console.error("Failed to fetch user info", err);
@@ -97,6 +100,18 @@ export default function Home({
                     {/* Shark Image removed due to missing file */}
                 </div>
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => {
+                            console.log('Toggling debug mode. Current:', isDebugNoCrew, 'HasCrew:', hasCrew);
+                            setIsDebugNoCrew(prev => !prev);
+                        }}
+                        className={`text-[10px] px-2 py-1 rounded border mr-2 transition-colors ${isDebugNoCrew
+                                ? 'bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200'
+                                : 'bg-red-100 text-red-600 border-red-200 hover:bg-red-200'
+                            }`}
+                    >
+                        {isDebugNoCrew ? 'Show My Crew' : 'Simulate No Crew'}
+                    </button>
                     <Button variant="ghost" size="icon" onClick={onSearchClick} className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <BellIcon className="w-[24px] h-[24px]" />
                     </Button>
@@ -111,7 +126,7 @@ export default function Home({
 
                 {/* Team Info */}
                 <div className="px-4 mb-8">
-                    {hasCrew && userInfo?.crew ? (
+                    {!isDebugNoCrew && hasCrew && userInfo?.crew ? (
                         <>
                             <div className="text-sm text-zinc-500 font-medium mb-1">{crewDetail?.univ || userInfo.school}</div>
                             <div
