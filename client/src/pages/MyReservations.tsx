@@ -20,6 +20,7 @@ const ChevronLeftIcon = ({ className }: { className?: string }) => (
 
 export default function MyReservations({ onBack, onCrewClick }: MyReservationsProps) {
     const [selectedDay, setSelectedDay] = useState<number | null>(3); // Default to Today (3)
+    const [isLessonApplied, setIsLessonApplied] = useState(false);
 
     // Mock Data based on screenshots
     const confirmedDays = [13, 14, 25, 26];
@@ -28,6 +29,8 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
 
     const handleDayClick = (day: number) => {
         setSelectedDay(day);
+        // Reset toggle when changing days for demo purposes
+        setIsLessonApplied(false);
     };
 
     return (
@@ -130,19 +133,35 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                         // Case: Selected Reservation (Confirmed/Pending)
                         if (isConfirmed || isPending) {
                             return (
-                                <div className="w-full bg-[#EDF2FF] rounded-[24px] p-5 flex items-center justify-between shadow-sm">
-                                    <div className="flex items-center gap-2.5">
-                                        <div className={`w-2.5 h-2.5 rounded-full ${isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#9CA3AF]'}`} />
-                                        <span className="text-zinc-900 font-bold text-base">
-                                            12/{String(selectedDay).padStart(2, '0')} 예약 {isConfirmed ? '확정' : '대기'}
-                                        </span>
+                                <div className="w-full flex flex-col gap-3">
+                                    {isConfirmed && (
+                                        <div className="flex items-center justify-end gap-2 px-1">
+                                            <span className="text-xs font-bold text-zinc-900">강습 신청하기</span>
+                                            <button
+                                                className="w-10 h-6 bg-zinc-200 rounded-full relative transition-colors duration-200 ease-in-out data-[checked=true]:bg-[#1E3A8A]"
+                                                data-checked={isLessonApplied}
+                                                onClick={() => setIsLessonApplied(!isLessonApplied)}
+                                            >
+                                                <span className="absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out data-[checked=true]:translate-x-4"
+                                                    data-checked={isLessonApplied}
+                                                />
+                                            </button>
+                                        </div>
+                                    )}
+                                    <div className="w-full bg-[#EDF2FF] rounded-[24px] p-5 flex items-center justify-between shadow-sm">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className={`w-2.5 h-2.5 rounded-full ${isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#9CA3AF]'}`} />
+                                            <span className="text-zinc-900 font-bold text-base">
+                                                12/{String(selectedDay).padStart(2, '0')} 예약 {isConfirmed ? '확정' : '대기'}
+                                            </span>
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            className="bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-full px-4 h-9 text-sm font-medium shadow-sm transition-colors"
+                                        >
+                                            예약 취소
+                                        </Button>
                                     </div>
-                                    <Button
-                                        variant="outline"
-                                        className="bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-full px-4 h-9 text-sm font-medium shadow-sm transition-colors"
-                                    >
-                                        예약 취소
-                                    </Button>
                                 </div>
                             );
                         }
