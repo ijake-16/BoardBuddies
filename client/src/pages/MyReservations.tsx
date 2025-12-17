@@ -19,13 +19,30 @@ const ChevronLeftIcon = ({ className }: { className?: string }) => (
 
 
 export default function MyReservations({ onBack, onCrewClick }: MyReservationsProps) {
-    const [selectedDay, setSelectedDay] = useState<number | null>(3); // Default to Today (3)
+    const todayDate = new Date();
+    const currentYear = todayDate.getFullYear();
+    const currentMonthIndex = todayDate.getMonth(); // 0-11
+    const todayDay = todayDate.getDate();
+
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    const currentMonthName = monthNames[currentMonthIndex];
+
+    // Calculate days in current month
+    const daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
+
+    // Calculate start day of week (0=Sun, 1=Mon, etc.)
+    const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1).getDay();
+
+    const [selectedDay, setSelectedDay] = useState<number | null>(todayDay);
     const [isLessonApplied, setIsLessonApplied] = useState(false);
 
-    // Mock Data based on screenshots
+    // Mock Data based on screenshots - kept static for now as per instructions (only fix "Today" and calendar grid)
+    // In a real app these would likely come from props or API based on the current month
     const confirmedDays = [13, 14, 25, 26];
     const pendingDays = [27];
-    const today = 3;
 
     const handleDayClick = (day: number) => {
         setSelectedDay(day);
@@ -60,10 +77,10 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
 
                 <Calendar
                     className="mb-8"
-                    month="December"
-                    year={2025}
-                    startDayOfWeek={1}
-                    totalDays={31}
+                    month={currentMonthName}
+                    year={currentYear}
+                    startDayOfWeek={firstDayOfMonth}
+                    totalDays={daysInMonth}
                     expandable={false}
                     hideHeader={false}
                     onDayClick={handleDayClick}
@@ -77,7 +94,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                         const isSelected = selectedDay === day;
                         const isConfirmed = confirmedDays.includes(day);
                         const isPending = pendingDays.includes(day);
-                        const isToday = day === today;
+                        const isToday = day === todayDay;
 
                         // Base Container Classes
                         let containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 cursor-pointer text-sm font-bold rounded-[10px]";
@@ -152,7 +169,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                                         <div className="flex items-center gap-2.5">
                                             <div className={`w-2.5 h-2.5 rounded-full ${isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#9CA3AF]'}`} />
                                             <span className="text-zinc-900 font-bold text-base">
-                                                12/{String(selectedDay).padStart(2, '0')} 예약 {isConfirmed ? '확정' : '대기'}
+                                                {currentMonthIndex + 1}/{String(selectedDay).padStart(2, '0')} 예약 {isConfirmed ? '확정' : '대기'}
                                             </span>
                                         </div>
                                         <Button
@@ -171,7 +188,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                             <>
                                 <div className="text-center mb-6">
                                     <p className="text-sm text-zinc-500 leading-relaxed">
-                                        12/{selectedDay ? String(selectedDay).padStart(2, '0') : '--'} 예약내역이 없습니다.<br />
+                                        {currentMonthIndex + 1}/{selectedDay ? String(selectedDay).padStart(2, '0') : '--'} 예약내역이 없습니다.<br />
                                         예약하시겠습니까?
                                     </p>
                                 </div>
