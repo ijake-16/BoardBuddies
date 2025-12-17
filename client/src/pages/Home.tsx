@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { getUserInfo } from '../services/user';
 import { getCrewInfo } from '../services/crew';
 import { UserDetail, CrewDetail } from '../types/api';
+import { Bus, Mountain } from 'lucide-react';
 
 // Icons
 
@@ -106,8 +107,8 @@ export default function Home({
                             setIsDebugNoCrew(prev => !prev);
                         }}
                         className={`text-[10px] px-2 py-1 rounded border mr-2 transition-colors ${isDebugNoCrew
-                                ? 'bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200'
-                                : 'bg-red-100 text-red-600 border-red-200 hover:bg-red-200'
+                            ? 'bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200'
+                            : 'bg-red-100 text-red-600 border-red-200 hover:bg-red-200'
                             }`}
                     >
                         {isDebugNoCrew ? 'Show My Crew' : 'Simulate No Crew'}
@@ -127,16 +128,40 @@ export default function Home({
                 {/* Team Info */}
                 <div className="px-4 mb-8">
                     {!isDebugNoCrew && hasCrew && userInfo?.crew ? (
-                        <>
-                            <div className="text-sm text-zinc-500 font-medium mb-1">{crewDetail?.univ || userInfo.school}</div>
-                            <div
-                                onClick={onTeamClick}
-                                className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-                            >
-                                <h2 className="text-2xl font-bold">{userInfo.crew.crewName}</h2>
-                                <CircleArrowRightIcon className="w-5 h-5 text-[#FCD34D]" />
+                        <div className="flex items-end justify-between">
+                            <div>
+                                <div className="text-sm text-zinc-500 font-medium mb-1">{crewDetail?.univ || userInfo.school}</div>
+                                <div
+                                    onClick={onTeamClick}
+                                    className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                                >
+                                    <h2 className="text-2xl font-bold truncate max-w-[200px]">{userInfo.crew.crewName}</h2>
+                                    <CircleArrowRightIcon className="w-5 h-5 text-[#FCD34D] shrink-0" />
+                                </div>
                             </div>
-                        </>
+
+                            {/* External Link Buttons */}
+                            <div className="flex items-center gap-3 mb-1">
+                                <a
+                                    href="https://skibus.purplebus.co.kr/Pp/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-2 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors text-zinc-600 shadow-sm"
+                                    aria-label="Bus Reservation"
+                                >
+                                    <Bus className="w-5 h-5" />
+                                </a>
+                                <a
+                                    href="https://phoenixhnr.co.kr/m/static/pyeongchang/snowpark/slope-lift"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-2 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors text-zinc-600 shadow-sm"
+                                    aria-label="Slope Status"
+                                >
+                                    <Mountain className="w-5 h-5" />
+                                </a>
+                            </div>
+                        </div>
                     ) : (
                         <div className="flex items-center justify-between">
                             <div

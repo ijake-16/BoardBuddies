@@ -1,5 +1,5 @@
 import { Button } from '../components/Button';
-import { ChevronLeftIcon, ChevronRightIcon, SmileIcon, UserPlusIcon } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, Crown, UserPlusIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getCrewInfo } from '../services/crew';
 import { getUserInfo } from '../services/user';
@@ -91,7 +91,7 @@ export default function CrewDetail({ onBack, onCalendarClick, onMemberClick }: C
                     {/* Stats Row */}
                     <div className="flex items-center justify-around px-2">
                         <div className="flex items-center gap-2">
-                            <SmileIcon className="w-5 h-5 text-zinc-800" />
+                            <Crown className="w-5 h-5 text-zinc-800" />
                             <span className="text-sm font-medium text-zinc-800">{crewInfo.president_name}</span>
                         </div>
                         <button
