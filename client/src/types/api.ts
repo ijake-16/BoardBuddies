@@ -43,3 +43,10 @@ export interface UserDetail {
     updatedAt: string;
     crew: CrewSimple;
 }
+
+export interface CrewMember {
+    user_id: number;
+    name: string;
+    student_id: string;
+    role: string; // "MEMBER", etc.
+}

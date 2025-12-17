@@ -99,29 +99,29 @@ export default function CrewDetail({ onBack, onCalendarClick, onMemberClick }: C
                             className="flex items-center gap-2 hover:opacity-70 transition-opacity"
                         >
                             <UserPlusIcon className="w-5 h-5 text-zinc-800" />
-                            <span className="text-sm font-medium text-zinc-800">부원수 : 119명</span>
+                            <span className="text-sm font-medium text-zinc-800">부원수 : {crewInfo.member_count}명</span>
+                        </button>
                     </div>
                 </div>
-        </div>
 
-                {/* Action Row */ }
-    <button
-        onClick={onCalendarClick}
-        className="w-full bg-zinc-100 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 transition-colors mb-auto"
-    >
-        <span className="font-bold text-zinc-600">크루 달력</span>
-        <div className="flex items-center gap-1 text-zinc-500">
-            <span className="text-sm font-medium">확인하기</span>
-            <ChevronRightIcon className="w-5 h-5" />
-        </div>
-    </button>
+                {/* Action Row */}
+                <button
+                    onClick={onCalendarClick}
+                    className="w-full bg-zinc-100 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 transition-colors mb-auto"
+                >
+                    <span className="font-bold text-zinc-600">크루 달력</span>
+                    <div className="flex items-center gap-1 text-zinc-500">
+                        <span className="text-sm font-medium">확인하기</span>
+                        <ChevronRightIcon className="w-5 h-5" />
+                    </div>
+                </button>
 
-    {/* Footer Text */ }
-    <div className="mb-8 text-center">
-        <p className="text-xs text-zinc-400 font-medium">
-            나의 크루에 가입하고 다양한 정보를 확인하세요!
-        </p>
-    </div>
+                {/* Footer Text */}
+                <div className="mb-8 text-center">
+                    <p className="text-xs text-zinc-400 font-medium">
+                        나의 크루에 가입하고 다양한 정보를 확인하세요!
+                    </p>
+                </div>
 
             </main >
         </div >

@@ -1,6 +1,8 @@
 import { Button } from '../components/Button';
 import { ChevronLeftIcon, Trash2Icon, CheckIcon, XIcon, UserIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getUserInfo } from '../services/user';
+import { getCrewInfo, getCrewManagers, getCrewMembers } from '../services/crew';
 
 interface CrewMemberProps {
     onBack: () => void;
@@ -28,14 +30,7 @@ interface Applicant {
 }
 
 // Mock Data
-const MOCK_MEMBERS: Member[] = [
-    { id: '1', name: '김철수', role: 'PRESIDENT', studentId: '20201234' },
-    { id: '2', name: '이영희', role: 'ADMIN', studentId: '20215678' },
-    { id: '3', name: '박지성', role: 'ADMIN', studentId: '20191111' },
-    { id: '4', name: '손흥민', role: 'MEMBER', studentId: '20222222' },
-    { id: '5', name: '김연아', role: 'MEMBER', studentId: '20233333' },
-    { id: '6', name: 'BTS', role: 'MEMBER', studentId: '20244444' },
-];
+
 
 const MOCK_APPLICANTS: Applicant[] = [
     { id: '101', name: 'Newbie', studentId: '20250001', requestDate: '2025-03-01' },
@@ -47,8 +42,92 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
     const [currentUserRole, setCurrentUserRole] = useState<'ADMIN' | 'MEMBER'>('ADMIN');
 
     const [activeTab, setActiveTab] = useState<'members' | 'applicants'>('members');
-    const [members, setMembers] = useState<Member[]>(MOCK_MEMBERS);
+    const [members, setMembers] = useState<Member[]>([]);
     const [applicants, setApplicants] = useState<Applicant[]>(MOCK_APPLICANTS);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchMembers = async () => {
+            try {
+                const userData = await getUserInfo();
+                console.log('CrewMember: userData', userData);
+
+                if (userData.crew) {
+                    const crewId = userData.crew.crewId;
+                    console.log('CrewMember: fetching members for crewId', crewId);
+
+                    // Fetch all data in parallel
+                    const [crewInfo, managers, regularMembers] = await Promise.all([
+                        getCrewInfo(crewId),
+                        getCrewManagers(crewId),
+                        getCrewMembers(crewId)
+                    ]);
+
+                    const combinedMembers: Member[] = [];
+                    const presidentName = crewInfo?.president_name;
+                    let presidentFound = false;
+
+                    // 1. Process Managers
+                    if (Array.isArray(managers)) {
+                        managers.forEach(m => {
+                            if (m.name === presidentName) {
+                                // Found President in Managers list - use this rich data
+                                combinedMembers.push({
+                                    id: m.user_id.toString(),
+                                    name: m.name,
+                                    role: 'PRESIDENT', // Force role to Captain
+                                    studentId: m.student_id
+                                });
+                                presidentFound = true;
+                            } else {
+                                // Ordinary Manager
+                                combinedMembers.push({
+                                    id: m.user_id.toString(),
+                                    name: m.name,
+                                    role: 'ADMIN',
+                                    studentId: m.student_id
+                                });
+                            }
+                        });
+                    }
+
+                    // 2. Add President placeholder if not found in Managers
+                    if (presidentName && !presidentFound) {
+                        combinedMembers.unshift({
+                            id: 'president',
+                            name: presidentName,
+                            role: 'PRESIDENT',
+                            studentId: ''
+                        });
+                    }
+
+                    // 3. Add Members
+                    if (Array.isArray(regularMembers)) {
+                        regularMembers.forEach(m => {
+                            // Deduplicate just in case President is also in members list
+                            if (m.name !== presidentName) {
+                                combinedMembers.push({
+                                    id: m.user_id.toString(),
+                                    name: m.name,
+                                    role: 'MEMBER',
+                                    studentId: m.student_id
+                                });
+                            }
+                        });
+                    }
+
+                    setMembers(combinedMembers);
+                } else {
+                    console.warn('CrewMember: User has no crew');
+                }
+            } catch (err) {
+                console.error("Failed to fetch crew data", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMembers();
+    }, []);
 
     const handleDeleteMember = (id: string, name: string) => {
         if (window.confirm(`${name}님을 크루에서 삭제하시겠습니까?`)) {
@@ -88,6 +167,10 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
             setApplicants([]);
         }
     };
+
+    if (loading) {
+        return <div className="flex-1 flex items-center justify-center bg-white dark:bg-zinc-950">Loading...</div>;
+    }
 
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
