@@ -5,9 +5,10 @@ import { ChevronLeftIcon, ChevronRightIcon, SmileIcon, UserPlusIcon } from 'luci
 interface CrewDetailProps {
     onBack: () => void;
     onCalendarClick: () => void;
+    onMemberClick: () => void;
 }
 
-export default function CrewDetail({ onBack, onCalendarClick }: CrewDetailProps) {
+export default function CrewDetail({ onBack, onCalendarClick, onMemberClick }: CrewDetailProps) {
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
             {/* Header */}
@@ -42,10 +43,13 @@ export default function CrewDetail({ onBack, onCalendarClick }: CrewDetailProps)
                             <SmileIcon className="w-5 h-5 text-zinc-800" />
                             <span className="text-sm font-medium text-zinc-800">매니저 이름</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <button
+                            onClick={onMemberClick}
+                            className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                        >
                             <UserPlusIcon className="w-5 h-5 text-zinc-800" />
                             <span className="text-sm font-medium text-zinc-800">부원수 : 119명</span>
-                        </div>
+                        </button>
                     </div>
                 </div>
 
