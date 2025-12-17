@@ -1,7 +1,9 @@
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
-
-
+import { useState, useEffect } from 'react';
+import { getUserInfo } from '../services/user';
+import { getCrewInfo } from '../services/crew';
+import { UserDetail, CrewDetail } from '../types/api';
 
 // Icons
 
@@ -57,9 +59,35 @@ export default function Home({
     onCalendarClick,
     onTeamClick,
     onSearchClick,
-    hasCrew = true,
+    hasCrew: initialHasCrew = true,
     onJoinCrew
 }: HomeProps) {
+    const [userInfo, setUserInfo] = useState<UserDetail | null>(null);
+    const [crewDetail, setCrewDetail] = useState<CrewDetail | null>(null);
+    // Use prop as initial, but can be updated by data
+    const [hasCrew, setHasCrew] = useState(initialHasCrew);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getUserInfo();
+                setUserInfo(data);
+                if (data.crew) {
+                    setHasCrew(true);
+                    try {
+                        const cDetail = await getCrewInfo(data.crew.crewId);
+                        setCrewDetail(cDetail);
+                    } catch (e) {
+                        console.error("Failed to fetch crew detail", e);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch user info", err);
+            }
+        };
+        fetchData();
+    }, []);
+
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F8F9FA] relative">
             {/* Header */}
@@ -83,14 +111,14 @@ export default function Home({
 
                 {/* Team Info */}
                 <div className="px-4 mb-8">
-                    {hasCrew ? (
+                    {hasCrew && userInfo?.crew ? (
                         <>
-                            <div className="text-sm text-zinc-500 font-medium mb-1">홍익대학교</div>
+                            <div className="text-sm text-zinc-500 font-medium mb-1">{crewDetail?.univ || userInfo.school}</div>
                             <div
                                 onClick={onTeamClick}
                                 className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
                             >
-                                <h2 className="text-2xl font-bold">Team 401</h2>
+                                <h2 className="text-2xl font-bold">{userInfo.crew.crewName}</h2>
                                 <CircleArrowRightIcon className="w-5 h-5 text-[#FCD34D]" />
                             </div>
                         </>
