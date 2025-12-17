@@ -9,9 +9,10 @@ import { CrewDetail as CrewDetailType } from '../types/api';
 interface CrewDetailProps {
     onBack: () => void;
     onCalendarClick: () => void;
+    onMemberClick: () => void;
 }
 
-export default function CrewDetail({ onBack, onCalendarClick }: CrewDetailProps) {
+export default function CrewDetail({ onBack, onCalendarClick, onMemberClick }: CrewDetailProps) {
     const [crewInfo, setCrewInfo] = useState<CrewDetailType | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -93,33 +94,36 @@ export default function CrewDetail({ onBack, onCalendarClick }: CrewDetailProps)
                             <SmileIcon className="w-5 h-5 text-zinc-800" />
                             <span className="text-sm font-medium text-zinc-800">{crewInfo.president_name}</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <button
+                            onClick={onMemberClick}
+                            className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+                        >
                             <UserPlusIcon className="w-5 h-5 text-zinc-800" />
-                            <span className="text-sm font-medium text-zinc-800">부원수 : {crewInfo.member_count}명</span>
-                        </div>
+                            <span className="text-sm font-medium text-zinc-800">부원수 : 119명</span>
                     </div>
                 </div>
-
-                {/* Action Row */}
-                <button
-                    onClick={onCalendarClick}
-                    className="w-full bg-zinc-100 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 transition-colors mb-auto"
-                >
-                    <span className="font-bold text-zinc-600">크루 달력</span>
-                    <div className="flex items-center gap-1 text-zinc-500">
-                        <span className="text-sm font-medium">확인하기</span>
-                        <ChevronRightIcon className="w-5 h-5" />
-                    </div>
-                </button>
-
-                {/* Footer Text */}
-                <div className="mb-8 text-center">
-                    <p className="text-xs text-zinc-400 font-medium">
-                        나의 크루에 가입하고 다양한 정보를 확인하세요!
-                    </p>
-                </div>
-
-            </main>
         </div>
+
+                {/* Action Row */ }
+    <button
+        onClick={onCalendarClick}
+        className="w-full bg-zinc-100 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 transition-colors mb-auto"
+    >
+        <span className="font-bold text-zinc-600">크루 달력</span>
+        <div className="flex items-center gap-1 text-zinc-500">
+            <span className="text-sm font-medium">확인하기</span>
+            <ChevronRightIcon className="w-5 h-5" />
+        </div>
+    </button>
+
+    {/* Footer Text */ }
+    <div className="mb-8 text-center">
+        <p className="text-xs text-zinc-400 font-medium">
+            나의 크루에 가입하고 다양한 정보를 확인하세요!
+        </p>
+    </div>
+
+            </main >
+        </div >
     );
 }
