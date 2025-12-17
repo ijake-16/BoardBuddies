@@ -50,3 +50,14 @@ export interface CrewMember {
     student_id: string;
     role: string; // "MEMBER", etc.
 }
+export interface CrewApplicant {
+    id: number; // application_id
+    user: {
+        userId: number;
+        name: string;
+        studentId: string;
+        profileImageUrl: string | null;
+    }
+    status: string; // "PENDING", etc.
+    created_at: string;
+}

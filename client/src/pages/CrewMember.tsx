@@ -2,11 +2,13 @@ import { Button } from '../components/Button';
 import { ChevronLeftIcon, Trash2Icon, CheckIcon, XIcon, UserIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getUserInfo } from '../services/user';
-import { getCrewInfo, getCrewManagers, getCrewMembers } from '../services/crew';
+import { getCrewInfo, getCrewManagers, getCrewMembers, getApplicants, manageApplicant } from '../services/crew';
 
 interface CrewMemberProps {
     onBack: () => void;
 }
+
+// ... existing types ...
 
 // Official Roles
 // Guest: Before admitting (Applicants)
@@ -23,19 +25,12 @@ interface Member {
 }
 
 interface Applicant {
-    id: string;
+    id: string; // This is application_id
     name: string;
     studentId: string;
     requestDate: string;
+    userId: number; // Keep track of user ID for adding to member list locally if needed
 }
-
-// Mock Data
-
-
-const MOCK_APPLICANTS: Applicant[] = [
-    { id: '101', name: 'Newbie', studentId: '20250001', requestDate: '2025-03-01' },
-    { id: '102', name: 'Wannabe', studentId: '20250002', requestDate: '2025-03-02' },
-];
 
 export default function CrewMember({ onBack }: CrewMemberProps) {
     // State to toggle between ADMIN (Manager view) and MEMBER (General view) for demonstration
@@ -43,128 +38,154 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
 
     const [activeTab, setActiveTab] = useState<'members' | 'applicants'>('members');
     const [members, setMembers] = useState<Member[]>([]);
-    const [applicants, setApplicants] = useState<Applicant[]>(MOCK_APPLICANTS);
+    const [applicants, setApplicants] = useState<Applicant[]>([]);
     const [loading, setLoading] = useState(true);
+    const [crewId, setCrewId] = useState<number | null>(null);
+
+    const refreshData = async () => {
+        setLoading(true);
+        try {
+            const userData = await getUserInfo();
+            if (userData.crew) {
+                const cId = userData.crew.crewId;
+                setCrewId(cId);
+
+                // Fetch all data in parallel
+                const [crewInfo, managers, regularMembers, apiApplicants] = await Promise.all([
+                    getCrewInfo(cId),
+                    getCrewManagers(cId),
+                    getCrewMembers(cId),
+                    getApplicants(cId)
+                ]);
+
+                // ... Process Members (Same as before) ...
+                const combinedMembers: Member[] = [];
+                const presidentName = crewInfo?.president_name;
+                let presidentFound = false;
+
+                // 1. Process Managers
+                if (Array.isArray(managers)) {
+                    managers.forEach(m => {
+                        if (m.name === presidentName) {
+                            combinedMembers.push({
+                                id: m.user_id.toString(),
+                                name: m.name,
+                                role: 'PRESIDENT',
+                                studentId: m.student_id
+                            });
+                            presidentFound = true;
+                        } else {
+                            combinedMembers.push({
+                                id: m.user_id.toString(),
+                                name: m.name,
+                                role: 'ADMIN',
+                                studentId: m.student_id
+                            });
+                        }
+                    });
+                }
+
+                // 2. Add President placeholder
+                if (presidentName && !presidentFound) {
+                    combinedMembers.unshift({
+                        id: 'president',
+                        name: presidentName,
+                        role: 'PRESIDENT',
+                        studentId: ''
+                    });
+                }
+
+                // 3. Add Members
+                if (Array.isArray(regularMembers)) {
+                    regularMembers.forEach(m => {
+                        if (m.name !== presidentName) {
+                            combinedMembers.push({
+                                id: m.user_id.toString(),
+                                name: m.name,
+                                role: 'MEMBER',
+                                studentId: m.student_id
+                            });
+                        }
+                    });
+                }
+                setMembers(combinedMembers);
+
+                // Process Applicants
+                if (Array.isArray(apiApplicants)) {
+                    const mappedApplicants: Applicant[] = apiApplicants.map(app => ({
+                        id: app.id.toString(),
+                        name: app.user.name,
+                        studentId: app.user.studentId,
+                        requestDate: new Date(app.created_at).toLocaleDateString(),
+                        userId: app.user.userId
+                    }));
+                    setApplicants(mappedApplicants);
+                }
+
+            }
+        } catch (err) {
+            console.error("Failed to fetch crew data", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchMembers = async () => {
-            try {
-                const userData = await getUserInfo();
-                console.log('CrewMember: userData', userData);
-
-                if (userData.crew) {
-                    const crewId = userData.crew.crewId;
-                    console.log('CrewMember: fetching members for crewId', crewId);
-
-                    // Fetch all data in parallel
-                    const [crewInfo, managers, regularMembers] = await Promise.all([
-                        getCrewInfo(crewId),
-                        getCrewManagers(crewId),
-                        getCrewMembers(crewId)
-                    ]);
-
-                    const combinedMembers: Member[] = [];
-                    const presidentName = crewInfo?.president_name;
-                    let presidentFound = false;
-
-                    // 1. Process Managers
-                    if (Array.isArray(managers)) {
-                        managers.forEach(m => {
-                            if (m.name === presidentName) {
-                                // Found President in Managers list - use this rich data
-                                combinedMembers.push({
-                                    id: m.user_id.toString(),
-                                    name: m.name,
-                                    role: 'PRESIDENT', // Force role to Captain
-                                    studentId: m.student_id
-                                });
-                                presidentFound = true;
-                            } else {
-                                // Ordinary Manager
-                                combinedMembers.push({
-                                    id: m.user_id.toString(),
-                                    name: m.name,
-                                    role: 'ADMIN',
-                                    studentId: m.student_id
-                                });
-                            }
-                        });
-                    }
-
-                    // 2. Add President placeholder if not found in Managers
-                    if (presidentName && !presidentFound) {
-                        combinedMembers.unshift({
-                            id: 'president',
-                            name: presidentName,
-                            role: 'PRESIDENT',
-                            studentId: ''
-                        });
-                    }
-
-                    // 3. Add Members
-                    if (Array.isArray(regularMembers)) {
-                        regularMembers.forEach(m => {
-                            // Deduplicate just in case President is also in members list
-                            if (m.name !== presidentName) {
-                                combinedMembers.push({
-                                    id: m.user_id.toString(),
-                                    name: m.name,
-                                    role: 'MEMBER',
-                                    studentId: m.student_id
-                                });
-                            }
-                        });
-                    }
-
-                    setMembers(combinedMembers);
-                } else {
-                    console.warn('CrewMember: User has no crew');
-                }
-            } catch (err) {
-                console.error("Failed to fetch crew data", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchMembers();
+        refreshData();
     }, []);
 
     const handleDeleteMember = (id: string, name: string) => {
         if (window.confirm(`${name}님을 크루에서 삭제하시겠습니까?`)) {
+            // TODO: Implement delete API
             setMembers(members.filter(m => m.id !== id));
         }
     };
 
-    const handleAcceptApplicant = (id: string) => {
-        const applicant = applicants.find(a => a.id === id);
-        if (applicant) {
-            const newMember: Member = {
-                id: applicant.id,
-                name: applicant.name,
-                role: 'MEMBER', // New members are always 'MEMBER' by default
-                studentId: applicant.studentId
-            };
-            setMembers([...members, newMember]);
-            setApplicants(applicants.filter(a => a.id !== id));
+    const handleAcceptApplicant = async (appId: string) => {
+        if (!crewId) return;
+        try {
+            await manageApplicant(crewId, parseInt(appId), 1);
+            // Optimistic update or refresh
+            const applicant = applicants.find(a => a.id === appId);
+            if (applicant) {
+                // Add to members list locally for immediate feedback
+                setMembers([...members, {
+                    id: applicant.userId.toString(),
+                    name: applicant.name,
+                    role: 'MEMBER',
+                    studentId: applicant.studentId
+                }]);
+                setApplicants(applicants.filter(a => a.id !== appId));
+            }
+        } catch (error) {
+            console.error("Failed to accept", error);
+            alert("처리 중 오류가 발생했습니다.");
         }
     };
 
-    const handleRejectApplicant = (id: string) => {
+    const handleRejectApplicant = async (appId: string) => {
+        if (!crewId) return;
         if (window.confirm('가입 요청을 거절하시겠습니까?')) {
-            setApplicants(applicants.filter(a => a.id !== id));
+            try {
+                await manageApplicant(crewId, parseInt(appId), 0);
+                setApplicants(applicants.filter(a => a.id !== appId));
+            } catch (error) {
+                console.error("Failed to reject", error);
+                alert("처리 중 오류가 발생했습니다.");
+            }
         }
     };
 
-    const handleAcceptAll = () => {
+    const handleAcceptAll = async () => {
+        if (!crewId) return;
         if (window.confirm('모든 가입 요청을 수락하시겠습니까?')) {
-            const newMembers = applicants.map(a => ({
-                id: a.id,
-                name: a.name,
-                role: 'MEMBER' as Role, // New members are always 'MEMBER' by default
-                studentId: a.studentId
-            }));
-            setMembers([...members, ...newMembers]);
-            setApplicants([]);
+            try {
+                await Promise.all(applicants.map(app => manageApplicant(crewId, parseInt(app.id), 1)));
+                refreshData(); // Refresh to get proper member list from server
+            } catch (error) {
+                console.error("Failed to accept all", error);
+                alert("일부 요청 처리 중 오류가 발생했습니다.");
+            }
         }
     };
 
