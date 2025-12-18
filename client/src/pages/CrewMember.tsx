@@ -66,6 +66,9 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
                 // 1. Process Managers
                 if (Array.isArray(managers)) {
                     managers.forEach(m => {
+                        // Skip if user_id is missing to prevent crash
+                        if (!m.user_id) return;
+
                         if (m.name === presidentName) {
                             combinedMembers.push({
                                 id: m.user_id.toString(),
@@ -98,7 +101,8 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
                 // 3. Add Members
                 if (Array.isArray(regularMembers)) {
                     regularMembers.forEach(m => {
-                        if (m.name !== presidentName) {
+                        // Skip if user_id is missing or it's the president (already handled)
+                        if (m.name !== presidentName && m.user_id) {
                             combinedMembers.push({
                                 id: m.user_id.toString(),
                                 name: m.name,
@@ -113,11 +117,11 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
                 // Process Applicants
                 if (Array.isArray(apiApplicants)) {
                     const mappedApplicants: Applicant[] = apiApplicants.map(app => ({
-                        id: app.id.toString(),
-                        name: app.user.name,
-                        studentId: app.user.studentId,
-                        requestDate: new Date(app.created_at).toLocaleDateString(),
-                        userId: app.user.userId
+                        id: app.applicationId.toString(),
+                        name: app.userName,
+                        studentId: app.studentId,
+                        requestDate: app.created_at ? new Date(app.created_at).toLocaleDateString() : 'Unknown',
+                        userId: app.userId
                     }));
                     setApplicants(mappedApplicants);
                 }

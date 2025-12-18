@@ -51,15 +51,13 @@ export interface CrewMember {
     role: string; // "MEMBER", etc.
 }
 export interface CrewApplicant {
-    id: number; // application_id
-    user: {
-        userId: number;
-        name: string;
-        studentId: string;
-        profileImageUrl: string | null;
-    }
+    applicationId: number;
+    userId: number;
+    userName: string;
+    studentId: string;
+    profileImageUrl?: string | null;
     status: string; // "PENDING", etc.
-    created_at: string;
+    created_at?: string; // Optional since it was missing in the log, but likely exists
 }
 
 
