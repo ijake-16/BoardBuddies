@@ -189,7 +189,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                         onClick={onCrewClick}
                         className="text-xs text-zinc-400 hover:text-zinc-600 font-medium px-0"
                     >
-                        그루 달력 <ChevronLeftIcon className="w-4 h-4 rotate-180" />
+                        크루 달력 <ChevronLeftIcon className="w-4 h-4 rotate-180" />
                     </Button>
                 </div>
             </header>
