@@ -40,7 +40,8 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
     const [selectedDay, setSelectedDay] = useState<number>(isCurrentMonthView ? todayDay : 5); // Default to today logic or fallback
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMySchedule, setShowMySchedule] = useState(false);
-    const [crewCapacity, setCrewCapacity] = useState<number>(20); // Default to 20, update from API
+    const [crewCapacity, setCrewCapacity] = useState<number>(20); // Default, will update
+    const [crewId, setCrewId] = useState<number | null>(null);
 
     // Store fetched reservation details
     // Key: "YYYY-MM-DD", Value: ReservationDetail
@@ -50,28 +51,40 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
         return `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     };
 
-    // Fetch Crew Info
+    // 1. Fetch User Info to get Crew ID
+    // 2. Then Fetch Crew Info using that ID
     useEffect(() => {
-        const fetchCrewInfo = async () => {
+        const initData = async () => {
             try {
-                // Hardcoded ID 100 as per instruction / sample data
-                const response = await getCrewInfo(100);
-                if (response && response.dailyCapacity) {
-                    setCrewCapacity(response.dailyCapacity);
+                // Import getUserInfo dynamically or if already imported
+                const { getUserInfo } = await import('../services/user');
+                const userData = await getUserInfo();
+
+                if (userData.crew && userData.crew.crewId) {
+                    const id = userData.crew.crewId;
+                    setCrewId(id);
+
+                    // Now fetch crew info for capacity
+                    const crewData = await getCrewInfo(id);
+                    if (crewData && crewData.dailyCapacity) {
+                        setCrewCapacity(crewData.dailyCapacity);
+                    }
                 }
             } catch (error) {
-                console.error("Failed to fetch crew info:", error);
+                console.error("Failed to initialize stats:", error);
             }
         };
-        fetchCrewInfo();
-    }, []);
+        initData();
+    }, []); // Run once on mount
 
     const fetchDetailForDay = async (day: number) => {
+        if (!crewId) return; // Wait for crewId
+
         const dateStr = formatDate(day);
         if (detailsCache[dateStr]) return; // Already cached
 
         try {
-            const data = await getReservationDetail(100, dateStr);
+            const data = await getReservationDetail(crewId, dateStr);
             setDetailsCache(prev => ({ ...prev, [dateStr]: data }));
         } catch (error) {
             console.error(`Failed to fetch detail for ${dateStr}:`, error);
@@ -80,10 +93,10 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
 
     // Effect to fetch detail when selectedDay changes
     useEffect(() => {
-        if (selectedDay) {
+        if (selectedDay && crewId) {
             fetchDetailForDay(selectedDay);
         }
-    }, [selectedDay, currentYear, currentMonthIndex]);
+    }, [selectedDay, currentYear, currentMonthIndex, crewId]);
 
 
     // Mock Reservation Data for "My Schedule" (Blue/Grey dots)

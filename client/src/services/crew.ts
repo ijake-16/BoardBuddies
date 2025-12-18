@@ -1,5 +1,5 @@
 import apiClient from '../lib/axios';
-import { ApiResponse, CrewDetail, CrewMember, CrewApplicant, ReservationDetail } from '../types/api';
+import { ApiResponse, CrewDetail, CrewMember, CrewApplicant, ReservationDetail, ReservationResponse } from '../types/api';
 
 export const getCrewInfo = async (crewId: number): Promise<CrewDetail> => {
     const response = await apiClient.get<ApiResponse<CrewDetail>>(`/crews/${crewId}`);
@@ -32,5 +32,15 @@ export const applyToCrew = async (crewId: number, crewPIN: string): Promise<void
 
 export const getReservationDetail = async (crewId: number, date: string): Promise<ReservationDetail> => {
     const response = await apiClient.get<ApiResponse<ReservationDetail>>(`/crews/${crewId}/reservations/detail?date=${date}`);
+    return response.data.data;
+};
+
+export const createReservation = async (crewId: number, dates: string[]): Promise<ReservationResponse> => {
+    const response = await apiClient.post<ApiResponse<ReservationResponse>>(`/crews/${crewId}/reservations`, { dates });
+    return response.data.data;
+};
+
+export const cancelReservation = async (crewId: number, dates: string[]): Promise<null> => {
+    const response = await apiClient.post<ApiResponse<null>>(`/crews/${crewId}/reservations/cancel`, { dates });
     return response.data.data;
 };
