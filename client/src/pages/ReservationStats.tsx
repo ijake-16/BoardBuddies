@@ -2,17 +2,28 @@ import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, Smile } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
-import { getCrewInfo, getReservationDetail, getCrewCalendar } from '../services/crew';
+import { getCrewInfo, getReservationDetail, getCrewCalendar, createReservation, cancelReservation } from '../services/crew';
 import { ReservationDetail, CrewCalendarResponse } from '../types/api';
 
 
 interface ReservationStatsProps {
     onBack: () => void;
     onMyCalendarClick?: () => void;
+    onReservationClick?: () => void;
 }
 
 
-export default function ReservationStats({ onBack, onMyCalendarClick }: ReservationStatsProps) {
+export default function ReservationStats({ onBack, onMyCalendarClick, onReservationClick }: ReservationStatsProps) {
+    // ... (lines 16-317)
+    {/* Change Link */ }
+    <div className="w-full flex justify-end mb-6 pr-2">
+        <button
+            onClick={onReservationClick}
+            className="text-xs font-medium text-zinc-500 flex items-center gap-1 hover:text-zinc-800 transition-colors"
+        >
+            예약 변경하러 가기 <ChevronRightIcon className="w-3 h-3" />
+        </button>
+    </div>
     const todayDate = new Date();
 
     // Default to current date
@@ -78,7 +89,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
         initData();
     }, []); // Run once on mount
 
-    // Fetch Calendar Data (Occupancy Statuses) whenever month/year or crewId changes
+    // Fetch Calendar Data (Occupancy Statuses) whenever month/year or crewId or showMySchedule changes
     useEffect(() => {
         const fetchCalendarData = async () => {
             if (!crewId) return;
@@ -87,7 +98,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
             const dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-15`;
 
             try {
-                const data = await getCrewCalendar(crewId, dateStr);
+                const data = await getCrewCalendar(crewId, dateStr, showMySchedule);
                 setCalendarData(data);
             } catch (error) {
                 console.error("Failed to fetch crew calendar:", error);
@@ -95,7 +106,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
         };
 
         fetchCalendarData();
-    }, [crewId, currentYear, currentMonthIndex]);
+    }, [crewId, currentYear, currentMonthIndex, showMySchedule]);
 
 
     const fetchDetailForDay = async (day: number) => {
@@ -120,9 +131,56 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
     }, [selectedDay, currentYear, currentMonthIndex, crewId]);
 
 
-    // Mock Reservation Data for "My Schedule" (Blue/Grey dots) - kept as requested or ignored based on "showMySchedule"
-    const confirmedDays = [13, 14, 25, 26];
-    const pendingDays = [27];
+    // Parse My Schedule Data
+    const confirmedDays = calendarData?.my_reservations
+        ?.filter(r => r.status === 'confirmed')
+        .map(r => parseInt(r.date.split('-')[2], 10)) || [];
+
+    const pendingDays = calendarData?.my_reservations
+        ?.filter(r => r.status === 'pending' || r.status === 'waiting') // Assuming 'waiting' or 'pending'
+        .map(r => parseInt(r.date.split('-')[2], 10)) || [];
+
+    const handleCreateReservation = async () => {
+        if (!crewId) {
+            alert("크루 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+            return;
+        }
+
+        const dateStr = formatDate(selectedDay);
+
+        try {
+            await createReservation(crewId, [dateStr]);
+            alert("예약 신청이 완료되었습니다.");
+            // Refresh data
+            const calDateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-15`;
+            const data = await getCrewCalendar(crewId, calDateStr, showMySchedule);
+            setCalendarData(data);
+            fetchDetailForDay(selectedDay);
+        } catch (error) {
+            console.error("Reservation creation failed:", error);
+            alert("예약 신청에 실패했습니다.");
+        }
+    };
+
+    const handleCancelReservation = async () => {
+        if (!crewId) return;
+
+        const dateStr = formatDate(selectedDay);
+
+        try {
+            await cancelReservation(crewId, [dateStr]);
+            alert("예약이 취소되었습니다.");
+
+            // Refresh data
+            const calDateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-15`;
+            const data = await getCrewCalendar(crewId, calDateStr, showMySchedule);
+            setCalendarData(data);
+            fetchDetailForDay(selectedDay);
+        } catch (error) {
+            console.error("Cancellation failed:", error);
+            alert("예약 취소에 실패했습니다.");
+        }
+    };
 
     const handleDayClick = (day: number) => {
         if (selectedDay === day) {
@@ -310,7 +368,10 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
 
                         {/* Change Link */}
                         <div className="w-full flex justify-end mb-6 pr-2">
-                            <button className="text-xs font-medium text-zinc-500 flex items-center gap-1 hover:text-zinc-800 transition-colors">
+                            <button
+                                onClick={onReservationClick}
+                                className="text-xs font-medium text-zinc-500 flex items-center gap-1 hover:text-zinc-800 transition-colors"
+                            >
                                 예약 변경하러 가기 <ChevronRightIcon className="w-3 h-3" />
                             </button>
                         </div>
@@ -319,12 +380,16 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
                         {confirmedDays.includes(selectedDay) || pendingDays.includes(selectedDay) ? (
                             <Button
                                 variant="outline"
+                                onClick={handleCancelReservation}
                                 className="w-full h-14 bg-white border border-zinc-400 hover:bg-zinc-50 rounded-[20px] text-zinc-500 text-lg font-bold shadow-sm transition-all active:scale-[0.98]"
                             >
                                 예약 취소하기
                             </Button>
                         ) : (
-                            <Button className="w-full h-14 bg-[#162660] hover:bg-[#1E3A8A] rounded-[20px] text-white text-lg font-bold shadow-md transition-all active:scale-[0.98]">
+                            <Button
+                                onClick={handleCreateReservation}
+                                className="w-full h-14 bg-[#162660] hover:bg-[#1E3A8A] rounded-[20px] text-white text-lg font-bold shadow-md transition-all active:scale-[0.98]"
+                            >
                                 예약하기
                             </Button>
                         )}
@@ -333,26 +398,26 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
                     /* Default Legend Section - Simplified for LOW/MEDIUM/HIGH */
                     <div className="w-full bg-[#F4F4F5] rounded-[20px] p-4 flex items-center justify-between px-2">
                         <div className="flex items-center gap-2">
-                            <span className="font-bold text-xs text-zinc-900">혼잡도</span>
+                            <span className="font-bold text-xs text-zinc-900 ml-4">혼잡도</span>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 mr-2">
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#4CAF50]" />
                                 <span className="text-[10px] font-medium text-zinc-500">
-                                    여유 (LOW)
+                                    여유
                                 </span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#F6C555]" />
                                 <span className="text-[10px] font-medium text-zinc-500">
-                                    보통 (MEDIUM)
+                                    보통
                                 </span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#FF6B6B]" />
                                 <span className="text-[10px] font-medium text-zinc-500">
-                                    혼잡 (HIGH)
+                                    혼잡
                                 </span>
                             </div>
                         </div>

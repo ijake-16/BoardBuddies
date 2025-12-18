@@ -1,9 +1,9 @@
 
 import { useEffect } from 'react';
 import kakaoLogin from '../assets/login/kakao.png';
-import naver1 from '../assets/login/naver1.png';
-import naver2 from '../assets/login/naver2.png';
-import naverFrame from '../assets/login/naverframe.png';
+// import naver1 from '../assets/login/naver1.png';
+// import naver2 from '../assets/login/naver2.png';
+// import naverFrame from '../assets/login/naverframe.png';
 
 interface LoginLandingProps {
     onLogin: () => void;
@@ -11,7 +11,7 @@ interface LoginLandingProps {
     onDebugUserInfo?: () => void;
 }
 
-export default function LoginLanding({ onLogin, onSignupNeeded, onDebugUserInfo }: LoginLandingProps) {
+export default function LoginLanding({ onLogin, onSignupNeeded, /* onDebugUserInfo */ }: LoginLandingProps) {
     useEffect(() => {
         if (window.Kakao && !window.Kakao.isInitialized()) {
             const kakaoKey = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY;
@@ -93,6 +93,7 @@ export default function LoginLanding({ onLogin, onSignupNeeded, onDebugUserInfo 
 
                 <div className="w-full space-y-3 mt-auto mb-10">
                     {/* Debug Button */}
+                    {/*
                     {onDebugUserInfo && (
                         <button
                             onClick={onDebugUserInfo}
@@ -101,6 +102,7 @@ export default function LoginLanding({ onLogin, onSignupNeeded, onDebugUserInfo 
                             Debug: Info Input Page
                         </button>
                     )}
+                    */}
 
                     <button
                         onClick={handleKakaoLogin}
@@ -109,6 +111,7 @@ export default function LoginLanding({ onLogin, onSignupNeeded, onDebugUserInfo 
                         <img src={kakaoLogin} alt="Kakao Login" className="w-full h-auto" />
                     </button>
 
+                    {/* Naver Login (Disabled)
                     <button
                         onClick={onLogin}
                         className="w-full hover:opacity-90 transition-opacity flex items-center justify-between px-4 h-12"
@@ -121,6 +124,7 @@ export default function LoginLanding({ onLogin, onSignupNeeded, onDebugUserInfo 
                         <img src={naver1} alt="Naver Logo" className="h-8 object-contain" />
                         <img src={naver2} alt="Naver Login" className="h-8 object-contain ml-auto" />
                     </button>
+                    */}
                 </div>
             </div>
         </div>

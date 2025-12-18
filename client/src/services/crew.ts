@@ -47,7 +47,7 @@ export const cancelReservation = async (crewId: number, dates: string[]): Promis
     return response.data.data;
 };
 
-export const getCrewCalendar = async (crewId: number, date: string): Promise<CrewCalendarResponse> => {
-    const response = await apiClient.get<ApiResponse<CrewCalendarResponse>>(`/crews/${crewId}/calendar?date=${date}&showMySchedule=false`);
+export const getCrewCalendar = async (crewId: number, date: string, showMySchedule: boolean = false): Promise<CrewCalendarResponse> => {
+    const response = await apiClient.get<ApiResponse<CrewCalendarResponse>>(`/crews/${crewId}/calendar?date=${date}&showMySchedule=${showMySchedule}`);
     return response.data.data;
 };

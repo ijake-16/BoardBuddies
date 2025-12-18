@@ -1,9 +1,9 @@
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
 import { useState, useEffect } from 'react';
-import { getUserInfo } from '../services/user';
+import { getUserInfo, getMyReservations } from '../services/user';
 import { getCrewInfo } from '../services/crew';
-import { UserDetail, CrewDetail } from '../types/api';
+import { UserDetail, CrewDetail, MyReservation } from '../types/api';
 import { Bus, Mountain } from 'lucide-react';
 
 // Icons
@@ -61,13 +61,14 @@ export default function Home({
     onTeamClick,
     onSearchClick,
     hasCrew: initialHasCrew = true,
-    onJoinCrew
+    // onJoinCrew // Commented out to fix lint "never read"
 }: HomeProps) {
     const [userInfo, setUserInfo] = useState<UserDetail | null>(null);
     const [crewDetail, setCrewDetail] = useState<CrewDetail | null>(null);
+    const [myReservations, setMyReservations] = useState<MyReservation[]>([]);
     // Use prop as initial, but can be updated by data
     const [hasCrew, setHasCrew] = useState(initialHasCrew);
-    const [isDebugNoCrew, setIsDebugNoCrew] = useState(false);
+    const [isDebugNoCrew] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -85,6 +86,15 @@ export default function Home({
                 } else {
                     setHasCrew(false);
                 }
+
+                // Fetch Reservations
+                try {
+                    const reservations = await getMyReservations();
+                    setMyReservations(reservations);
+                } catch (e) {
+                    console.error("Failed to fetch reservations", e);
+                }
+
             } catch (err) {
                 console.error("Failed to fetch user info", err);
             }
@@ -101,18 +111,20 @@ export default function Home({
                     {/* Shark Image removed due to missing file */}
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => {
-                            console.log('Toggling debug mode. Current:', isDebugNoCrew, 'HasCrew:', hasCrew);
-                            setIsDebugNoCrew(prev => !prev);
-                        }}
-                        className={`text-[10px] px-2 py-1 rounded border mr-2 transition-colors ${isDebugNoCrew
-                            ? 'bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200'
-                            : 'bg-red-100 text-red-600 border-red-200 hover:bg-red-200'
-                            }`}
-                    >
-                        {isDebugNoCrew ? 'Show My Crew' : 'Simulate No Crew'}
-                    </button>
+                    {/* 
+                        <button
+                            onClick={() => {
+                                console.log('Toggling debug mode. Current:', isDebugNoCrew, 'HasCrew:', hasCrew);
+                                setIsDebugNoCrew(prev => !prev);
+                            }}
+                            className={`text-[10px] px-2 py-1 rounded border mr-2 transition-colors ${isDebugNoCrew
+                                ? 'bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200'
+                                : 'bg-red-100 text-red-600 border-red-200 hover:bg-red-200'
+                                }`}
+                        >
+                            {isDebugNoCrew ? 'Show My Crew' : 'Simulate No Crew'}
+                        </button>
+                        */}
                     <Button variant="ghost" size="icon" onClick={onSearchClick} className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <BellIcon className="w-[24px] h-[24px]" />
                     </Button>
@@ -168,20 +180,22 @@ export default function Home({
                                 onClick={onSearchClick}
                                 className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity py-2"
                             >
-                                <h2 className="text-2xl font-bold text-zinc-400">크루에 가입하세요</h2>
+                                <h2 className="text-2xl font-bold text-zinc-400">탭해서 크루에 가입하세요</h2>
                                 <CircleArrowRightIcon className="w-5 h-5 text-zinc-300" />
                             </div>
-                            <Button
-                                size="small"
-                                variant="outline"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onJoinCrew?.();
-                                }}
-                                className="text-xs h-8 px-3"
-                            >
-                                가입 (Debug)
-                            </Button>
+                            {/* 
+                                <Button
+                                    size="small"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onJoinCrew?.();
+                                    }}
+                                    className="text-xs h-8 px-3"
+                                >
+                                    가입 (Debug)
+                                </Button>
+                                */}
                         </div>
                     )}
                 </div>
@@ -231,17 +245,27 @@ export default function Home({
                                         expandable={false}
                                         hideHeader={true}
                                         maxWeeks={2}
+                                        startWeekIndex={(() => {
+                                            // Calculate which week contains today (Dec 2025)
+                                            // For dynamic, we should use real date. But for this fixed month:
+                                            // Dec 1st 2025 is Monday (offset 1)
+                                            // Week 0: [null, 1, 2, 3, 4, 5, 6]
+                                            // Week 1: [7, 8, 9, 10, 11, 12, 13]
+                                            // ...
+                                            const today = new Date().getDate(); // Assuming we are in Dec 2025 context or mocking it
+                                            // Real logic:
+                                            // (today + startDayOfWeek - 1) / 7
+                                            const startDayOfWeek = 1;
+                                            return Math.floor((today + startDayOfWeek - 1) / 7);
+                                        })()}
                                         renderDay={(day) => {
-                                            const hasDot = [5, 12, 19].includes(day);
-                                            const hasBlueDot = [2, 3].includes(day);
+                                            const dateStr = `2025-12-${String(day).padStart(2, '0')}`;
+                                            const hasReservation = myReservations.some(r => r.date === dateStr && r.status === 'confirmed');
 
                                             return (
                                                 <div className="w-8 h-8 flex flex-col items-center justify-center relative">
                                                     <span className="text-sm font-medium text-zinc-500">{day}</span>
-                                                    {hasDot && (
-                                                        <div className="w-2 h-2 rounded-full bg-[#1E3A8A] opacity-40 absolute bottom-[-4px]" />
-                                                    )}
-                                                    {hasBlueDot && (
+                                                    {hasReservation && (
                                                         <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-[-4px]" />
                                                     )}
                                                 </div>
@@ -264,7 +288,7 @@ export default function Home({
 
                             <div className="z-10 pl-8 py-6">
                                 <div className="font-bold text-lg text-white">휘닉스파크</div>
-                                <div className="text-sm text-white/90">2025. 11. 11 Tue</div>
+                                <div className="text-sm text-white/90">2025. 08. 11 Tue</div>
                             </div>
                             <div className="z-10 pr-8 text-5xl font-light text-white">
                                 33<span className="text-2xl align-top">°</span>

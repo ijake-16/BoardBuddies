@@ -31,6 +31,7 @@ function App() {
           <ReservationStats
             onBack={() => setCurrentView('home')}
             onMyCalendarClick={() => setCurrentView('my_reservations')}
+            onReservationClick={() => setCurrentView('reservation')}
           />
         ) : currentView === 'my_reservations' ? (
           <MyReservations
@@ -60,7 +61,7 @@ function App() {
               setCurrentView('my_reservations');
             }}
             onCalendarClick={() => {
-              setCurrentView('stats');
+              setCurrentView('my_reservations');
             }}
             onTeamClick={() => setCurrentView('crew_detail')}
             onSearchClick={() => setCurrentView('search_crew')}

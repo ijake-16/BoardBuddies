@@ -51,6 +51,10 @@ export default function Reservation({ onBack }: ReservationProps) {
     const [crewId, setCrewId] = useState<number | null>(null);
 
     // Fetch Reservations on Mount
+
+
+    // Crew Details for Reservation Settings
+    // Fetch Reservations Helper
     const fetchReservations = async () => {
         try {
             const data = await getMyReservations();
@@ -60,41 +64,106 @@ export default function Reservation({ onBack }: ReservationProps) {
         }
     };
 
-    // Fetch User Info to get Crew ID
-    const fetchUserCrewId = async () => {
+    // Crew Details for Reservation Settings
+    const [crew, setCrew] = useState<any>(null); // Use CrewDetail type if imported, but using any for quick integration with existing imports
+
+    // Fetch User Info -> Crew ID -> Crew Detail
+    const fetchAllData = async () => {
         try {
             const userData = await getUserInfo();
             if (userData.crew && userData.crew.crewId) {
-                setCrewId(userData.crew.crewId);
+                const cId = userData.crew.crewId;
+                setCrewId(cId);
+
+                // Fetch full crew info
+                // Dynamically import or use existing import if added
+                const { getCrewInfo } = await import('../services/crew');
+                const crewData = await getCrewInfo(cId);
+                setCrew(crewData);
             }
+
+            const reservations = await getMyReservations();
+            setMyReservations(reservations);
         } catch (error) {
-            console.error("Failed to fetch user info:", error);
+            console.error("Failed to load data:", error);
         }
     };
 
     useEffect(() => {
-        fetchUserCrewId();
-        fetchReservations();
+        fetchAllData();
     }, []);
 
     // Derived state: reserved days for the current month view
     const reservedDays = myReservations
         .filter(r => {
             const d = new Date(r.date);
-            // Consider "confirmed" status or all? User implied we can cancel them, so list all active ones.
-            // Assuming 'confirmed' or 'pending' or 'created' are valid to cancel.
             return d.getFullYear() === currentYear && d.getMonth() === currentMonthIndex && (r.status === 'confirmed' || r.status === 'created' || r.status === 'pending');
         })
         .map(r => new Date(r.date).getDate());
 
-
     const [withdrawDay, setWithdrawDay] = useState<number | null>(null);
 
-    // Mock Availability: All days in future are available
-    // A simple check: day >= today
+    // Reservation Rules Calculation
     const isDayAvailable = (day: number) => {
-        if (!isCurrentMonthView) return true; // Future/Past months logic (simplified)
-        return day >= todayDay;
+        // Construct the full date for the target day
+        // Note: Months in JS Date are 0-index.
+        const targetDate = new Date(currentYear, currentMonthIndex, day);
+        targetDate.setHours(0, 0, 0, 0);
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (targetDate < today) return false; // Past dates unavailable
+
+        // Calculate "This Saturday" (end of current week range)
+        // today.getDay(): 0=Sun ... 6=Sat
+        const daysUntilSaturday = 6 - today.getDay();
+        const thisSaturday = new Date(today);
+        thisSaturday.setDate(today.getDate() + daysUntilSaturday);
+        thisSaturday.setHours(23, 59, 59, 999);
+
+        // Calculate "Next Saturday" (end of next week range)
+        const nextSaturday = new Date(thisSaturday);
+        nextSaturday.setDate(thisSaturday.getDate() + 7);
+        nextSaturday.setHours(23, 59, 59, 999);
+
+        // 1. If within [Today, This Saturday], it is OPEN.
+        if (targetDate <= thisSaturday) return true;
+
+        // 2. If within [Next Sunday, Next Saturday], check Crew Opening Rule.
+        if (targetDate <= nextSaturday) {
+            if (!crew) return false; // Not loaded yet? Default closed.
+
+            // Parse Reservation Open Settings
+            // crew.reservation_day: "FRIDAY"
+            // crew.reservation_time: "18:00"
+            const dayMap: { [key: string]: number } = {
+                "SUNDAY": 0, "MONDAY": 1, "TUESDAY": 2, "WEDNESDAY": 3, "THURSDAY": 4, "FRIDAY": 5, "SATURDAY": 6
+            };
+            const openDayIndex = dayMap[crew.reservation_day.toUpperCase()] ?? 5; // Default Friday?
+            const [openHour, openMinute] = (crew.reservation_time || "18:00").split(':').map(Number);
+
+            // "Reservation Open Time" is THIS week's occurrence of that day/time.
+            // We need to find the date of "This Week's [OpenDay]"
+            // "This Week" usually starts Sunday or Monday depending on logic, 
+            // but for "Next Week's" availability, we compare "Now" vs "This Week's Open Target".
+
+            // Let's assume standard Sunday-start week for calculation base
+            const currentDayIndex = today.getDay(); // 0-6
+            const diff = openDayIndex - currentDayIndex;
+
+            const openDate = new Date(); // Start with Now
+            openDate.setDate(today.getDate() + diff); // Move to the target day of THIS week
+            openDate.setHours(openHour, openMinute, 0, 0);
+
+            // Now check: Has the current time passed the Open Date?
+            const now = new Date();
+            // If now >= openDate, then next week is OPEN.
+            return now >= openDate;
+        }
+
+        // 3. Beyond Next Saturday: CLOSED.
+        return false;
     };
 
     const toggleDay = (day: number) => {
@@ -212,7 +281,13 @@ export default function Reservation({ onBack }: ReservationProps) {
                     renderDay={(day) => {
                         const isReserved = reservedDays.includes(day);
                         const isSelected = selectedDays.includes(day);
+                        // Recalculate availability here or pass it in. Check if day is valid.
+                        // Ideally we compute full availability in logic above to keep render clean,
+                        // but local logic 'isDayAvailable' calls are fine if not too heavy.
                         const isAvailable = isDayAvailable(day);
+
+                        // "Today" check
+                        // We highlight today specifically if needed, but for availability:
                         const isToday = day === todayDay && isCurrentMonthView;
 
                         if (isReserved) {
@@ -232,14 +307,20 @@ export default function Reservation({ onBack }: ReservationProps) {
                         // Base styles
                         let buttonClasses = "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all relative";
 
-                        // Today marker (if not selected)
-                        if (isToday && !isSelected) {
-                            buttonClasses += " bg-[#F4F4F5] text-zinc-900 font-bold";
-                        } else if (isSelected) {
-                            buttonClasses += " bg-[#F6C555] text-black shadow-sm font-bold scale-110";
-                        } else if (isAvailable) {
-                            buttonClasses += " text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800";
+                        if (isAvailable) {
+                            // Available Style (Black/Dark)
+                            if (isSelected) {
+                                // Selected State
+                                buttonClasses += " bg-[#F6C555] text-black shadow-sm font-bold scale-110";
+                            } else if (isToday) {
+                                // Today State (Available)
+                                buttonClasses += " bg-zinc-900 text-white font-bold";
+                            } else {
+                                // Normal Available State
+                                buttonClasses += " text-zinc-900 hover:bg-zinc-100 font-semibold";
+                            }
                         } else {
+                            // Unavailable Style (Grey)
                             buttonClasses += " text-zinc-300 dark:text-zinc-700 cursor-default";
                         }
 

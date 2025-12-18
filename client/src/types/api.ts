@@ -91,6 +91,11 @@ export interface CrewCalendarResponse {
         date: string;
         occupancy_status: 'LOW' | 'MEDIUM' | 'HIGH';
     }[];
+    my_reservations: {
+        date: string;
+        status: string;
+        waiting_order: number | null;
+    }[] | null;
 }
 
 export interface ReservationResponse {
