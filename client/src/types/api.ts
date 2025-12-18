@@ -92,3 +92,8 @@ export interface CrewCalendarResponse {
         occupancy_status: 'LOW' | 'MEDIUM' | 'HIGH';
     }[];
 }
+
+export interface ReservationResponse {
+    reservationId: number;
+    status: string;
+}
