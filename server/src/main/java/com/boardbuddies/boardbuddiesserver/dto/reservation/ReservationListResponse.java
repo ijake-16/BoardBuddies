@@ -37,5 +37,9 @@ public class ReservationListResponse {
          * 게스트 예약인 경우 예약한 부원 이름 (일반 예약인 경우 null)
          */
         private String registeredByName;
+        /**
+         * 강습 신청 여부
+         */
+        private Boolean teaching;
     }
 }

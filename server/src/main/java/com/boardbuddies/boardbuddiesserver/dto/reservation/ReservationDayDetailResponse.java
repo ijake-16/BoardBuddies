@@ -30,5 +30,7 @@ public class ReservationDayDetailResponse {
     public static class MyReservationInfo {
         @JsonProperty("reservation_id")
         private Long reservationId;
+        @JsonProperty("teaching")
+        private Boolean teaching;
     }
 }

@@ -44,9 +44,9 @@ public class ReservationController {
         /**
          * 예약 취소 (일괄 취소)
          * 
-         * POST /api/crews/{crewId}/reservations/cancel
+         * DELETE /api/crews/{crewId}/reservations
          */
-        @PostMapping("/{crewId}/reservations/cancel")
+        @DeleteMapping("/{crewId}/reservations")
         public ResponseEntity<ApiResponse<Void>> cancel(
                         @CurrentUser Long userId,
                         @PathVariable Long crewId,
@@ -108,5 +108,40 @@ public class ReservationController {
 
                 return ResponseEntity.ok(
                                 ApiResponse.success(200, "내 예약 조회 완료", response));
+        }
+
+        /**
+         * 강습 신청
+         * 예약이 확정된 날에만 신청 가능
+         * 
+         * POST /api/crews/{crewId}/reservations/{reservationId}/teaching
+         */
+        @PostMapping("/{crewId}/reservations/{reservationId}/teaching")
+        public ResponseEntity<ApiResponse<Void>> applyTeaching(
+                        @CurrentUser Long userId,
+                        @PathVariable Long crewId,
+                        @PathVariable Long reservationId) {
+
+                reservationService.applyTeaching(userId, crewId, reservationId);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(200, "강습 신청 완료"));
+        }
+
+        /**
+         * 강습 취소
+         * 
+         * DELETE /api/crews/{crewId}/reservations/{reservationId}/teaching
+         */
+        @DeleteMapping("/{crewId}/reservations/{reservationId}/teaching")
+        public ResponseEntity<ApiResponse<Void>> cancelTeaching(
+                        @CurrentUser Long userId,
+                        @PathVariable Long crewId,
+                        @PathVariable Long reservationId) {
+
+                reservationService.cancelTeaching(userId, crewId, reservationId);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(200, "강습 취소 완료"));
         }
 }

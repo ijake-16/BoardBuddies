@@ -54,25 +54,24 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
          */
         @Query("SELECT r FROM Reservation r " +
                 "WHERE r.guest IS NULL AND r.user = :user AND r.crew = :crew " +
-                "AND r.date = :date AND r.status <> :status")
-        Optional<Reservation> findByUserAndCrewAndDateAndStatusNotAndGuestIsNull(
+                "AND r.date = :date")
+        Optional<Reservation> findByUserAndCrewAndDateAndGuestIsNull(
                 @Param("user") User user,
                 @Param("crew") Crew crew,
-                @Param("date") LocalDate date,
-                @Param("status") String status);
+                @Param("date") LocalDate date);
 
-        Long countByCrewAndDateAndStatusNot(Crew crew, LocalDate date, String status);
+        Long countByCrewAndDate(Crew crew, LocalDate date);
 
         List<Reservation> findByCrewAndDateAndStatusOrderByCreatedAtAsc(Crew crew, LocalDate date, String status);
 
-        Optional<Reservation> findByUserAndCrewAndDateAndStatusNot(User user, Crew crew, LocalDate date, String status);
+        Optional<Reservation> findByUserAndCrewAndDate(User user, Crew crew, LocalDate date);
 
         /**
-         * 게스트 예약 조회 (취소되지 않은 것)
+         * 게스트 예약 조회
          */
-        Optional<Reservation> findByGuestAndCrewAndDateAndStatusNot(Guest guest, Crew crew, LocalDate date, String status);
+        Optional<Reservation> findByGuestAndCrewAndDate(Guest guest, Crew crew, LocalDate date);
 
-        List<Reservation> findByCrewAndDateAndStatusNot(Crew crew, LocalDate date, String status);
+        List<Reservation> findByCrewAndDate(Crew crew, LocalDate date);
 
         /**
          * 크루와 날짜로 예약 조회 (User, Guest Fetch Join으로 N+1 문제 방지)
@@ -81,16 +80,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 "LEFT JOIN FETCH r.user " +
                 "LEFT JOIN FETCH r.guest " +
                 "LEFT JOIN FETCH r.guest.registeredBy " +
-                "WHERE r.crew = :crew AND r.date = :date AND r.status <> :status " +
+                "WHERE r.crew = :crew AND r.date = :date " +
                 "ORDER BY r.createdAt ASC")
-        List<Reservation> findByCrewAndDateAndStatusNotWithFetch(Crew crew, LocalDate date, @Param("status") String status);
+        List<Reservation> findByCrewAndDateWithFetch(@Param("crew") Crew crew, @Param("date") LocalDate date);
 
         List<Reservation> findByCrewAndStatus(Crew crew, String status);
 
-        List<Reservation> findAllByCrewAndDateBetweenAndStatusNot(Crew crew, LocalDate startDate, LocalDate endDate,
-                        String status);
+        List<Reservation> findAllByCrewAndDateBetween(Crew crew, LocalDate startDate, LocalDate endDate);
 
-        List<Reservation> findAllByCrewAndDateAndStatusNotOrderByCreatedAtAsc(Crew crew, LocalDate date, String status);
+        List<Reservation> findAllByCrewAndDateOrderByCreatedAtAsc(Crew crew, LocalDate date);
 
         /**
          * 크루와 날짜로 예약 조회 (User, Guest Fetch Join으로 N+1 문제 방지) - 정렬 포함
@@ -99,23 +97,22 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 "LEFT JOIN FETCH r.user " +
                 "LEFT JOIN FETCH r.guest " +
                 "LEFT JOIN FETCH r.guest.registeredBy " +
-                "WHERE r.crew = :crew AND r.date = :date AND r.status <> :status " +
+                "WHERE r.crew = :crew AND r.date = :date " +
                 "ORDER BY r.createdAt ASC")
-        List<Reservation> findAllByCrewAndDateAndStatusNotOrderByCreatedAtAscWithFetch(Crew crew, LocalDate date, @Param("status") String status);
+        List<Reservation> findAllByCrewAndDateOrderByCreatedAtAscWithFetch(@Param("crew") Crew crew, @Param("date") LocalDate date);
 
         @Query("SELECT new com.boardbuddies.boardbuddiesserver.dto.crew.DailyReservationCount(r.date, COUNT(r)) " +
                         "FROM Reservation r " +
                         "WHERE r.crew = :crew " +
                         "AND r.date BETWEEN :startDate AND :endDate " +
-                        "AND r.status <> 'CANCELLED' " +
                         "GROUP BY r.date")
         List<DailyReservationCount> findDailyCountsByCrewAndDateBetween(
                         @Param("crew") Crew crew,
                         @Param("startDate") LocalDate startDate,
                         @Param("endDate") LocalDate endDate);
 
-        List<Reservation> findAllByCrewAndUserAndDateBetweenAndStatusNot(Crew crew, User user, LocalDate startDate,
-                        LocalDate endDate, String status);
+        List<Reservation> findAllByCrewAndUserAndDateBetween(Crew crew, User user, LocalDate startDate,
+                        LocalDate endDate);
 
         /**
          * 일반 예약만 조회 (게스트 예약 제외) - 크루, 사용자, 날짜 범위
@@ -123,13 +120,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
          */
         @Query("SELECT r FROM Reservation r " +
                 "WHERE r.guest IS NULL AND r.crew = :crew AND r.user = :user " +
-                "AND r.date BETWEEN :startDate AND :endDate AND r.status <> :status")
-        List<Reservation> findAllByCrewAndUserAndDateBetweenAndStatusNotAndGuestIsNull(
+                "AND r.date BETWEEN :startDate AND :endDate")
+        List<Reservation> findAllByCrewAndUserAndDateBetweenAndGuestIsNull(
                 @Param("crew") Crew crew,
                 @Param("user") User user,
                 @Param("startDate") LocalDate startDate,
-                @Param("endDate") LocalDate endDate,
-                @Param("status") String status);
+                @Param("endDate") LocalDate endDate);
 
         Long countByUserAndCrewAndStatus(User user, Crew crew, String status);
 

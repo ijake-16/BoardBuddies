@@ -940,7 +940,7 @@
     {
       "name": "예약 취소 (일괄 취소)",
       "request": {
-        "method": "POST",
+        "method": "DELETE",
         "header": [
           {
             "key": "Content-Type",
@@ -957,7 +957,7 @@
           "raw": "{\n  \"dates\": [\"2026-01-01\"]\n}"
         },
         "url": {
-          "raw": "{{base_url}}/api/crews/{{crew_id}}/reservations/cancel",
+          "raw": "{{base_url}}/api/crews/{{crew_id}}/reservations",
           "host": [
             "{{base_url}}"
           ],
@@ -965,8 +965,7 @@
             "api",
             "crews",
             "{{crew_id}}",
-            "reservations",
-            "cancel"
+            "reservations"
           ]
         }
       }

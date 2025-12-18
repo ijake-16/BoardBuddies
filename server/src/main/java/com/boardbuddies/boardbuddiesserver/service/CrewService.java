@@ -766,8 +766,8 @@ public class CrewService {
                 .orElseThrow(() -> new RuntimeException("해당 크루를 찾을 수 없습니다."));
 
         // 일반 예약만 조회 (게스트 예약 제외)
-        List<Reservation> reservations = reservationRepository.findAllByCrewAndUserAndDateBetweenAndStatusNotAndGuestIsNull(
-                crew, user, startDate, endDate, "CANCELLED");
+        List<Reservation> reservations = reservationRepository.findAllByCrewAndUserAndDateBetweenAndGuestIsNull(
+                crew, user, startDate, endDate);
 
         return reservations.stream()
                 .map(r -> {
@@ -779,9 +779,11 @@ public class CrewService {
                         waitingOrder = (int) count + 1;
                     }
                     return CrewMyMonthlyReservationResponse.builder()
+                            .reservationId(r.getId())
                             .date(r.getDate())
                             .status(r.getStatus())
                             .waitingOrder(waitingOrder)
+                            .teaching(r.getTeaching())
                             .build();
                 })
                 .collect(Collectors.toList());

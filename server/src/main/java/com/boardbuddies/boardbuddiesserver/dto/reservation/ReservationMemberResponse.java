@@ -30,4 +30,10 @@ public class ReservationMemberResponse {
      */
     @JsonProperty("registered_by_name")
     private String registeredByName;
+
+    /**
+     * 강습 신청 여부
+     */
+    @JsonProperty("teaching")
+    private Boolean teaching;
 }
