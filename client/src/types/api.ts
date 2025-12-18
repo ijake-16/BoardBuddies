@@ -61,3 +61,18 @@ export interface CrewApplicant {
     status: string; // "PENDING", etc.
     created_at: string;
 }
+
+export interface ReservationDetail {
+    date: string;
+    status: string;
+    booked: number;
+    waitingCount: number;
+    capacity: number;
+    member_list: {
+        user_id: number;
+        name: string;
+        profile_image_url: string | null;
+    }[];
+    waiting_member_list: any[];
+    my_reservation: any | null;
+}
