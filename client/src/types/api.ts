@@ -62,6 +62,7 @@ export interface CrewApplicant {
     created_at: string;
 }
 
+
 export interface ReservationDetail {
     date: string;
     status: string;
@@ -75,4 +76,12 @@ export interface ReservationDetail {
     }[];
     waiting_member_list: any[];
     my_reservation: any | null;
+}
+
+export interface MyReservation {
+    date: string; // "YYYY-MM-DD"
+    status: string; // "confirmed"
+    reservation_id: number;
+    crew_id: number;
+    created_at: string;
 }

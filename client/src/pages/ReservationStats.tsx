@@ -251,7 +251,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
                             {/* Users Grid */}
                             <div className="grid grid-cols-2 gap-y-5 gap-x-4">
                                 {currentMemberList.length > 0 ? (
-                                    currentMemberList.map((member) => (
+                                    currentMemberList.map((member: { user_id: number; name: string; profile_image_url: string | null }) => (
                                         <div key={member.user_id} className="flex items-center gap-3">
                                             <div className="w-10 h-10 bg-zinc-300 rounded-full shrink-0 overflow-hidden">
                                                 {member.profile_image_url ? (

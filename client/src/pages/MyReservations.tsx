@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
+import { getMyReservations } from '../services/user';
+import { MyReservation } from '../types/api';
 
 
 interface MyReservationsProps {
@@ -45,10 +47,47 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
     const [selectedDay, setSelectedDay] = useState<number | null>(isCurrentMonthView ? todayDay : null);
     const [isLessonApplied, setIsLessonApplied] = useState(false);
 
-    // Mock Data based on screenshots - kept static for now as per instructions (only fix "Today" and calendar grid)
-    // In a real app these would likely come from props or API based on the current month
-    const confirmedDays = [13, 14, 25, 26];
-    const pendingDays = [27];
+    // Store reservations
+    const [reservations, setReservations] = useState<MyReservation[]>([]);
+
+    // Fetch Reservations
+    useEffect(() => {
+        const fetchReservations = async () => {
+            try {
+                const data = await getMyReservations();
+                setReservations(data);
+            } catch (error) {
+                console.error("Failed to fetch my reservations:", error);
+            }
+        };
+        fetchReservations();
+    }, []);
+
+    // Filter reservations for current month view
+    // Format: YYYY-MM-DD
+    const getReservationForDay = (day: number) => {
+        const dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        return reservations.find(r => r.date === dateStr);
+    };
+
+    // Derived State for Calendar
+    // confirmed = status === 'confirmed', pending = otherwise (if any)
+    // Note: The mock data had "pending" but the API might only show confirmed or we map status.
+    // User sample showed "confirmed". I'll assume anything else is pending or we check status.
+    const confirmedDays = reservations
+        .filter(r => {
+            const d = new Date(r.date);
+            return d.getFullYear() === currentYear && d.getMonth() === currentMonthIndex && r.status === 'confirmed';
+        })
+        .map(r => new Date(r.date).getDate());
+
+    const pendingDays = reservations
+        .filter(r => {
+            const d = new Date(r.date);
+            return d.getFullYear() === currentYear && d.getMonth() === currentMonthIndex && r.status !== 'confirmed';
+        })
+        .map(r => new Date(r.date).getDate());
+
 
     const handleDayClick = (day: number) => {
         setSelectedDay(day);
@@ -120,7 +159,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                     headerRight={
                         <div className="bg-[#EDF2FF] px-4 py-2 rounded-full flex gap-3 items-center shadow-sm">
                             <span className="text-xs font-bold text-zinc-900">시즌방 이용 횟수 :</span>
-                            <span className="text-xs font-bold text-zinc-900">13박</span>
+                            <span className="text-xs font-bold text-zinc-900">{reservations.filter(r => r.status === 'confirmed').length}박</span>
                         </div>
                     }
                     renderDay={(day) => {
@@ -177,11 +216,11 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                 {/* Bottom Action Section */}
                 <div className="w-full mt-auto">
                     {(() => {
-                        const isConfirmed = selectedDay && confirmedDays.includes(selectedDay);
-                        const isPending = selectedDay && pendingDays.includes(selectedDay);
+                        const reservation = selectedDay ? getReservationForDay(selectedDay) : null;
+                        const isConfirmed = reservation?.status === 'confirmed';
 
                         // Case: Selected Reservation (Confirmed/Pending)
-                        if (isConfirmed || isPending) {
+                        if (reservation) {
                             return (
                                 <div className="w-full flex flex-col gap-3">
                                     {isConfirmed && (
