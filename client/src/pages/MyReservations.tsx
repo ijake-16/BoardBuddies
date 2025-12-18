@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
-import { getMyReservations } from '../services/user';
+import { getMyReservations, getUserInfo } from '../services/user';
+import { createReservation, cancelReservation } from '../services/crew';
 import { MyReservation } from '../types/api';
 
 
@@ -49,19 +50,69 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
 
     // Store reservations
     const [reservations, setReservations] = useState<MyReservation[]>([]);
+    const [crewId, setCrewId] = useState<number | null>(null);
 
-    // Fetch Reservations
+    // Fetch Reservations & Crew Info
+    const fetchReservations = async () => {
+        try {
+            const data = await getMyReservations();
+            setReservations(data);
+        } catch (error) {
+            console.error("Failed to fetch my reservations:", error);
+        }
+    };
+
     useEffect(() => {
-        const fetchReservations = async () => {
+        const initData = async () => {
+            // 1. Fetch Reservations
+            await fetchReservations();
+
+            // 2. Fetch Crew ID
             try {
-                const data = await getMyReservations();
-                setReservations(data);
+                const userData = await getUserInfo();
+                if (userData.crew && userData.crew.crewId) {
+                    setCrewId(userData.crew.crewId);
+                }
             } catch (error) {
-                console.error("Failed to fetch my reservations:", error);
+                console.error("Failed to fetch user info:", error);
             }
         };
-        fetchReservations();
+        initData();
     }, []);
+
+    const formatDate = (day: number) => {
+        return `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    };
+
+    const handleCreateReservation = async () => {
+        if (!crewId || !selectedDay) return;
+
+        const dateStr = formatDate(selectedDay);
+
+        try {
+            await createReservation(crewId, [dateStr]);
+            alert("예약 신청이 완료되었습니다.");
+            fetchReservations();
+        } catch (error) {
+            console.error("Reservation creation failed:", error);
+            alert("예약 신청에 실패했습니다.");
+        }
+    };
+
+    const handleCancelReservation = async () => {
+        if (!crewId || !selectedDay) return;
+
+        const dateStr = formatDate(selectedDay);
+
+        try {
+            await cancelReservation(crewId, [dateStr]);
+            alert("예약이 취소되었습니다.");
+            fetchReservations();
+        } catch (error) {
+            console.error("Cancellation failed:", error);
+            alert("예약 취소에 실패했습니다.");
+        }
+    };
 
     // Filter reservations for current month view
     // Format: YYYY-MM-DD
@@ -246,6 +297,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                                         </div>
                                         <Button
                                             variant="outline"
+                                            onClick={handleCancelReservation}
                                             className="bg-white border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 rounded-full px-4 h-9 text-sm font-medium shadow-sm transition-colors"
                                         >
                                             예약 취소
@@ -265,6 +317,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                                     </p>
                                 </div>
                                 <Button
+                                    onClick={handleCreateReservation}
                                     className="w-full h-14 bg-[#162660] hover:bg-[#1E3A8A] rounded-[20px] text-white text-lg font-bold shadow-md transition-all active:scale-[0.98]"
                                 >
                                     예약하기
