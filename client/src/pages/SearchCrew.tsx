@@ -22,6 +22,7 @@ export default function SearchCrew({ onBack }: SearchCrewProps) {
         { id: 8, university: '충남대학교', crewName: 'RIDE' },
         { id: 10, university: '카이스트', crewName: 'KAKI' },
         { id: 9, university: '홍익대학교', crewName: 'Team 401' },
+        { id: 4, university: 'test', crewName: 'test' }
     ];
 
     useEffect(() => {

@@ -41,6 +41,8 @@ export const createReservation = async (crewId: number, dates: string[]): Promis
 };
 
 export const cancelReservation = async (crewId: number, dates: string[]): Promise<null> => {
-    const response = await apiClient.post<ApiResponse<null>>(`/crews/${crewId}/reservations/cancel`, { dates });
+    const response = await apiClient.delete<ApiResponse<null>>(`/crews/${crewId}/reservations`, {
+        data: { dates }
+    });
     return response.data.data;
 };
