@@ -44,9 +44,9 @@ public class ReservationController {
         /**
          * 예약 취소 (일괄 취소)
          * 
-         * POST /api/crews/{crewId}/reservations/cancel
+         * DELETE /api/crews/{crewId}/reservations
          */
-        @PostMapping("/{crewId}/reservations/cancel")
+        @DeleteMapping("/{crewId}/reservations")
         public ResponseEntity<ApiResponse<Void>> cancel(
                         @CurrentUser Long userId,
                         @PathVariable Long crewId,
