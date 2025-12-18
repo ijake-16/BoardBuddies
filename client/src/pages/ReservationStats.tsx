@@ -2,15 +2,14 @@ import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, Smile } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
-import { getCrewInfo, getReservationDetail } from '../services/crew';
-import { ReservationDetail } from '../types/api';
+import { getCrewInfo, getReservationDetail, getCrewCalendar } from '../services/crew';
+import { ReservationDetail, CrewCalendarResponse } from '../types/api';
 
 
 interface ReservationStatsProps {
     onBack: () => void;
     onMyCalendarClick?: () => void;
 }
-
 
 
 export default function ReservationStats({ onBack, onMyCalendarClick }: ReservationStatsProps) {
@@ -37,15 +36,17 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
     // Calculate start day of week (0=Sun, 1=Mon, etc.)
     const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1).getDay();
 
-    const [selectedDay, setSelectedDay] = useState<number>(isCurrentMonthView ? todayDay : 5); // Default to today logic or fallback
+    const [selectedDay, setSelectedDay] = useState<number>(isCurrentMonthView ? todayDay : 0);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMySchedule, setShowMySchedule] = useState(false);
     const [crewCapacity, setCrewCapacity] = useState<number>(20); // Default, will update
     const [crewId, setCrewId] = useState<number | null>(null);
 
     // Store fetched reservation details
-    // Key: "YYYY-MM-DD", Value: ReservationDetail
     const [detailsCache, setDetailsCache] = useState<Record<string, ReservationDetail | null>>({});
+
+    // Store monthly calendar data (occupancy statuses)
+    const [calendarData, setCalendarData] = useState<CrewCalendarResponse | null>(null);
 
     const formatDate = (day: number) => {
         return `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -64,7 +65,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
                     const id = userData.crew.crewId;
                     setCrewId(id);
 
-                    // Now fetch crew info for capacity
+                    // Now fetch crew info for capacity (still used for expanded view "X/Total")
                     const crewData = await getCrewInfo(id);
                     if (crewData && crewData.dailyCapacity) {
                         setCrewCapacity(crewData.dailyCapacity);
@@ -76,6 +77,26 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
         };
         initData();
     }, []); // Run once on mount
+
+    // Fetch Calendar Data (Occupancy Statuses) whenever month/year or crewId changes
+    useEffect(() => {
+        const fetchCalendarData = async () => {
+            if (!crewId) return;
+
+            // Use 15th of the month as reference date for fetching the month's calendar
+            const dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-15`;
+
+            try {
+                const data = await getCrewCalendar(crewId, dateStr);
+                setCalendarData(data);
+            } catch (error) {
+                console.error("Failed to fetch crew calendar:", error);
+            }
+        };
+
+        fetchCalendarData();
+    }, [crewId, currentYear, currentMonthIndex]);
+
 
     const fetchDetailForDay = async (day: number) => {
         if (!crewId) return; // Wait for crewId
@@ -93,14 +114,13 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
 
     // Effect to fetch detail when selectedDay changes
     useEffect(() => {
-        if (selectedDay && crewId) {
+        if (selectedDay > 0 && crewId) {
             fetchDetailForDay(selectedDay);
         }
     }, [selectedDay, currentYear, currentMonthIndex, crewId]);
 
 
-    // Mock Reservation Data for "My Schedule" (Blue/Grey dots)
-    // These remain static mocks as per instructions "shouldn't be any yellow or red" refers to occupancy colors.
+    // Mock Reservation Data for "My Schedule" (Blue/Grey dots) - kept as requested or ignored based on "showMySchedule"
     const confirmedDays = [13, 14, 25, 26];
     const pendingDays = [27];
 
@@ -121,7 +141,8 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
         const newDate = new Date(currentYear, currentMonthIndex - 1, 1);
         if (newDate >= minDate) {
             setViewDate(newDate);
-            setSelectedDay(0); // Reset selection or handle appropriately
+            setSelectedDay(0);
+            setIsExpanded(false);
         }
     };
 
@@ -129,26 +150,31 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
         const newDate = new Date(currentYear, currentMonthIndex + 1, 1);
         if (newDate <= maxDate) {
             setViewDate(newDate);
-            setSelectedDay(0); // Reset selection
+            setSelectedDay(0);
+            setIsExpanded(false);
         }
     };
 
     const canGoPrev = new Date(currentYear, currentMonthIndex - 1, 1) >= minDate;
     const canGoNext = new Date(currentYear, currentMonthIndex + 1, 1) <= maxDate;
 
-    // Get Occupancy from cache or default to 0 (Green)
-    const getOccupancy = (day: number) => {
+    // Get Occupancy Status from Calendar Data
+    const getOccupancyStatus = (day: number) => {
+        if (!calendarData?.calendar) return 'LOW'; // Default
         const dateStr = formatDate(day);
-        return detailsCache[dateStr]?.booked ?? 0;
+        const dayData = calendarData.calendar.find(item => item.date === dateStr);
+        return dayData?.occupancy_status || 'LOW';
     };
 
     const getCrewDayColor = (day: number) => {
-        const count = getOccupancy(day);
-        const ratio = count / crewCapacity;
+        const status = getOccupancyStatus(day);
 
-        if (ratio < 0.4) return 'bg-[#4CAF50]'; // Green < 40%
-        if (ratio < 0.8) return 'bg-[#F6C555]'; // Yellow < 80%
-        return 'bg-[#FF6B6B]'; // Red >= 80%
+        switch (status) {
+            case 'LOW': return 'bg-[#4CAF50]'; // Green
+            case 'MEDIUM': return 'bg-[#F6C555]'; // Yellow
+            case 'HIGH': return 'bg-[#FF6B6B]'; // Red
+            default: return 'bg-[#4CAF50]';
+        }
     };
 
     const currentDetail = selectedDay ? detailsCache[formatDate(selectedDay)] : null;
@@ -304,7 +330,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
                         )}
                     </div>
                 ) : (
-                    /* Default Legend Section */
+                    /* Default Legend Section - Simplified for LOW/MEDIUM/HIGH */
                     <div className="w-full bg-[#F4F4F5] rounded-[20px] p-4 flex items-center justify-between px-2">
                         <div className="flex items-center gap-2">
                             <span className="font-bold text-xs text-zinc-900">혼잡도</span>
@@ -314,19 +340,19 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#4CAF50]" />
                                 <span className="text-[10px] font-medium text-zinc-500">
-                                    {`~${Math.floor(crewCapacity * 0.4)} (~40%)`}
+                                    여유 (LOW)
                                 </span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#F6C555]" />
                                 <span className="text-[10px] font-medium text-zinc-500">
-                                    {`${Math.floor(crewCapacity * 0.4)}~${Math.floor(crewCapacity * 0.8)} (40~80%)`}
+                                    보통 (MEDIUM)
                                 </span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#FF6B6B]" />
                                 <span className="text-[10px] font-medium text-zinc-500">
-                                    {`${Math.floor(crewCapacity * 0.8)}~ (80%~)`}
+                                    혼잡 (HIGH)
                                 </span>
                             </div>
                         </div>

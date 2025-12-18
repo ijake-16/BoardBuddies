@@ -85,3 +85,10 @@ export interface MyReservation {
     crew_id: number;
     created_at: string;
 }
+
+export interface CrewCalendarResponse {
+    calendar: {
+        date: string;
+        occupancy_status: 'LOW' | 'MEDIUM' | 'HIGH';
+    }[];
+}
