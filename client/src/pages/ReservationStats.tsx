@@ -12,10 +12,32 @@ interface ReservationStatsProps {
 
 
 export default function ReservationStats({ onBack, onMyCalendarClick }: ReservationStatsProps) {
-    const [selectedDay, setSelectedDay] = useState<number>(5);
+    const todayDate = new Date();
+
+    // Default to current date
+    const [viewDate, setViewDate] = useState(new Date());
+    const currentYear = viewDate.getFullYear();
+    const currentMonthIndex = viewDate.getMonth(); // 0-11
+
+    // Check if "Today" is in the currently viewed month/year to highlight it
+    const isCurrentMonthView = todayDate.getFullYear() === currentYear && todayDate.getMonth() === currentMonthIndex;
+    const todayDay = todayDate.getDate();
+
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    const currentMonthName = monthNames[currentMonthIndex];
+
+    // Calculate days in current month
+    const daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
+
+    // Calculate start day of week (0=Sun, 1=Mon, etc.)
+    const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1).getDay();
+
+    const [selectedDay, setSelectedDay] = useState<number>(isCurrentMonthView ? todayDay : 5); // Default to today logic or fallback
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMySchedule, setShowMySchedule] = useState(false);
-    const today = 3;
 
     // Mock Reservation Data
     const confirmedDays = [13, 14, 25, 26];
@@ -23,8 +45,6 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
 
     const handleDayClick = (day: number) => {
         if (selectedDay === day) {
-            // Toggle expansion or set true? Req says "Upon tapping again... it should expand".
-            // If already expanded, maybe nothing or collapse? Let's toggle for better UX.
             setIsExpanded(!isExpanded);
         } else {
             setSelectedDay(day);
@@ -32,15 +52,34 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
         }
     };
 
+    // Navigation Bounds
+    const minDate = new Date(2025, 9, 1); // October 2025
+    const maxDate = new Date(2026, 4, 31); // May 2026
+
+    const handlePrevMonth = () => {
+        const newDate = new Date(currentYear, currentMonthIndex - 1, 1);
+        if (newDate >= minDate) {
+            setViewDate(newDate);
+            setSelectedDay(0); // Reset selection or handle appropriately
+        }
+    };
+
+    const handleNextMonth = () => {
+        const newDate = new Date(currentYear, currentMonthIndex + 1, 1);
+        if (newDate <= maxDate) {
+            setViewDate(newDate);
+            setSelectedDay(0); // Reset selection
+        }
+    };
+
+    const canGoPrev = new Date(currentYear, currentMonthIndex - 1, 1) >= minDate;
+    const canGoNext = new Date(currentYear, currentMonthIndex + 1, 1) <= maxDate;
+
     const getCrewDayColor = (day: number) => {
         // Mock logic to match screenshot colors approximately
-        // 5, 25, 30: Green
-        // 6, 8, 13, 27: Yellow
-        // 3: Green
-        // 11, 16, 20: Red
-        const greenDays = [1, 3, 5, 9, 12, 14, 18, 20, 25, 30]; // Added 20 as green to match row 3? Wait, screenshot row 3 day 20 is GREEN.
+        const greenDays = [1, 3, 5, 9, 12, 14, 18, 20, 25, 30];
         const yellowDays = [2, 6, 7, 8, 10, 13, 15, 19, 21, 23, 26, 27, 28];
-        const redDays = [11, 17, 29]; // 11 is red.
+        const redDays = [11, 17, 29];
 
         if (greenDays.includes(day)) return 'bg-[#4CAF50]';
         if (yellowDays.includes(day)) return 'bg-[#F6C555]';
@@ -80,15 +119,17 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
 
                 <Calendar
                     className="mb-8"
-                    month="December"
-                    year={2025}
-                    startDayOfWeek={0}
-                    totalDays={31}
+                    month={currentMonthName}
+                    year={currentYear}
+                    startDayOfWeek={firstDayOfMonth}
+                    totalDays={daysInMonth}
                     expandable={false}
                     hideHeader={false}
                     selectedDays={[selectedDay]}
                     isCollapsed={isExpanded}
                     onDayClick={handleDayClick}
+                    onPrevMonth={canGoPrev ? handlePrevMonth : undefined}
+                    onNextMonth={canGoNext ? handleNextMonth : undefined}
                     headerRight={
                         <div className="flex items-center gap-2">
                             <span className="text-xs font-bold text-zinc-500">내 일정</span>
@@ -102,7 +143,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
                     }
                     renderDay={(day) => {
                         const isSelected = selectedDay === day;
-                        const isToday = day === today;
+                        const isToday = day === todayDay && isCurrentMonthView;
                         const colorClass = getCrewDayColor(day);
 
                         const isConfirmed = showMySchedule && confirmedDays.includes(day);
