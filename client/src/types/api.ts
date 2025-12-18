@@ -61,3 +61,39 @@ export interface CrewApplicant {
     status: string; // "PENDING", etc.
     created_at: string;
 }
+
+
+export interface ReservationDetail {
+    date: string;
+    status: string;
+    booked: number;
+    waitingCount: number;
+    capacity: number;
+    member_list: {
+        user_id: number;
+        name: string;
+        profile_image_url: string | null;
+    }[];
+    waiting_member_list: any[];
+    my_reservation: any | null;
+}
+
+export interface MyReservation {
+    date: string; // "YYYY-MM-DD"
+    status: string; // "confirmed"
+    reservation_id: number;
+    crew_id: number;
+    created_at: string;
+}
+
+export interface CrewCalendarResponse {
+    calendar: {
+        date: string;
+        occupancy_status: 'LOW' | 'MEDIUM' | 'HIGH';
+    }[];
+}
+
+export interface ReservationResponse {
+    reservationId: number;
+    status: string;
+}

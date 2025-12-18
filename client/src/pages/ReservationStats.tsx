@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, Smile } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
+import { getCrewInfo, getReservationDetail, getCrewCalendar } from '../services/crew';
+import { ReservationDetail, CrewCalendarResponse } from '../types/api';
 
 
 interface ReservationStatsProps {
@@ -10,21 +12,120 @@ interface ReservationStatsProps {
 }
 
 
-
 export default function ReservationStats({ onBack, onMyCalendarClick }: ReservationStatsProps) {
-    const [selectedDay, setSelectedDay] = useState<number>(5);
+    const todayDate = new Date();
+
+    // Default to current date
+    const [viewDate, setViewDate] = useState(new Date());
+    const currentYear = viewDate.getFullYear();
+    const currentMonthIndex = viewDate.getMonth(); // 0-11
+
+    // Check if "Today" is in the currently viewed month/year to highlight it
+    const isCurrentMonthView = todayDate.getFullYear() === currentYear && todayDate.getMonth() === currentMonthIndex;
+    const todayDay = todayDate.getDate();
+
+    const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    const currentMonthName = monthNames[currentMonthIndex];
+
+    // Calculate days in current month
+    const daysInMonth = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
+
+    // Calculate start day of week (0=Sun, 1=Mon, etc.)
+    const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1).getDay();
+
+    const [selectedDay, setSelectedDay] = useState<number>(isCurrentMonthView ? todayDay : 0);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMySchedule, setShowMySchedule] = useState(false);
-    const today = 3;
+    const [crewCapacity, setCrewCapacity] = useState<number>(20); // Default, will update
+    const [crewId, setCrewId] = useState<number | null>(null);
 
-    // Mock Reservation Data
+    // Store fetched reservation details
+    const [detailsCache, setDetailsCache] = useState<Record<string, ReservationDetail | null>>({});
+
+    // Store monthly calendar data (occupancy statuses)
+    const [calendarData, setCalendarData] = useState<CrewCalendarResponse | null>(null);
+
+    const formatDate = (day: number) => {
+        return `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    };
+
+    // 1. Fetch User Info to get Crew ID
+    // 2. Then Fetch Crew Info using that ID
+    useEffect(() => {
+        const initData = async () => {
+            try {
+                // Import getUserInfo dynamically or if already imported
+                const { getUserInfo } = await import('../services/user');
+                const userData = await getUserInfo();
+
+                if (userData.crew && userData.crew.crewId) {
+                    const id = userData.crew.crewId;
+                    setCrewId(id);
+
+                    // Now fetch crew info for capacity (still used for expanded view "X/Total")
+                    const crewData = await getCrewInfo(id);
+                    if (crewData && crewData.dailyCapacity) {
+                        setCrewCapacity(crewData.dailyCapacity);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to initialize stats:", error);
+            }
+        };
+        initData();
+    }, []); // Run once on mount
+
+    // Fetch Calendar Data (Occupancy Statuses) whenever month/year or crewId changes
+    useEffect(() => {
+        const fetchCalendarData = async () => {
+            if (!crewId) return;
+
+            // Use 15th of the month as reference date for fetching the month's calendar
+            const dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-15`;
+
+            try {
+                const data = await getCrewCalendar(crewId, dateStr);
+                setCalendarData(data);
+            } catch (error) {
+                console.error("Failed to fetch crew calendar:", error);
+            }
+        };
+
+        fetchCalendarData();
+    }, [crewId, currentYear, currentMonthIndex]);
+
+
+    const fetchDetailForDay = async (day: number) => {
+        if (!crewId) return; // Wait for crewId
+
+        const dateStr = formatDate(day);
+        if (detailsCache[dateStr]) return; // Already cached
+
+        try {
+            const data = await getReservationDetail(crewId, dateStr);
+            setDetailsCache(prev => ({ ...prev, [dateStr]: data }));
+        } catch (error) {
+            console.error(`Failed to fetch detail for ${dateStr}:`, error);
+        }
+    };
+
+    // Effect to fetch detail when selectedDay changes
+    useEffect(() => {
+        if (selectedDay > 0 && crewId) {
+            fetchDetailForDay(selectedDay);
+        }
+    }, [selectedDay, currentYear, currentMonthIndex, crewId]);
+
+
+    // Mock Reservation Data for "My Schedule" (Blue/Grey dots) - kept as requested or ignored based on "showMySchedule"
     const confirmedDays = [13, 14, 25, 26];
     const pendingDays = [27];
 
     const handleDayClick = (day: number) => {
         if (selectedDay === day) {
-            // Toggle expansion or set true? Req says "Upon tapping again... it should expand".
-            // If already expanded, maybe nothing or collapse? Let's toggle for better UX.
             setIsExpanded(!isExpanded);
         } else {
             setSelectedDay(day);
@@ -32,26 +133,54 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
         }
     };
 
-    const getCrewDayColor = (day: number) => {
-        // Mock logic to match screenshot colors approximately
-        // 5, 25, 30: Green
-        // 6, 8, 13, 27: Yellow
-        // 3: Green
-        // 11, 16, 20: Red
-        const greenDays = [1, 3, 5, 9, 12, 14, 18, 20, 25, 30]; // Added 20 as green to match row 3? Wait, screenshot row 3 day 20 is GREEN.
-        const yellowDays = [2, 6, 7, 8, 10, 13, 15, 19, 21, 23, 26, 27, 28];
-        const redDays = [11, 17, 29]; // 11 is red.
+    // Navigation Bounds
+    const minDate = new Date(2025, 9, 1); // October 2025
+    const maxDate = new Date(2026, 4, 31); // May 2026
 
-        if (greenDays.includes(day)) return 'bg-[#4CAF50]';
-        if (yellowDays.includes(day)) return 'bg-[#F6C555]';
-        if (redDays.includes(day)) return 'bg-[#FF6B6B]';
-
-        // Random fallback
-        const val = day % 3;
-        if (val === 0) return 'bg-[#4CAF50]';
-        if (val === 1) return 'bg-[#F6C555]';
-        return 'bg-[#FF6B6B]';
+    const handlePrevMonth = () => {
+        const newDate = new Date(currentYear, currentMonthIndex - 1, 1);
+        if (newDate >= minDate) {
+            setViewDate(newDate);
+            setSelectedDay(0);
+            setIsExpanded(false);
+        }
     };
+
+    const handleNextMonth = () => {
+        const newDate = new Date(currentYear, currentMonthIndex + 1, 1);
+        if (newDate <= maxDate) {
+            setViewDate(newDate);
+            setSelectedDay(0);
+            setIsExpanded(false);
+        }
+    };
+
+    const canGoPrev = new Date(currentYear, currentMonthIndex - 1, 1) >= minDate;
+    const canGoNext = new Date(currentYear, currentMonthIndex + 1, 1) <= maxDate;
+
+    // Get Occupancy Status from Calendar Data
+    const getOccupancyStatus = (day: number) => {
+        if (!calendarData?.calendar) return 'LOW'; // Default
+        const dateStr = formatDate(day);
+        const dayData = calendarData.calendar.find(item => item.date === dateStr);
+        return dayData?.occupancy_status || 'LOW';
+    };
+
+    const getCrewDayColor = (day: number) => {
+        const status = getOccupancyStatus(day);
+
+        switch (status) {
+            case 'LOW': return 'bg-[#4CAF50]'; // Green
+            case 'MEDIUM': return 'bg-[#F6C555]'; // Yellow
+            case 'HIGH': return 'bg-[#FF6B6B]'; // Red
+            default: return 'bg-[#4CAF50]';
+        }
+    };
+
+    const currentDetail = selectedDay ? detailsCache[formatDate(selectedDay)] : null;
+    const currentMemberCount = currentDetail?.booked ?? 0;
+    // Fix: Ensure we fallback to empty array if member_list is undefined
+    const currentMemberList = currentDetail?.member_list || [];
 
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
@@ -80,15 +209,17 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
 
                 <Calendar
                     className="mb-8"
-                    month="December"
-                    year={2025}
-                    startDayOfWeek={0}
-                    totalDays={31}
+                    month={currentMonthName}
+                    year={currentYear}
+                    startDayOfWeek={firstDayOfMonth}
+                    totalDays={daysInMonth}
                     expandable={false}
                     hideHeader={false}
                     selectedDays={[selectedDay]}
                     isCollapsed={isExpanded}
                     onDayClick={handleDayClick}
+                    onPrevMonth={canGoPrev ? handlePrevMonth : undefined}
+                    onNextMonth={canGoNext ? handleNextMonth : undefined}
                     headerRight={
                         <div className="flex items-center gap-2">
                             <span className="text-xs font-bold text-zinc-500">내 일정</span>
@@ -102,7 +233,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
                     }
                     renderDay={(day) => {
                         const isSelected = selectedDay === day;
-                        const isToday = day === today;
+                        const isToday = day === todayDay && isCurrentMonthView;
                         const colorClass = getCrewDayColor(day);
 
                         const isConfirmed = showMySchedule && confirmedDays.includes(day);
@@ -153,17 +284,27 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
                                     <Smile className="w-4 h-4 text-white" strokeWidth={2.5} />
                                 </div>
                                 <span className="font-bold text-zinc-900 text-sm">예약 완료</span>
-                                <span className="text-xs text-zinc-400 mt-0.5">8명/20</span>
+                                <span className="text-xs text-zinc-400 mt-0.5">{currentMemberCount}명/{crewCapacity}</span>
                             </div>
 
                             {/* Users Grid */}
                             <div className="grid grid-cols-2 gap-y-5 gap-x-4">
-                                {Array.from({ length: 8 }).map((_, i) => (
-                                    <div key={i} className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-zinc-300 rounded-full shrink-0" />
-                                        <span className="text-sm font-bold text-zinc-700">홍대 이수현</span>
+                                {currentMemberList.length > 0 ? (
+                                    currentMemberList.map((member: { user_id: number; name: string; profile_image_url: string | null }) => (
+                                        <div key={member.user_id} className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-zinc-300 rounded-full shrink-0 overflow-hidden">
+                                                {member.profile_image_url ? (
+                                                    <img src={member.profile_image_url} alt={member.name} className="w-full h-full object-cover" />
+                                                ) : null}
+                                            </div>
+                                            <span className="text-sm font-bold text-zinc-700">{member.name}</span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="col-span-2 text-center text-zinc-400 text-sm py-4">
+                                        예약자가 없습니다.
                                     </div>
-                                ))}
+                                )}
                             </div>
                         </div>
 
@@ -189,29 +330,34 @@ export default function ReservationStats({ onBack, onMyCalendarClick }: Reservat
                         )}
                     </div>
                 ) : (
-                    /* Default Legend Section */
+                    /* Default Legend Section - Simplified for LOW/MEDIUM/HIGH */
                     <div className="w-full bg-[#F4F4F5] rounded-[20px] p-4 flex items-center justify-between px-2">
                         <div className="flex items-center gap-2">
-                            <span className="font-bold text-xs text-zinc-900">인원수</span>
+                            <span className="font-bold text-xs text-zinc-900">혼잡도</span>
                         </div>
 
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#4CAF50]" />
-                                <span className="text-[10px] font-medium text-zinc-500">~5</span>
+                                <span className="text-[10px] font-medium text-zinc-500">
+                                    여유 (LOW)
+                                </span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#F6C555]" />
-                                <span className="text-[10px] font-medium text-zinc-500">5~10</span>
+                                <span className="text-[10px] font-medium text-zinc-500">
+                                    보통 (MEDIUM)
+                                </span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#FF6B6B]" />
-                                <span className="text-[10px] font-medium text-zinc-500">10~</span>
+                                <span className="text-[10px] font-medium text-zinc-500">
+                                    혼잡 (HIGH)
+                                </span>
                             </div>
                         </div>
                     </div>
                 )}
-
             </main>
         </div>
     );
