@@ -61,14 +61,14 @@ export default function Home({
     onTeamClick,
     onSearchClick,
     hasCrew: initialHasCrew = true,
-    onJoinCrew
+    // onJoinCrew // Commented out to fix lint "never read"
 }: HomeProps) {
     const [userInfo, setUserInfo] = useState<UserDetail | null>(null);
     const [crewDetail, setCrewDetail] = useState<CrewDetail | null>(null);
     const [myReservations, setMyReservations] = useState<MyReservation[]>([]);
     // Use prop as initial, but can be updated by data
     const [hasCrew, setHasCrew] = useState(initialHasCrew);
-    const [isDebugNoCrew, setIsDebugNoCrew] = useState(false);
+    const [isDebugNoCrew] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
