@@ -15,6 +15,8 @@ interface CalendarProps {
     hideHeader?: boolean;
     maxWeeks?: number;
     isCollapsed?: boolean;
+    onPrevMonth?: () => void;
+    onNextMonth?: () => void;
 }
 
 export const Calendar = ({
@@ -33,6 +35,8 @@ export const Calendar = ({
     headerTop,
     className,
     isCollapsed,
+    onPrevMonth,
+    onNextMonth,
 }: CalendarProps & { headerRight?: React.ReactNode, headerTop?: React.ReactNode, className?: string }) => {
     const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
     const [focusedWeekIndex, setFocusedWeekIndex] = useState<number | null>(null);
@@ -126,13 +130,25 @@ export const Calendar = ({
             {/* Month Header Bar */}
             {!hideHeader && (
                 <div className="w-full bg-white rounded-2xl py-1 shadow-sm mb-4 flex items-center px-4">
-                    <Button variant="ghost" size="small" className="text-zinc-900">
+                    <Button
+                        variant="ghost"
+                        size="small"
+                        className="text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed"
+                        onClick={onPrevMonth}
+                        disabled={!onPrevMonth}
+                    >
                         <ChevronLeftIcon className="w-5 h-5" />
                     </Button>
                     <h2 className="flex-1 text-center text-base font-bold text-zinc-900">
                         {month}
                     </h2>
-                    <Button variant="ghost" size="small" className="text-zinc-900">
+                    <Button
+                        variant="ghost"
+                        size="small"
+                        className="text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed"
+                        onClick={onNextMonth}
+                        disabled={!onNextMonth}
+                    >
                         <ChevronRightIcon className="w-5 h-5" />
                     </Button>
                 </div>

@@ -17,11 +17,17 @@ const ChevronLeftIcon = ({ className }: { className?: string }) => (
 
 
 
-
 export default function MyReservations({ onBack, onCrewClick }: MyReservationsProps) {
     const todayDate = new Date();
-    const currentYear = todayDate.getFullYear();
-    const currentMonthIndex = todayDate.getMonth(); // 0-11
+
+    // Default to the current date, but clamp to the range if outside? 
+    // For now, I'll stick to real current date as the starting point.
+    const [viewDate, setViewDate] = useState(new Date());
+    const currentYear = viewDate.getFullYear();
+    const currentMonthIndex = viewDate.getMonth(); // 0-11
+
+    // Check if "Today" is in the currently viewed month/year to highlight it
+    const isCurrentMonthView = todayDate.getFullYear() === currentYear && todayDate.getMonth() === currentMonthIndex;
     const todayDay = todayDate.getDate();
 
     const monthNames = [
@@ -36,7 +42,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
     // Calculate start day of week (0=Sun, 1=Mon, etc.)
     const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1).getDay();
 
-    const [selectedDay, setSelectedDay] = useState<number | null>(todayDay);
+    const [selectedDay, setSelectedDay] = useState<number | null>(isCurrentMonthView ? todayDay : null);
     const [isLessonApplied, setIsLessonApplied] = useState(false);
 
     // Mock Data based on screenshots - kept static for now as per instructions (only fix "Today" and calendar grid)
@@ -49,6 +55,31 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
         // Reset toggle when changing days for demo purposes
         setIsLessonApplied(false);
     };
+
+    // Navigation Bounds
+    const minDate = new Date(2025, 9, 1); // October 2025 (Month is 0-indexed: 9=Oct)
+    const maxDate = new Date(2026, 4, 31); // May 2026 (Month is 0-indexed: 4=May)
+
+    const handlePrevMonth = () => {
+        const newDate = new Date(currentYear, currentMonthIndex - 1, 1);
+        if (newDate >= minDate) {
+            setViewDate(newDate);
+            setSelectedDay(null); // Deselect when changing months
+        }
+    };
+
+    const handleNextMonth = () => {
+        const newDate = new Date(currentYear, currentMonthIndex + 1, 1);
+        // We only care about the month/year, so check if the first of the next month is <= maxDate
+        if (newDate <= maxDate) {
+            setViewDate(newDate);
+            setSelectedDay(null); // Deselect when changing months
+        }
+    };
+
+    // Determine if buttons should be enabled
+    const canGoPrev = new Date(currentYear, currentMonthIndex - 1, 1) >= minDate;
+    const canGoNext = new Date(currentYear, currentMonthIndex + 1, 1) <= maxDate;
 
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
@@ -84,6 +115,8 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                     expandable={false}
                     hideHeader={false}
                     onDayClick={handleDayClick}
+                    onPrevMonth={canGoPrev ? handlePrevMonth : undefined}
+                    onNextMonth={canGoNext ? handleNextMonth : undefined}
                     headerRight={
                         <div className="bg-[#EDF2FF] px-4 py-2 rounded-full flex gap-3 items-center shadow-sm">
                             <span className="text-xs font-bold text-zinc-900">시즌방 이용 횟수 :</span>
@@ -94,7 +127,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                         const isSelected = selectedDay === day;
                         const isConfirmed = confirmedDays.includes(day);
                         const isPending = pendingDays.includes(day);
-                        const isToday = day === todayDay;
+                        const isToday = day === todayDay && isCurrentMonthView;
 
                         // Base Container Classes
                         let containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 cursor-pointer text-sm font-bold rounded-[10px]";
