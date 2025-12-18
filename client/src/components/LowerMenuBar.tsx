@@ -141,7 +141,10 @@ export const LowerMenuBar = ({
             key={item.id}
             variant="ghost"
             size="icon" // Use the new size
-            onClick={() => onTabChange?.(item.id)}
+            onClick={() => {
+              if (item.id === 'user') return; // Disable Profile Link
+              onTabChange?.(item.id);
+            }}
             className={cn(
               'flex flex-col items-center justify-center transition-colors duration-200 h-auto w-auto p-2',
               isActive

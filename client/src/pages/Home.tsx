@@ -111,18 +111,20 @@ export default function Home({
                     {/* Shark Image removed due to missing file */}
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => {
-                            console.log('Toggling debug mode. Current:', isDebugNoCrew, 'HasCrew:', hasCrew);
-                            setIsDebugNoCrew(prev => !prev);
-                        }}
-                        className={`text-[10px] px-2 py-1 rounded border mr-2 transition-colors ${isDebugNoCrew
-                            ? 'bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200'
-                            : 'bg-red-100 text-red-600 border-red-200 hover:bg-red-200'
-                            }`}
-                    >
-                        {isDebugNoCrew ? 'Show My Crew' : 'Simulate No Crew'}
-                    </button>
+                    {/* 
+                        <button
+                            onClick={() => {
+                                console.log('Toggling debug mode. Current:', isDebugNoCrew, 'HasCrew:', hasCrew);
+                                setIsDebugNoCrew(prev => !prev);
+                            }}
+                            className={`text-[10px] px-2 py-1 rounded border mr-2 transition-colors ${isDebugNoCrew
+                                ? 'bg-blue-100 text-blue-600 border-blue-200 hover:bg-blue-200'
+                                : 'bg-red-100 text-red-600 border-red-200 hover:bg-red-200'
+                                }`}
+                        >
+                            {isDebugNoCrew ? 'Show My Crew' : 'Simulate No Crew'}
+                        </button>
+                        */}
                     <Button variant="ghost" size="icon" onClick={onSearchClick} className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <BellIcon className="w-[24px] h-[24px]" />
                     </Button>
@@ -178,20 +180,22 @@ export default function Home({
                                 onClick={onSearchClick}
                                 className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity py-2"
                             >
-                                <h2 className="text-2xl font-bold text-zinc-400">크루에 가입하세요</h2>
+                                <h2 className="text-2xl font-bold text-zinc-400">탭해서 크루에 가입하세요</h2>
                                 <CircleArrowRightIcon className="w-5 h-5 text-zinc-300" />
                             </div>
-                            <Button
-                                size="small"
-                                variant="outline"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onJoinCrew?.();
-                                }}
-                                className="text-xs h-8 px-3"
-                            >
-                                가입 (Debug)
-                            </Button>
+                            {/* 
+                                <Button
+                                    size="small"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onJoinCrew?.();
+                                    }}
+                                    className="text-xs h-8 px-3"
+                                >
+                                    가입 (Debug)
+                                </Button>
+                                */}
                         </div>
                     )}
                 </div>
@@ -284,7 +288,7 @@ export default function Home({
 
                             <div className="z-10 pl-8 py-6">
                                 <div className="font-bold text-lg text-white">휘닉스파크</div>
-                                <div className="text-sm text-white/90">2025. 11. 11 Tue</div>
+                                <div className="text-sm text-white/90">2025. 08. 11 Tue</div>
                             </div>
                             <div className="z-10 pr-8 text-5xl font-light text-white">
                                 33<span className="text-2xl align-top">°</span>
