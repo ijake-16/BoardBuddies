@@ -14,6 +14,7 @@ interface CalendarProps {
     expandable?: boolean;
     hideHeader?: boolean;
     maxWeeks?: number;
+    startWeekIndex?: number;
     isCollapsed?: boolean;
     onPrevMonth?: () => void;
     onNextMonth?: () => void;
@@ -31,6 +32,7 @@ export const Calendar = ({
     expandable = false,
     hideHeader = false,
     maxWeeks,
+    startWeekIndex = 0,
     headerRight,
     headerTop,
     className,
@@ -69,11 +71,11 @@ export const Calendar = ({
         }
 
         if (maxWeeks) {
-            return weeksArray.slice(0, maxWeeks);
+            return weeksArray.slice(startWeekIndex, startWeekIndex + maxWeeks);
         }
 
         return weeksArray;
-    }, [startDayOfWeek, totalDays, maxWeeks]);
+    }, [startDayOfWeek, totalDays, maxWeeks, startWeekIndex]);
 
     // Handle external collapse state changes
     useEffect(() => {

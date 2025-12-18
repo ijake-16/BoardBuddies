@@ -1,9 +1,9 @@
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
 import { useState, useEffect } from 'react';
-import { getUserInfo } from '../services/user';
+import { getUserInfo, getMyReservations } from '../services/user';
 import { getCrewInfo } from '../services/crew';
-import { UserDetail, CrewDetail } from '../types/api';
+import { UserDetail, CrewDetail, MyReservation } from '../types/api';
 import { Bus, Mountain } from 'lucide-react';
 
 // Icons
@@ -65,6 +65,7 @@ export default function Home({
 }: HomeProps) {
     const [userInfo, setUserInfo] = useState<UserDetail | null>(null);
     const [crewDetail, setCrewDetail] = useState<CrewDetail | null>(null);
+    const [myReservations, setMyReservations] = useState<MyReservation[]>([]);
     // Use prop as initial, but can be updated by data
     const [hasCrew, setHasCrew] = useState(initialHasCrew);
     const [isDebugNoCrew, setIsDebugNoCrew] = useState(false);
@@ -85,6 +86,15 @@ export default function Home({
                 } else {
                     setHasCrew(false);
                 }
+
+                // Fetch Reservations
+                try {
+                    const reservations = await getMyReservations();
+                    setMyReservations(reservations);
+                } catch (e) {
+                    console.error("Failed to fetch reservations", e);
+                }
+
             } catch (err) {
                 console.error("Failed to fetch user info", err);
             }
@@ -231,17 +241,27 @@ export default function Home({
                                         expandable={false}
                                         hideHeader={true}
                                         maxWeeks={2}
+                                        startWeekIndex={(() => {
+                                            // Calculate which week contains today (Dec 2025)
+                                            // For dynamic, we should use real date. But for this fixed month:
+                                            // Dec 1st 2025 is Monday (offset 1)
+                                            // Week 0: [null, 1, 2, 3, 4, 5, 6]
+                                            // Week 1: [7, 8, 9, 10, 11, 12, 13]
+                                            // ...
+                                            const today = new Date().getDate(); // Assuming we are in Dec 2025 context or mocking it
+                                            // Real logic:
+                                            // (today + startDayOfWeek - 1) / 7
+                                            const startDayOfWeek = 1;
+                                            return Math.floor((today + startDayOfWeek - 1) / 7);
+                                        })()}
                                         renderDay={(day) => {
-                                            const hasDot = [5, 12, 19].includes(day);
-                                            const hasBlueDot = [2, 3].includes(day);
+                                            const dateStr = `2025-12-${String(day).padStart(2, '0')}`;
+                                            const hasReservation = myReservations.some(r => r.date === dateStr && r.status === 'confirmed');
 
                                             return (
                                                 <div className="w-8 h-8 flex flex-col items-center justify-center relative">
                                                     <span className="text-sm font-medium text-zinc-500">{day}</span>
-                                                    {hasDot && (
-                                                        <div className="w-2 h-2 rounded-full bg-[#1E3A8A] opacity-40 absolute bottom-[-4px]" />
-                                                    )}
-                                                    {hasBlueDot && (
+                                                    {hasReservation && (
                                                         <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-[-4px]" />
                                                     )}
                                                 </div>

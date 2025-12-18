@@ -61,7 +61,7 @@ function App() {
               setCurrentView('my_reservations');
             }}
             onCalendarClick={() => {
-              setCurrentView('stats');
+              setCurrentView('my_reservations');
             }}
             onTeamClick={() => setCurrentView('crew_detail')}
             onSearchClick={() => setCurrentView('search_crew')}
