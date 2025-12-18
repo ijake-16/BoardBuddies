@@ -14,6 +14,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class CrewMyMonthlyReservationResponse {
 
+    @JsonProperty("reservation_id")
+    private Long reservationId;
+
     @JsonProperty("date")
     private LocalDate date;
 
@@ -26,4 +29,7 @@ public class CrewMyMonthlyReservationResponse {
 
     @JsonProperty("waiting_order")
     private Integer waitingOrder;
+
+    @JsonProperty("teaching")
+    private Boolean teaching;
 }

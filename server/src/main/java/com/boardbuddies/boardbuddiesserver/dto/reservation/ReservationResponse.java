@@ -29,6 +29,8 @@ public class ReservationResponse {
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
+    private Boolean teaching;
+
     public static ReservationResponse from(Reservation reservation) {
         return ReservationResponse.builder()
                 .reservationId(reservation.getId())
@@ -36,6 +38,7 @@ public class ReservationResponse {
                 .date(reservation.getDate())
                 .status(reservation.getStatus())
                 .createdAt(reservation.getCreatedAt())
+                .teaching(reservation.getTeaching())
                 .build();
     }
 }

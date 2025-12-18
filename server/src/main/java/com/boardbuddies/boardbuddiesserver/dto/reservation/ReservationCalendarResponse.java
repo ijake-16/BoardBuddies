@@ -11,4 +11,5 @@ public class ReservationCalendarResponse {
     private Long reservationId;
     private LocalDate date;
     private String status;
+    private Boolean teaching;
 }

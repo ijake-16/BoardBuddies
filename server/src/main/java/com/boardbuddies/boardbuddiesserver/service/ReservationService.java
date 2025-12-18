@@ -161,9 +161,9 @@ public class ReservationService {
         // 2. 중복 체크 (게스트 예약인 경우 게스트 기준, 일반 예약인 경우 사용자 기준)
         if (guest != null) {
             // 게스트 예약 중복 체크
-            List<Reservation> guestReservations = reservationRepository.findByCrewAndDateAndStatusNot(crew, date, "CANCELLED");
+            List<Reservation> guestReservations = reservationRepository.findByCrewAndDate(crew, date);
             boolean exists = guestReservations.stream()
-                    .anyMatch(r -> r.getGuest() != null && r.getGuest().getId().equals(guest.getId()) && !"CANCELLED".equals(r.getStatus()));
+                    .anyMatch(r -> r.getGuest() != null && r.getGuest().getId().equals(guest.getId()));
             if (exists) {
                 throw new RuntimeException("이미 해당 날짜에 게스트 예약이 존재합니다.");
             }
@@ -172,16 +172,12 @@ public class ReservationService {
             List<Reservation> myReservations = reservationRepository.findAllByUserAndDateBetweenOrderByCreatedAtDesc(
                     user, date, date);
             if (!myReservations.isEmpty()) {
-                boolean exists = myReservations.stream()
-                        .anyMatch(r -> !"CANCELLED".equals(r.getStatus()));
-                if (exists) {
-                    throw new RuntimeException("이미 해당 날짜에 예약이 존재합니다.");
-                }
+                throw new RuntimeException("이미 해당 날짜에 예약이 존재합니다.");
             }
         }
 
         // 3. 용량(Capacity) 체크 - 제한 설정된 경우에만
-        Long currentCount = reservationRepository.countByCrewAndDateAndStatusNot(crew, date, "CANCELLED");
+        Long currentCount = reservationRepository.countByCrewAndDate(crew, date);
         String status = "confirmed";
 
         if (crew.getIsCapacityLimited() && currentCount >= crew.getDailyCapacity()) {
@@ -241,20 +237,19 @@ public class ReservationService {
         Reservation myReservation;
         if (guest != null) {
             // 게스트 예약 취소: guestId가 필수로 있어야 함
-            myReservation = reservationRepository.findByGuestAndCrewAndDateAndStatusNot(
-                    guest, crew, date, "CANCELLED")
+            myReservation = reservationRepository.findByGuestAndCrewAndDate(guest, crew, date)
                     .orElseThrow(() -> new RuntimeException("해당 날짜에 게스트 예약이 없습니다."));
         } else {
             // 일반 예약 취소: guest가 null인 예약만 취소 (게스트 예약은 제외)
-            myReservation = reservationRepository.findByUserAndCrewAndDateAndStatusNotAndGuestIsNull(
-                    user, crew, date, "CANCELLED")
+            myReservation = reservationRepository.findByUserAndCrewAndDateAndGuestIsNull(
+                    user, crew, date)
                     .orElseThrow(() -> new RuntimeException("해당 날짜에 일반 예약이 없습니다. 게스트 예약을 취소하려면 guest_id를 포함해주세요."));
         }
 
         String oldStatus = myReservation.getStatus();
 
-        // 상태 변경 -> CANCELLED
-        myReservation.cancel();
+        // 예약 삭제
+        reservationRepository.delete(myReservation);
 
         // 만약 기존 상태가 CONFIRMED였다면, 대기열 승격 시도
         if ("confirmed".equals(oldStatus)) {
@@ -290,7 +285,7 @@ public class ReservationService {
 
         for (LocalDate date : dates) {
             // 해당 날짜의 현재 확정된 예약 수 조회
-            long confirmedCount = reservationRepository.findByCrewAndDateAndStatusNot(crew, date, "CANCELLED").stream()
+            long confirmedCount = reservationRepository.findByCrewAndDate(crew, date).stream()
                     .filter(r -> "confirmed".equals(r.getStatus()))
                     .count();
 
@@ -333,8 +328,8 @@ public class ReservationService {
             throw new RuntimeException("해당 크루의 회원이 아닙니다.");
         }
 
-        // 해당 날짜의 모든 예약 조회 (취소 제외) - Fetch Join으로 N+1 문제 방지
-        List<Reservation> reservations = reservationRepository.findByCrewAndDateAndStatusNotWithFetch(crew, date, "CANCELLED");
+        // 해당 날짜의 모든 예약 조회 - Fetch Join으로 N+1 문제 방지
+        List<Reservation> reservations = reservationRepository.findByCrewAndDateWithFetch(crew, date);
 
         List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary> confirmedList = new ArrayList<>();
         List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary> waitingList = new ArrayList<>();
@@ -349,9 +344,11 @@ public class ReservationService {
             if (r.getGuest() != null) {
                 summaryBuilder.name(r.getGuest().getName())  // 게스트 이름
                         .guestId(r.getGuest().getId())
-                        .registeredByName(r.getUser().getName());  // 예약한 부원 이름
+                        .registeredByName(r.getUser().getName())  // 예약한 부원 이름
+                        .teaching(r.getTeaching());
             } else {
-                summaryBuilder.name(r.getUser().getName());  // 일반 예약은 부원 이름
+                summaryBuilder.name(r.getUser().getName())  // 일반 예약은 부원 이름
+                        .teaching(r.getTeaching());
             }
             
             com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary summary = summaryBuilder.build();
@@ -409,8 +406,7 @@ public class ReservationService {
         }
 
         // Fetch Join으로 N+1 문제 방지
-        List<Reservation> reservations = reservationRepository.findAllByCrewAndDateAndStatusNotOrderByCreatedAtAscWithFetch(crew,
-                date, "CANCELLED");
+        List<Reservation> reservations = reservationRepository.findAllByCrewAndDateOrderByCreatedAtAscWithFetch(crew, date);
 
         int booked = 0;
         List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse> memberList = new ArrayList<>();
@@ -427,9 +423,11 @@ public class ReservationService {
             if (r.getGuest() != null) {
                 memberResponseBuilder.name(r.getGuest().getName())  // 게스트 이름
                         .guestId(r.getGuest().getId())
-                        .registeredByName(r.getUser().getName());  // 예약한 부원 이름
+                        .registeredByName(r.getUser().getName())  // 예약한 부원 이름
+                        .teaching(r.getTeaching());
             } else {
-                memberResponseBuilder.name(r.getUser().getName());  // 일반 예약은 부원 이름
+                memberResponseBuilder.name(r.getUser().getName())  // 일반 예약은 부원 이름
+                        .teaching(r.getTeaching());
             }
             
             com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse memberResponse = memberResponseBuilder.build();
@@ -447,6 +445,7 @@ public class ReservationService {
                 myReservationInfo = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo
                         .builder()
                         .reservationId(r.getId())
+                        .teaching(r.getTeaching())
                         .build();
             }
         }
@@ -554,12 +553,97 @@ public class ReservationService {
                 start, end);
 
         return reservations.stream()
-                .filter(r -> !"CANCELLED".equals(r.getStatus()))
                 .map(r -> com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationCalendarResponse.builder()
                         .reservationId(r.getId())
                         .date(r.getDate())
                         .status(r.getStatus())
+                        .teaching(r.getTeaching())
                         .build())
                 .toList();
+    }
+
+    /**
+     * 강습 신청
+     * 예약이 확정된 경우에만 신청 가능
+     */
+    @Transactional
+    public void applyTeaching(Long userId, Long crewId, Long reservationId) {
+        if (userId == null || crewId == null || reservationId == null) {
+            throw new IllegalArgumentException("User ID, Crew ID, and Reservation ID must not be null");
+        }
+
+        // 1. 사용자 및 크루 조회
+        User user = Objects.requireNonNull(userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("크루를 찾을 수 없습니다."));
+
+        if (!user.getCrew().equals(crew)) {
+            throw new RuntimeException("해당 크루의 회원이 아닙니다.");
+        }
+
+        // 2. 예약 조회
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("예약을 찾을 수 없습니다."));
+
+        // 3. 예약이 해당 크루의 예약인지 확인
+        if (!reservation.getCrew().getId().equals(crewId)) {
+            throw new RuntimeException("해당 크루의 예약이 아닙니다.");
+        }
+
+        // 4. 권한 확인 (본인의 예약인지 확인)
+        if (!reservation.getUser().getId().equals(userId)) {
+            throw new RuntimeException("본인의 예약만 강습을 신청할 수 있습니다.");
+        }
+
+        // 5. 게스트 예약인 경우 제외
+        if (reservation.getGuest() != null) {
+            throw new RuntimeException("게스트 예약은 강습을 신청할 수 없습니다.");
+        }
+
+        // 6. 예약 상태 확인 (확정된 경우에만 강습 신청 가능)
+        if (!"confirmed".equals(reservation.getStatus())) {
+            throw new RuntimeException("예약이 확정된 경우에만 강습을 신청할 수 있습니다.");
+        }
+
+        // 7. 강습 신청
+        reservation.applyTeaching();
+    }
+
+    /**
+     * 강습 취소
+     */
+    @Transactional
+    public void cancelTeaching(Long userId, Long crewId, Long reservationId) {
+        if (userId == null || crewId == null || reservationId == null) {
+            throw new IllegalArgumentException("User ID, Crew ID, and Reservation ID must not be null");
+        }
+
+        // 1. 사용자 및 크루 조회
+        User user = Objects.requireNonNull(userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(() -> new RuntimeException("크루를 찾을 수 없습니다."));
+
+        if (!user.getCrew().equals(crew)) {
+            throw new RuntimeException("해당 크루의 회원이 아닙니다.");
+        }
+
+        // 2. 예약 조회
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("예약을 찾을 수 없습니다."));
+
+        // 3. 예약이 해당 크루의 예약인지 확인
+        if (!reservation.getCrew().getId().equals(crewId)) {
+            throw new RuntimeException("해당 크루의 예약이 아닙니다.");
+        }
+
+        // 4. 권한 확인 (본인의 예약인지 확인)
+        if (!reservation.getUser().getId().equals(userId)) {
+            throw new RuntimeException("본인의 예약만 강습을 취소할 수 있습니다.");
+        }
+
+        // 5. 강습 취소
+        reservation.cancelTeaching();
     }
 }

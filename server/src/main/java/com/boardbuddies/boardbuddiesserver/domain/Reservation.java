@@ -39,15 +39,29 @@ public class Reservation {
     @Column(nullable = false)
     private String status;
 
+    /**
+     * 강습 신청 여부 (예약 확정된 날에만 신청 가능)
+     */
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean teaching = false;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public void cancel() {
-        this.status = "CANCELLED";
-    }
-
     public void confirm() {
         this.status = "confirmed";
+    }
+
+    public void applyTeaching() {
+        if (!"confirmed".equals(this.status)) {
+            throw new IllegalStateException("예약이 확정된 경우에만 강습을 신청할 수 있습니다.");
+        }
+        this.teaching = true;
+    }
+
+    public void cancelTeaching() {
+        this.teaching = false;
     }
 }
