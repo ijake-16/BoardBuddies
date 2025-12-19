@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
-import { getMyReservations, getUserInfo } from '../services/user';
-import { createReservation, cancelReservation } from '../services/crew';
+import { getUserInfo } from '../services/user';
+import { createReservation, cancelReservation, applyForTeaching, withdrawFromTeaching, getMyCrewCalendar } from '../services/crew';
 import { MyReservation } from '../types/api';
 
 
@@ -47,16 +47,19 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
 
     const [selectedDay, setSelectedDay] = useState<number | null>(isCurrentMonthView ? todayDay : null);
     const [isLessonApplied, setIsLessonApplied] = useState(false);
+    const [usageCount, setUsageCount] = useState(0);
 
     // Store reservations
     const [reservations, setReservations] = useState<MyReservation[]>([]);
     const [crewId, setCrewId] = useState<number | null>(null);
 
     // Fetch Reservations & Crew Info
-    const fetchReservations = async () => {
+    const fetchReservations = async (targetCrewId: number, targetDate: Date) => {
         try {
-            const data = await getMyReservations();
-            setReservations(data);
+            const dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+            const data = await getMyCrewCalendar(targetCrewId, dateStr);
+            setReservations(data.my_reservations);
+            setUsageCount(data.usage_count);
         } catch (error) {
             console.error("Failed to fetch my reservations:", error);
         }
@@ -64,14 +67,14 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
 
     useEffect(() => {
         const initData = async () => {
-            // 1. Fetch Reservations
-            await fetchReservations();
-
-            // 2. Fetch Crew ID
+            // 1. Fetch Crew ID
             try {
                 const userData = await getUserInfo();
                 if (userData.crew && userData.crew.crewId) {
-                    setCrewId(userData.crew.crewId);
+                    const cId = userData.crew.crewId;
+                    setCrewId(cId);
+                    // 2. Fetch Reservations using crewId
+                    await fetchReservations(cId, viewDate);
                 }
             } catch (error) {
                 console.error("Failed to fetch user info:", error);
@@ -79,6 +82,13 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
         };
         initData();
     }, []);
+
+    // Update reservations when viewDate changes (if API supports month filtering via date param)
+    useEffect(() => {
+        if (crewId) {
+            fetchReservations(crewId, viewDate);
+        }
+    }, [viewDate, crewId]);
 
     const formatDate = (day: number) => {
         return `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -92,7 +102,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
         try {
             await createReservation(crewId, [dateStr]);
             alert("예약 신청이 완료되었습니다.");
-            fetchReservations();
+            fetchReservations(crewId, viewDate);
         } catch (error) {
             console.error("Reservation creation failed:", error);
             alert("예약 신청에 실패했습니다.");
@@ -107,10 +117,32 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
         try {
             await cancelReservation(crewId, [dateStr]);
             alert("예약이 취소되었습니다.");
-            fetchReservations();
+            fetchReservations(crewId, viewDate);
         } catch (error) {
             console.error("Cancellation failed:", error);
             alert("예약 취소에 실패했습니다.");
+        }
+    };
+
+    const handleTeachingToggle = async () => {
+        if (!crewId || !selectedDay) return;
+        const reservation = getReservationForDay(selectedDay);
+        if (!reservation) return;
+
+        try {
+            if (isLessonApplied) {
+                await withdrawFromTeaching(crewId, reservation.reservation_id);
+                setIsLessonApplied(false);
+            } else {
+                await applyForTeaching(crewId, reservation.reservation_id);
+                setIsLessonApplied(true);
+            }
+            fetchReservations(crewId, viewDate); // Refresh data
+        } catch (error) {
+            console.error("Failed to toggle teaching:", error);
+            alert("처리 중 오류가 발생했습니다.");
+            // Revert state on error
+            setIsLessonApplied(!isLessonApplied);
         }
     };
 
@@ -142,8 +174,8 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
 
     const handleDayClick = (day: number) => {
         setSelectedDay(day);
-        // Reset toggle when changing days for demo purposes
-        setIsLessonApplied(false);
+        const reservation = getReservationForDay(day);
+        setIsLessonApplied(reservation?.teaching ?? false);
     };
 
     // Navigation Bounds
@@ -210,7 +242,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                     headerRight={
                         <div className="bg-[#EDF2FF] px-4 py-2 rounded-full flex gap-3 items-center shadow-sm">
                             <span className="text-xs font-bold text-zinc-900">시즌방 이용 횟수 :</span>
-                            <span className="text-xs font-bold text-zinc-900">{reservations.filter(r => r.status === 'confirmed').length}박</span>
+                            <span className="text-xs font-bold text-zinc-900">{usageCount}박</span>
                         </div>
                     }
                     renderDay={(day) => {
@@ -280,7 +312,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                                             <button
                                                 className="w-10 h-6 bg-zinc-200 rounded-full relative transition-colors duration-200 ease-in-out data-[checked=true]:bg-[#1E3A8A]"
                                                 data-checked={isLessonApplied}
-                                                onClick={() => setIsLessonApplied(!isLessonApplied)}
+                                                onClick={handleTeachingToggle}
                                             >
                                                 <span className="absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out data-[checked=true]:translate-x-4"
                                                     data-checked={isLessonApplied}

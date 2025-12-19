@@ -80,8 +80,15 @@ export interface MyReservation {
     date: string; // "YYYY-MM-DD"
     status: string; // "confirmed"
     reservation_id: number;
-    crew_id: number;
-    created_at: string;
+    crew_id?: number;
+    created_at?: string;
+    teaching: boolean;
+    waiting_order?: number | null;
+}
+
+export interface MyCalendarResponse {
+    my_reservations: MyReservation[];
+    usage_count: number;
 }
 
 export interface CrewCalendarResponse {

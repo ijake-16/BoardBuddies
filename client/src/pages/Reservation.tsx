@@ -9,6 +9,7 @@ import { MyReservation } from '../types/api';
 
 interface ReservationProps {
     onBack: () => void;
+    isGuest?: boolean;
 }
 
 const CheckIcon = ({ className }: { className?: string }) => (
@@ -17,7 +18,7 @@ const CheckIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
-export default function Reservation({ onBack }: ReservationProps) {
+export default function Reservation({ onBack, isGuest = false }: ReservationProps) {
     const todayDate = new Date();
 
     // Dynamic View Date State
@@ -43,6 +44,10 @@ export default function Reservation({ onBack }: ReservationProps) {
 
     // Selected days for NEW reservation
     const [selectedDays, setSelectedDays] = useState<number[]>([]);
+
+    // Guest State
+    const [guestName, setGuestName] = useState('');
+    const [guestPhone, setGuestPhone] = useState('');
 
     // Existing Reservations (Fetched from API)
     const [myReservations, setMyReservations] = useState<MyReservation[]>([]);
@@ -239,8 +244,10 @@ export default function Reservation({ onBack }: ReservationProps) {
             return `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         });
 
+        const guestInfo = isGuest ? { name: guestName, phoneNumber: guestPhone } : undefined;
+
         try {
-            await createReservation(crewId, formattedDates);
+            await createReservation(crewId, formattedDates, guestInfo);
             alert("예약 신청이 완료되었습니다."); // Simple feedback
             setSelectedDays([]); // Clear selection
             // Refresh list so the new reservation appears as "reserved" immediately
@@ -261,12 +268,37 @@ export default function Reservation({ onBack }: ReservationProps) {
                         <ChevronLeftIcon className="w-6 h-6" />
                     </Button>
                 </div>
-                <h1 className="flex-1 text-center text-lg font-bold text-zinc-900">예약하기</h1>
+                <h1 className="flex-1 text-center text-lg font-bold text-zinc-900">{isGuest ? '게스트 예약하기' : '예약하기'}</h1>
                 <div className="w-10" />
             </header>
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto px-4 pb-[120px] flex flex-col items-center">
+
+                {isGuest && (
+                    <div className="w-full mb-6 space-y-3">
+                        <div>
+                            <label className="block text-sm font-medium text-zinc-700 mb-1">게스트 이름</label>
+                            <input
+                                type="text"
+                                value={guestName}
+                                onChange={(e) => setGuestName(e.target.value)}
+                                placeholder="이름을 입력하세요"
+                                className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#162660] transition-all"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-zinc-700 mb-1">전화번호</label>
+                            <input
+                                type="tel"
+                                value={guestPhone}
+                                onChange={(e) => setGuestPhone(e.target.value)}
+                                placeholder="010-0000-0000"
+                                className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#162660] transition-all"
+                            />
+                        </div>
+                    </div>
+                )}
 
                 <Calendar
                     className="mb-8 p-4"
@@ -337,10 +369,9 @@ export default function Reservation({ onBack }: ReservationProps) {
                     }}
                 />
 
-                {/* Apply Button */}
                 <div className="w-full flex justify-center mt-auto">
                     <Button
-                        disabled={selectedDays.length === 0}
+                        disabled={selectedDays.length === 0 || (isGuest && (!guestName || !guestPhone))}
                         onClick={handleSubmit}
                         className={`
                             w-full h-14 bg-[#162660] rounded-[20px] text-white text-lg font-bold
