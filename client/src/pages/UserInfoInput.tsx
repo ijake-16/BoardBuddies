@@ -1,6 +1,7 @@
 import { Button } from '../components/Button';
 import { ChevronLeftIcon, CheckIcon } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { TermsModal } from '../components/TermsModal';
 
 interface UserInfoInputProps {
     onBack: () => void;
@@ -16,6 +17,38 @@ const SCHOOL_DATA = [
     //{ name: '숙명여자대학교', aliases: ['숙대', 'sookmyung womens university', 'sookmyung'] },
 ];
 
+const TERMS_CONTENT = {
+    service: {
+        title: '베타 테스트 서비스 이용약관',
+        content: `제1조 (목적)
+본 약관은 '보드버디(BoardBuddy)'(이하 "서비스")가 제공하는 베타 테스트 서비스의 이용 조건 및 절차에 관한 사항을 규정함을 목적으로 합니다. 본 서비스는 시즌방 운영진의 효율적인 관리와 이용자들의 편리한 예약 및 정보 확인을 돕기 위해 제공됩니다.
+
+제2조 (베타 테스트의 특수성 및 한계)
+1. 개발팀은 테스트 목적에 따라 사전 예고 없이 서비스의 기능, UI 등을 변경하거나 서비스를 일시 중단할 수 있습니다.
+2. 베타 테스트 기간 중 생성된 데이터(예약 내역, 회원 정보 등)는 정식 서비스 출시 시 이관되지 않을 수 있으며, 테스트 종료 후 초기화될 수 있습니다.
+3. 이용자는 본 서비스가 테스트 목적임을 인지합니다.`
+    },
+    privacy: {
+        title: '개인정보 수집 및 이용 동의',
+        content: `'보드버디'는 베타 테스트 진행을 위해 최소한의 개인정보만을 수집하며, 수집된 정보는 테스트 종료 후 안전하게 파기됩니다. 제3자에게 제공하지 않습니다.
+
+1. 수집 및 이용 목적
+- 베타 테스트 서비스 제공 (본인 확인 및 회원 관리)
+- 시즌방 예약 및 이용 현황 관리
+- 서비스 관련 공지 및 피드백 수집
+
+2. 수집 항목
+- 성명, 휴대전화번호, 소속(대학교/동아리명), 학번, 생년월일
+
+3. 보유 및 이용 기간
+- 베타 테스트 종료 시까지
+(단, 관계 법령에 따라 보존할 필요가 있는 경우 해당 기간까지 보관 후 파기)
+
+4. 동의 거부 권리
+- 귀하는 개인정보 수집 및 이용에 대한 동의를 거부할 권리가 있습니다. 다만, 필수 항목 동의를 거부할 경우 베타 테스트 참여 및 서비스 이용이 불가능합니다.`
+    }
+};
+
 export default function UserInfoInput({ onBack }: UserInfoInputProps) {
     const [name, setName] = useState('');
     const [school, setSchool] = useState('');
@@ -26,8 +59,8 @@ export default function UserInfoInput({ onBack }: UserInfoInputProps) {
     const [terms, setTerms] = useState({
         term1: false,
         term2: false,
-        term3: false,
     });
+    const [activeModal, setActiveModal] = useState<'service' | 'privacy' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     // School Search State
@@ -299,59 +332,82 @@ export default function UserInfoInput({ onBack }: UserInfoInputProps) {
                 <div className="bg-white px-6 py-8 flex flex-col">
                     <h3 className="text-sm font-bold text-zinc-800 mb-4 ml-1">약관</h3>
                     <div className="space-y-4">
-                        <label className="flex items-center gap-3 cursor-pointer">
-                            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${terms.term1 ? 'bg-blue-600' : 'bg-zinc-300'}`}>
-                                <CheckIcon className="w-3 h-3 text-white" />
-                            </div>
-                            <input
-                                type="checkbox"
-                                className="hidden"
-                                checked={terms.term1}
-                                onChange={() => setTerms(prev => ({ ...prev, term1: !prev.term1 }))}
-                            />
-                            <span className="text-blue-600 font-medium text-sm">필수</span>
-                        </label>
+                        <div className="flex items-center justify-between">
+                            <label className="flex items-center gap-3 cursor-pointer flex-1">
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${terms.term1 ? 'bg-blue-600' : 'bg-zinc-300'}`}>
+                                    <CheckIcon className="w-3 h-3 text-white" />
+                                </div>
+                                <input
+                                    type="checkbox"
+                                    className="hidden"
+                                    checked={terms.term1}
+                                    onChange={() => setTerms(prev => ({ ...prev, term1: !prev.term1 }))}
+                                />
+                                <span className="text-zinc-800 text-sm">{TERMS_CONTENT.service.title}</span>
+                                <span className="text-blue-600 font-medium text-sm whitespace-nowrap">(필수)</span>
+                            </label>
+                            <Button
+                                variant="ghost"
+                                className="text-xs text-zinc-400 underline p-0 h-auto hover:text-zinc-600"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setActiveModal('service');
+                                }}
+                            >
+                                자세히 보기
+                            </Button>
+                        </div>
 
-                        <label className="flex items-center gap-3 cursor-pointer">
-                            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${terms.term2 ? 'bg-blue-600' : 'bg-zinc-300'}`}>
-                                <CheckIcon className="w-3 h-3 text-white" />
-                            </div>
-                            <input
-                                type="checkbox"
-                                className="hidden"
-                                checked={terms.term2}
-                                onChange={() => setTerms(prev => ({ ...prev, term2: !prev.term2 }))}
-                            />
-                            <span className="text-blue-600 font-medium text-sm">필수</span>
-                        </label>
+                        <div className="flex items-center justify-between">
+                            <label className="flex items-center gap-3 cursor-pointer flex-1">
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${terms.term2 ? 'bg-blue-600' : 'bg-zinc-300'}`}>
+                                    <CheckIcon className="w-3 h-3 text-white" />
+                                </div>
+                                <input
+                                    type="checkbox"
+                                    className="hidden"
+                                    checked={terms.term2}
+                                    onChange={() => setTerms(prev => ({ ...prev, term2: !prev.term2 }))}
+                                />
+                                <span className="text-zinc-800 text-sm">개인정보 수집 및 이용 동의</span>
+                                <span className="text-blue-600 font-medium text-sm whitespace-nowrap">(필수)</span>
+                            </label>
+                            <Button
+                                variant="ghost"
+                                className="text-xs text-zinc-400 underline p-0 h-auto hover:text-zinc-600"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setActiveModal('privacy');
+                                }}
+                            >
+                                자세히 보기
+                            </Button>
+                        </div>
 
-                        <label className="flex items-center gap-3 cursor-pointer">
-                            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${terms.term3 ? 'bg-blue-600' : 'bg-zinc-300'}`}>
-                                <CheckIcon className="w-3 h-3 text-white" />
-                            </div>
-                            <input
-                                type="checkbox"
-                                className="hidden"
-                                checked={terms.term3}
-                                onChange={() => setTerms(prev => ({ ...prev, term3: !prev.term3 }))}
-                            />
-                            <span className="text-blue-600 font-medium text-sm">선택</span>
-                        </label>
+
                     </div>
                 </div>
-            </div>
 
-            {/* Confirm Button - Fixed Bottom */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-white border-t border-zinc-100 z-40">
-                <Button
-                    className="w-full h-14 text-lg font-bold rounded-2xl bg-[#000000] hover:bg-zinc-800 text-white"
-                    onClick={handleSubmit}
-                    disabled={isLoading}
-                >
-                    {isLoading ? '처리중...' : '확인'}
-                </Button>
-            </div>
+                {/* Confirm Button - Fixed Bottom */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 bg-white border-t border-zinc-100 z-40">
+                    <Button
+                        className="w-full h-14 text-lg font-bold rounded-2xl bg-[#000000] hover:bg-zinc-800 text-white"
+                        onClick={handleSubmit}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? '처리중...' : '확인'}
+                    </Button>
+                </div>
 
+                {/* Terms Modal */}
+                <TermsModal
+                    isOpen={!!activeModal}
+                    onClose={() => setActiveModal(null)}
+                    title={activeModal ? TERMS_CONTENT[activeModal].title : ''}
+                    content={activeModal ? TERMS_CONTENT[activeModal].content : ''}
+                />
+
+            </div>
         </div>
     );
 }
