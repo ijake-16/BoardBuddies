@@ -39,4 +39,10 @@ public class ReservationMemberResponse {
      */
     @JsonProperty("teaching")
     private Boolean teaching;
+
+    /**
+     * 예약한 부원의 역할 (게스트 예약인 경우 예약한 부원의 role, 일반 예약인 경우 예약한 부원의 role)
+     */
+    @JsonProperty("role")
+    private String role;
 }

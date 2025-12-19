@@ -3,7 +3,6 @@ package com.boardbuddies.boardbuddiesserver.api;
 import com.boardbuddies.boardbuddiesserver.config.CurrentUser;
 import com.boardbuddies.boardbuddiesserver.dto.common.ApiResponse;
 import com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse;
-import com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse;
 import com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMultiResponse;
 import com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationRequest;
 import com.boardbuddies.boardbuddiesserver.service.ReservationService;
@@ -59,29 +58,11 @@ public class ReservationController {
         }
 
         /**
-         * 날짜별 예약자 명단 조회
+         * 날짜별 예약 상세 조회 (단건 - 캘린더 클릭 시)
          * 
          * GET /api/crews/{crewId}/reservations?date=2023-11-01
          */
         @GetMapping("/{crewId}/reservations")
-        public ResponseEntity<ApiResponse<ReservationListResponse>> getReservationsByDate(
-                        @CurrentUser Long userId,
-                        @PathVariable Long crewId,
-                        @RequestParam java.time.LocalDate date) {
-
-                ReservationListResponse response = reservationService
-                                .getReservationsByDate(userId, crewId, date);
-
-                return ResponseEntity.ok(
-                                ApiResponse.success(200, "예약자 명단 조회 완료", response));
-        }
-
-        /**
-         * 날짜별 예약 상세 조회 (단건 - 캘린더 클릭 시)
-         * 
-         * GET /api/crews/{crewId}/reservations/detail?date=2023-11-01
-         */
-        @GetMapping("/{crewId}/reservations/detail")
         public ResponseEntity<ApiResponse<ReservationDayDetailResponse>> getDayReservationDetail(
                         @CurrentUser Long userId,
                         @PathVariable Long crewId,
