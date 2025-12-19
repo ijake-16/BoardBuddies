@@ -33,9 +33,8 @@ interface Applicant {
 }
 
 export default function CrewMember({ onBack }: CrewMemberProps) {
-    // State to toggle between ADMIN (Manager view) and MEMBER (General view) for demonstration
-    const [currentUserRole] = useState<'ADMIN' | 'MEMBER'>('ADMIN');
-
+    // State to toggle between ADMIN (Manager view) and MEMBER (General view)
+    const [currentUserRole, setCurrentUserRole] = useState<'ADMIN' | 'MEMBER'>('MEMBER');
 
     const [activeTab, setActiveTab] = useState<'members' | 'applicants'>('members');
     const [members, setMembers] = useState<Member[]>([]);
@@ -47,19 +46,54 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
         setLoading(true);
         try {
             const userData = await getUserInfo();
+            const currentUserId = userData.userId;
+
             if (userData.crew) {
                 const cId = userData.crew.crewId;
                 setCrewId(cId);
 
-                // Fetch all data in parallel
-                const [crewInfo, managers, regularMembers, apiApplicants] = await Promise.all([
+                // Fetch basic crew data first
+                const [crewInfo, managers, regularMembers] = await Promise.all([
                     getCrewInfo(cId),
                     getCrewManagers(cId),
-                    getCrewMembers(cId),
-                    getApplicants(cId)
+                    getCrewMembers(cId)
                 ]);
 
-                // ... Process Members (Same as before) ...
+                console.log("DEBUG: UserData", userData);
+                console.log("DEBUG: CrewInfo", crewInfo);
+                console.log("DEBUG: Managers", managers);
+                console.log("DEBUG: RegularMembers", regularMembers);
+
+                // Determine Role
+                let isAdmin = false;
+                if (Array.isArray(managers)) {
+                    // Check if current user is in the managers list
+                    if (managers.some(m => m.user_id === currentUserId)) {
+                        isAdmin = true;
+                    }
+                }
+                // Fallback check for president by name if not in managers list (though they should be)
+                if (crewInfo && crewInfo.president_name === userData.name) {
+                    isAdmin = true;
+                }
+
+                console.log("DEBUG: Is Admin?", isAdmin);
+
+                setCurrentUserRole(isAdmin ? 'ADMIN' : 'MEMBER');
+
+                // Conditionally fetch applicants if Admin
+                let apiApplicants: any[] = [];
+                if (isAdmin) {
+                    try {
+                        apiApplicants = await getApplicants(cId);
+                        console.log("DEBUG: Applicants", apiApplicants);
+                    } catch (err) {
+                        console.error("Failed to fetch applicants", err);
+                        // Don't crash overall if just applicants fail
+                    }
+                }
+
+                // ... Process Members ...
                 const combinedMembers: Member[] = [];
                 const presidentName = crewInfo?.president_name;
                 let presidentFound = false;
@@ -67,7 +101,6 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
                 // 1. Process Managers
                 if (Array.isArray(managers)) {
                     managers.forEach(m => {
-                        // Skip if user_id is missing to prevent crash
                         if (!m.user_id) return;
 
                         if (m.name === presidentName) {
@@ -89,7 +122,7 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
                     });
                 }
 
-                // 2. Add President placeholder
+                // 2. Add President placeholder if missing
                 if (presidentName && !presidentFound) {
                     combinedMembers.unshift({
                         id: 'president',
@@ -102,23 +135,27 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
                 // 3. Add Members
                 if (Array.isArray(regularMembers)) {
                     regularMembers.forEach(m => {
-                        // Skip if user_id is missing or it's the president (already handled)
                         if (m.name !== presidentName && m.user_id) {
-                            combinedMembers.push({
-                                id: m.user_id.toString(),
-                                name: m.name,
-                                role: 'MEMBER',
-                                studentId: m.student_id
-                            });
+                            // Check if this member is NOT in the managers list (avoid duplicates)
+                            const isManager = managers.some(mgr => mgr.user_id === m.user_id);
+                            if (!isManager) {
+                                combinedMembers.push({
+                                    id: m.user_id.toString(),
+                                    name: m.name,
+                                    role: 'MEMBER',
+                                    studentId: m.student_id
+                                });
+                            }
                         }
                     });
                 }
+                console.log("DEBUG: Combined Members", combinedMembers);
                 setMembers(combinedMembers);
 
                 // Process Applicants
-                if (Array.isArray(apiApplicants)) {
+                if (isAdmin && Array.isArray(apiApplicants)) {
                     const mappedApplicants: Applicant[] = apiApplicants
-                        .filter(app => app.applicationId != null && app.status === 'PENDING') // Filter out invalid and non-pending applications
+                        .filter(app => app.applicationId != null && app.status === 'PENDING')
                         .map(app => ({
                             id: app.applicationId.toString(),
                             name: app.userName,
@@ -127,6 +164,8 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
                             userId: app.userId
                         }));
                     setApplicants(mappedApplicants);
+                } else {
+                    setApplicants([]);
                 }
 
             }

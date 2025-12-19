@@ -71,6 +71,10 @@ export interface ReservationDetail {
         user_id: number;
         name: string;
         profile_image_url: string | null;
+        teaching: boolean;
+        role: string;
+        phoneNumber?: string;
+        registered_by_name?: string;
     }[];
     waiting_member_list: any[];
     my_reservation: any | null;
