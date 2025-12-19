@@ -35,4 +35,9 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
      * 사용자가 특정 크루에 대기중인 신청이 있는지 확인
      */
     boolean existsByUserAndCrewAndStatus(User user, Crew crew, MemberStatus status);
+
+    /**
+     * 사용자의 모든 가입 신청 조회 (최신순)
+     */
+    List<Application> findByUserOrderByCreatedAtDesc(User user);
 }

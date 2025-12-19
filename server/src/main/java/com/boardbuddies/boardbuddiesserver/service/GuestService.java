@@ -75,28 +75,5 @@ public class GuestService {
                 .createdAt(guest.getCreatedAt())
                 .build();
     }
-
-    /**
-     * 게스트 목록 조회 (이름과 전화번호로 조회)
-     * 모든 게스트를 조회합니다.
-     */
-    @Transactional(readOnly = true)
-    public java.util.List<GuestResponse> getMyGuests(Long userId) {
-        // 사용자 조회 (권한 검증용)
-        userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        // 모든 게스트 조회
-        java.util.List<Guest> guests = guestRepository.findAll();
-
-        return guests.stream()
-                .map(guest -> GuestResponse.builder()
-                        .id(guest.getId())
-                        .name(guest.getName())
-                        .phoneNumber(guest.getPhoneNumber())
-                        .createdAt(guest.getCreatedAt())
-                        .build())
-                .toList();
-    }
 }
 

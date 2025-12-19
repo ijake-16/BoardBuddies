@@ -299,65 +299,6 @@ public class ReservationService {
     }
 
     /**
-     * 날짜별 예약자 명단 조회
-     */
-    @Transactional(readOnly = true)
-    public com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse getReservationsByDate(
-            Long userId, Long crewId, LocalDate date) {
-        if (userId == null || crewId == null) {
-            throw new IllegalArgumentException("User ID and Crew ID must not be null");
-        }
-
-        // 권한 확인 (회원 이상)
-        User user = Objects.requireNonNull(userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
-        Crew crew = crewRepository.findById(crewId)
-                .orElseThrow(() -> new RuntimeException("크루를 찾을 수 없습니다."));
-
-        if (!user.getCrew().equals(crew)) {
-            throw new RuntimeException("해당 크루의 회원이 아닙니다.");
-        }
-
-        // 해당 날짜의 모든 예약 조회 - Fetch Join으로 N+1 문제 방지
-        List<Reservation> reservations = reservationRepository.findByCrewAndDateWithFetch(crew, date);
-
-        List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary> confirmedList = new ArrayList<>();
-        List<com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary> waitingList = new ArrayList<>();
-
-        for (Reservation r : reservations) {
-            com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary.UserSummaryBuilder summaryBuilder = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary
-                    .builder()
-                    .userId(r.getUser().getId())
-                    .role(r.getUser().getRole());
-            
-            // 게스트 예약인 경우 게스트 이름을 name에 표시, 예약한 부원 이름은 registeredByName에 표시
-            if (r.getGuest() != null) {
-                summaryBuilder.name(r.getGuest().getName())  // 게스트 이름
-                        .guestId(r.getGuest().getId())
-                        .registeredByName(r.getUser().getName())  // 예약한 부원 이름
-                        .teaching(r.getTeaching());
-            } else {
-                summaryBuilder.name(r.getUser().getName())  // 일반 예약은 부원 이름
-                        .teaching(r.getTeaching());
-            }
-            
-            com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.UserSummary summary = summaryBuilder.build();
-
-            if ("confirmed".equals(r.getStatus())) {
-                confirmedList.add(summary);
-            } else if ("waiting".equals(r.getStatus())) {
-                waitingList.add(summary);
-            }
-        }
-
-        return com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationListResponse.builder()
-                .date(date.toString())
-                .confirmed(confirmedList)
-                .waiting(waitingList)
-                .build();
-    }
-
-    /**
      * 날짜별 예약 상세 조회 (단건)
      */
     @Transactional(readOnly = true)
@@ -410,14 +351,16 @@ public class ReservationService {
                     .userId(r.getUser().getId())
                     .profileImageUrl(r.getUser().getProfileImageUrl());
             
-            // 게스트 예약인 경우 게스트 이름을 name에 표시, 예약한 부원 이름은 registeredByName에 표시
+            // 게스트 예약인 경우 게스트 이름을 name에 표시, 예약한 부원 이름은 registeredByName에 표시, role은 'VISITOR'
             if (r.getGuest() != null) {
                 memberResponseBuilder.name(r.getGuest().getName())  // 게스트 이름
                         .guestId(r.getGuest().getId())
                         .registeredByName(r.getUser().getName())  // 예약한 부원 이름
+                        .role("VISITOR")  // 게스트 예약인 경우 role은 'VISITOR'
                         .teaching(r.getTeaching());
             } else {
                 memberResponseBuilder.name(r.getUser().getName())  // 일반 예약은 부원 이름
+                        .role(r.getUser().getRole() != null ? r.getUser().getRole().name() : null)  // 일반 예약은 부원의 role
                         .teaching(r.getTeaching());
             }
             

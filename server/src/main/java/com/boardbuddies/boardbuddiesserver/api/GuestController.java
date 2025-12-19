@@ -46,19 +46,5 @@ public class GuestController {
         return ResponseEntity.ok(
                 ApiResponse.success(200, "게스트 조회 완료", response));
     }
-
-    /**
-     * 본인이 등록한 게스트 목록 조회
-     * GET /api/guests
-     */
-    @GetMapping
-    public ResponseEntity<ApiResponse<java.util.List<GuestResponse>>> getMyGuests(
-            @CurrentUser Long userId) {
-
-        java.util.List<GuestResponse> response = guestService.getMyGuests(userId);
-
-        return ResponseEntity.ok(
-                ApiResponse.success(200, "게스트 목록 조회 완료", response));
-    }
 }
 
