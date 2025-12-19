@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.boardbuddies.boardbuddiesserver.domain.Reservation;
 import com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationResponse;
 import com.boardbuddies.boardbuddiesserver.repository.ReservationRepository;
+import com.boardbuddies.boardbuddiesserver.dto.crew.MyApplicationResponse;
+import com.boardbuddies.boardbuddiesserver.service.CrewApplicationService;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,6 +39,7 @@ public class UserController {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final RedisTokenService redisTokenService;
+    private final CrewApplicationService crewApplicationService;
 
     /**
      * 내 정보 조회 (JWT 인증 필요)
@@ -100,6 +103,23 @@ public class UserController {
 
         return ResponseEntity.ok(
                 ApiResponse.success(200, "내 예약 조회 성공", response));
+    }
+
+    /**
+     * 내 크루 가입 신청 상태 조회 (마이페이지용)
+     * 
+     * @param userId 현재 로그인한 사용자 ID
+     * @return 가입 신청 목록
+     */
+    @GetMapping("/me/applications")
+    @Transactional(readOnly = true)
+    public ResponseEntity<ApiResponse<List<MyApplicationResponse>>> getMyApplications(
+            @CurrentUser Long userId) {
+
+        List<MyApplicationResponse> response = crewApplicationService.getMyApplications(userId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(200, "가입 신청 상태 조회 성공", response));
     }
 
     /**

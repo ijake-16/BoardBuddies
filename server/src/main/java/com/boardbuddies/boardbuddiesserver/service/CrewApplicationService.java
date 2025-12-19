@@ -4,6 +4,7 @@ import com.boardbuddies.boardbuddiesserver.domain.*;
 import com.boardbuddies.boardbuddiesserver.dto.crew.ApplicationDecisionRequest;
 import com.boardbuddies.boardbuddiesserver.dto.crew.CrewApplicationRequest;
 import com.boardbuddies.boardbuddiesserver.dto.crew.CrewApplicationResponse;
+import com.boardbuddies.boardbuddiesserver.dto.crew.MyApplicationResponse;
 import com.boardbuddies.boardbuddiesserver.repository.ApplicationRepository;
 import com.boardbuddies.boardbuddiesserver.repository.CrewRepository;
 import com.boardbuddies.boardbuddiesserver.repository.UserRepository;
@@ -157,5 +158,29 @@ public class CrewApplicationService {
             log.info("크루 가입 거절: userId={}, crewId={}, applicationId={}",
                     applicant.getId(), crewId, applicationId);
         }
+    }
+
+    /**
+     * 사용자의 크루 가입 신청 상태 조회 (마이페이지용)
+     * 
+     * @param userId 사용자 ID
+     * @return 사용자의 모든 가입 신청 목록
+     */
+    @Transactional(readOnly = true)
+    public List<MyApplicationResponse> getMyApplications(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID must not be null");
+        }
+
+        // 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 사용자의 모든 가입 신청 조회
+        List<Application> applications = applicationRepository.findByUserOrderByCreatedAtDesc(user);
+
+        return applications.stream()
+                .map(MyApplicationResponse::from)
+                .collect(Collectors.toList());
     }
 }
