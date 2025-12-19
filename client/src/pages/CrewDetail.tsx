@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getCrewInfo, getCrewManagers } from '../services/crew';
 import { getUserInfo } from '../services/user';
 import { CrewDetail as CrewDetailType } from '../types/api';
+import MemberStats from './MemberStats';
 
 
 interface CrewDetailProps {
@@ -17,6 +18,7 @@ export default function CrewDetail({ onBack, onCalendarClick, onMemberClick, onS
     const [crewInfo, setCrewInfo] = useState<CrewDetailType | null>(null);
     const [loading, setLoading] = useState(true);
     const [isManager, setIsManager] = useState(false);
+    const [showStats, setShowStats] = useState(false);
 
     console.log('CrewDetail rendered, isManager:', isManager);
 
@@ -69,6 +71,10 @@ export default function CrewDetail({ onBack, onCalendarClick, onMemberClick, onS
                 </Button>
             </div>
         );
+    }
+
+    if (showStats) {
+        return <MemberStats crewId={crewInfo.crew_id} onBack={() => setShowStats(false)} />;
     }
 
     return (
@@ -135,9 +141,20 @@ export default function CrewDetail({ onBack, onCalendarClick, onMemberClick, onS
                 {/* Action Row */}
                 <button
                     onClick={onCalendarClick}
-                    className="w-full bg-zinc-100 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 transition-colors mb-auto"
+                    className="w-full bg-zinc-100 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 transition-colors mb-4"
                 >
                     <span className="font-bold text-zinc-600">크루 달력</span>
+                    <div className="flex items-center gap-1 text-zinc-500">
+                        <span className="text-sm font-medium">확인하기</span>
+                        <ChevronRightIcon className="w-5 h-5" />
+                    </div>
+                </button>
+
+                <button
+                    onClick={() => setShowStats(true)}
+                    className="w-full bg-zinc-100 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 transition-colors mb-auto"
+                >
+                    <span className="font-bold text-zinc-600">시즌방 사용 기록</span>
                     <div className="flex items-center gap-1 text-zinc-500">
                         <span className="text-sm font-medium">확인하기</span>
                         <ChevronRightIcon className="w-5 h-5" />

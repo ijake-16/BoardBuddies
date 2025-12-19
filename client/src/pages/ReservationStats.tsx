@@ -3,6 +3,7 @@ import { ChevronLeftIcon, ChevronRightIcon, Smile } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
 import { getCrewInfo, getReservationDetail, getCrewCalendar, createReservation, cancelReservation } from '../services/crew';
+import { getUserInfo } from '../services/user';
 import { ReservationDetail, CrewCalendarResponse } from '../types/api';
 
 
@@ -69,7 +70,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
         const initData = async () => {
             try {
                 // Import getUserInfo dynamically or if already imported
-                const { getUserInfo } = await import('../services/user');
+                // const { getUserInfo } = await import('../services/user');
                 const userData = await getUserInfo();
 
                 if (userData.crew && userData.crew.crewId) {

@@ -110,3 +110,10 @@ export interface CrewUpdateRequest {
     dailyCapacity: number;
     isCapacityLimited: boolean;
 }
+
+export interface CrewUsageStatistic {
+    user_id: number;
+    name: string;
+    usage_count: number;
+    profile_image_url?: string | null; // Optional
+}

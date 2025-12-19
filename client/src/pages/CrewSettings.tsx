@@ -31,7 +31,7 @@ export default function CrewSettings({ onBack }: CrewSettingsProps) {
                 if (user.crew) {
                     const cId = user.crew.crewId;
                     setCrewId(cId);
-                    const [info, managers] = await Promise.all([
+                    const [info] = await Promise.all([
                         getCrewInfo(cId),
                         getCrewManagers(cId)
                     ]);

@@ -1,5 +1,5 @@
 import apiClient from '../lib/axios';
-import { ApiResponse, CrewDetail, CrewMember, CrewApplicant, ReservationDetail, ReservationResponse, CrewCalendarResponse, CrewUpdateRequest } from '../types/api';
+import { ApiResponse, CrewDetail, CrewMember, CrewApplicant, ReservationDetail, ReservationResponse, CrewCalendarResponse, CrewUpdateRequest, CrewUsageStatistic } from '../types/api';
 
 export const getCrewInfo = async (crewId: number): Promise<CrewDetail> => {
     const response = await apiClient.get<ApiResponse<CrewDetail>>(`/crews/${crewId}`);
@@ -62,4 +62,21 @@ export const promoteMember = async (crewId: number, userId: number): Promise<voi
 
 export const demoteManager = async (crewId: number, userId: number): Promise<void> => {
     await apiClient.delete(`/crews/${crewId}/managers/${userId}`);
+};
+
+
+export const getCrewUsageStatistics = async (
+    crewId: number,
+    sortBy: 'name' | 'usageCount' = 'name',
+    sortOrder: 'asc' | 'desc' = 'asc',
+    search: string = ''
+): Promise<CrewUsageStatistic[]> => {
+    const response = await apiClient.get<ApiResponse<CrewUsageStatistic[]>>(`/crews/${crewId}/usage-statistics`, {
+        params: {
+            sortBy,
+            sortOrder,
+            search
+        }
+    });
+    return response.data.data;
 };
