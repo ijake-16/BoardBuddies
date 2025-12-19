@@ -13,10 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import com.boardbuddies.boardbuddiesserver.domain.Guest;
 import com.boardbuddies.boardbuddiesserver.domain.Reservation;
 import com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationResponse;
-import com.boardbuddies.boardbuddiesserver.repository.GuestRepository;
 import com.boardbuddies.boardbuddiesserver.repository.ReservationRepository;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +36,6 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
-    private final GuestRepository guestRepository;
     private final RedisTokenService redisTokenService;
 
     /**
@@ -107,8 +104,9 @@ public class UserController {
 
     /**
      * 회원 탈퇴
-     * - 현재 로그인한 사용자의 예약/게스트/회원 정보를 모두 삭제
+     * - 현재 로그인한 사용자의 예약/회원 정보를 모두 삭제
      * - 해당 사용자의 리프레시 토큰 삭제
+     * - 게스트는 독립적으로 존재하므로 삭제하지 않음
      */
     @DeleteMapping("/me")
     @Transactional
@@ -121,26 +119,13 @@ public class UserController {
             throw new RuntimeException("동아리 회장은 회원 탈퇴를 할 수 없습니다. 회장을 변경한 후 다시 시도해주세요.");
         }
 
-        // 1. 해당 사용자가 등록한 게스트 조회
-        List<Guest> guests = guestRepository.findAllByRegisteredByOrderByCreatedAtDesc(user);
-
-        // 2. 게스트와 연관된 예약 삭제
-        if (!guests.isEmpty()) {
-            reservationRepository.deleteAllByGuestIn(guests);
-        }
-
-        // 3. 해당 사용자의 예약 삭제
+        // 1. 해당 사용자의 모든 예약 삭제 (일반 예약 + 게스트 예약 모두 포함)
         reservationRepository.deleteAllByUser(user);
 
-        // 4. 게스트 삭제
-        if (!guests.isEmpty()) {
-            guestRepository.deleteAll(guests);
-        }
-
-        // 5. 사용자 삭제
+        // 2. 사용자 삭제
         userRepository.delete(user);
 
-        // 6. 리프레시 토큰 삭제
+        // 3. 리프레시 토큰 삭제
         redisTokenService.deleteRefreshToken(userId);
 
         return ResponseEntity.ok(
