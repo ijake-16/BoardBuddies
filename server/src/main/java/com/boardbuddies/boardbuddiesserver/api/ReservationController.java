@@ -61,8 +61,9 @@ public class ReservationController {
          * 날짜별 예약 상세 조회 (단건 - 캘린더 클릭 시)
          * 
          * GET /api/crews/{crewId}/reservations?date=2023-11-01
+         * GET /api/crews/{crewId}/reservations/detail?date=2023-11-01 (호환성 유지)
          */
-        @GetMapping("/{crewId}/reservations")
+        @GetMapping({"/{crewId}/reservations", "/{crewId}/reservations/detail"})
         public ResponseEntity<ApiResponse<ReservationDayDetailResponse>> getDayReservationDetail(
                         @CurrentUser Long userId,
                         @PathVariable Long crewId,
