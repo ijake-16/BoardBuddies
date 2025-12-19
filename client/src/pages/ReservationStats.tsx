@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, Smile } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, Smile, Crown } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Calendar } from '../components/Calendar';
 import { getCrewInfo, getReservationDetail, getCrewCalendar, createReservation, cancelReservation } from '../services/crew';
@@ -59,6 +59,9 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
 
     // Store monthly calendar data (occupancy statuses)
     const [calendarData, setCalendarData] = useState<CrewCalendarResponse | null>(null);
+
+    // Guest Detail Modal State
+    const [selectedGuest, setSelectedGuest] = useState<{ name: string; phoneNumber?: string; inviter?: string } | null>(null);
 
     const formatDate = (day: number) => {
         return `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -239,7 +242,20 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
     const currentDetail = selectedDay ? detailsCache[formatDate(selectedDay)] : null;
     const currentMemberCount = currentDetail?.booked ?? 0;
     // Fix: Ensure we fallback to empty array if member_list is undefined
-    const currentMemberList = currentDetail?.member_list || [];
+    const currentMemberList = (currentDetail?.member_list || []).sort((a, b) => {
+        const getRolePriority = (role: string) => {
+            if (role === 'PRESIDENT') return 3;
+            if (role === 'MANAGER' || role === 'ADMIN') return 2;
+            return 1;
+        };
+        const priorityA = getRolePriority(a.role || 'MEMBER');
+        const priorityB = getRolePriority(b.role || 'MEMBER');
+
+        if (priorityA !== priorityB) {
+            return priorityB - priorityA; // Higher priority first
+        }
+        return a.name.localeCompare(b.name, 'ko'); // Korean alphabetical order
+    });
 
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
@@ -349,14 +365,53 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                             {/* Users Grid */}
                             <div className="grid grid-cols-2 gap-y-5 gap-x-4">
                                 {currentMemberList.length > 0 ? (
-                                    currentMemberList.map((member: { user_id: number; name: string; profile_image_url: string | null }) => (
+                                    currentMemberList.map((member: { user_id: number; name: string; profile_image_url: string | null; teaching: boolean; role: string; phoneNumber?: string; registered_by_name?: string }) => (
                                         <div key={member.user_id} className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-zinc-300 rounded-full shrink-0 overflow-hidden">
+                                            <div className="w-10 h-10 bg-zinc-300 rounded-full shrink-0 overflow-hidden relative">
                                                 {member.profile_image_url ? (
                                                     <img src={member.profile_image_url} alt={member.name} className="w-full h-full object-cover" />
                                                 ) : null}
+                                                {/* Role Icon Overlay (optional, but user asked for "Crown") -> User said "President gets color crown... Admin gets color crown".
+                                                    Placement wasn't strictly specified but usually next to name or on avatar. 
+                                                    I will place it next to the name as requested in the visual flow of "List sorted... Crown".
+                                                */}
                                             </div>
-                                            <span className="text-sm font-bold text-zinc-700">{member.name}</span>
+                                            <div className="flex flex-col items-start gap-0.5">
+                                                <div className="flex items-center gap-1.5">
+                                                    {/* Role Icon */}
+                                                    {member.role === 'PRESIDENT' && (
+                                                        <Crown className="w-3.5 h-3.5" strokeWidth={2.5} color="#162660" fill="#162660" />
+                                                    )}
+                                                    {(member.role === 'MANAGER' || member.role === 'ADMIN') && (
+                                                        <Crown className="w-3.5 h-3.5" strokeWidth={2.5} color="#60A5FA" fill="#D0E6FD" />
+                                                    )}
+
+                                                    <span
+                                                        className={`text-sm font-bold text-zinc-700 ${member.role === 'VISITOR' ? 'cursor-pointer hover:underline' : ''}`}
+                                                        onClick={() => {
+                                                            if (member.role === 'VISITOR') {
+                                                                setSelectedGuest({
+                                                                    name: member.name,
+                                                                    phoneNumber: member.phoneNumber,
+                                                                    inviter: member.registered_by_name
+                                                                });
+                                                            }
+                                                        }}
+                                                    >
+                                                        {member.name}
+                                                    </span>
+                                                    {member.teaching && (
+                                                        <div className="px-1.5 py-0.5 bg-purple-100 rounded-[4px] flex items-center justify-center">
+                                                            <span className="text-[10px] font-bold text-purple-700">강습</span>
+                                                        </div>
+                                                    )}
+                                                    {member.role === 'VISITOR' && (
+                                                        <div className="px-1.5 py-0.5 bg-yellow-100 rounded-[4px] flex items-center justify-center">
+                                                            <span className="text-[10px] font-bold text-yellow-700">게스트</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     ))
                                 ) : (
@@ -425,6 +480,34 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                     </div>
                 )}
             </main>
+
+            {/* Guest Detail Modal - Overlay for Guest Info */}
+            {selectedGuest && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-6 animate-in fade-in duration-200" onClick={() => setSelectedGuest(null)}>
+                    <div className="bg-white rounded-[24px] p-6 w-full max-w-[280px] shadow-2xl flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-zinc-900 mb-1">{selectedGuest.name}</h3>
+                        <p className="text-xs text-zinc-400 mb-6 font-medium">게스트 정보</p>
+
+                        <div className="w-full space-y-4 mb-6">
+                            <div className="flex gap-3 text-sm">
+                                <span className="font-bold text-zinc-500 w-14 shrink-0 text-right">휴대전화</span>
+                                <span className="text-zinc-900 font-medium">{selectedGuest.phoneNumber || '-'}</span>
+                            </div>
+                            <div className="flex gap-3 text-sm">
+                                <span className="font-bold text-zinc-500 w-14 shrink-0 text-right">초대자</span>
+                                <span className="text-zinc-900 font-medium">{selectedGuest.inviter || '-'}</span>
+                            </div>
+                        </div>
+
+                        <Button
+                            className="w-full bg-[#1E3A8A] text-white rounded-xl py-2.5 text-sm font-bold shadow-md hover:bg-[#172554]"
+                            onClick={() => setSelectedGuest(null)}
+                        >
+                            닫기
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

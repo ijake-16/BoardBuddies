@@ -35,8 +35,10 @@ export const getReservationDetail = async (crewId: number, date: string): Promis
     return response.data.data;
 };
 
-export const createReservation = async (crewId: number, dates: string[], guestInfo?: { name: string, phoneNumber: string }): Promise<ReservationResponse> => {
-    const response = await apiClient.post<ApiResponse<ReservationResponse>>(`/crews/${crewId}/reservations`, { dates, guestInfo });
+export const createReservation = async (crewId: number, dates: string[], guestId?: number): Promise<ReservationResponse> => {
+    const payload: any = { dates };
+    if (guestId) payload.guest_id = guestId;
+    const response = await apiClient.post<ApiResponse<ReservationResponse>>(`/crews/${crewId}/reservations`, payload);
     return response.data.data;
 };
 
