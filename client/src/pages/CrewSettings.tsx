@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getCrewInfo, getCrewManagers, updateCrew } from '../services/crew';
 import { getUserInfo } from '../services/user';
 import { CrewUpdateRequest } from '../types/api';
+import Promote from './Promote';
 
 interface CrewSettingsProps {
     onBack: () => void;
@@ -12,6 +13,7 @@ interface CrewSettingsProps {
 export default function CrewSettings({ onBack }: CrewSettingsProps) {
     const [loading, setLoading] = useState(true);
     const [crewId, setCrewId] = useState<number | null>(null);
+    const [showPromote, setShowPromote] = useState(false);
     const [formData, setFormData] = useState<CrewUpdateRequest>({
         crewName: '',
         manager_list: [],
@@ -84,6 +86,10 @@ export default function CrewSettings({ onBack }: CrewSettingsProps) {
     };
 
     if (loading) return <div className="flex-1 flex items-center justify-center">로딩 중...</div>;
+
+    if (showPromote && crewId) {
+        return <Promote crewId={crewId} onBack={() => setShowPromote(false)} />;
+    }
 
     return (
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
@@ -176,6 +182,15 @@ export default function CrewSettings({ onBack }: CrewSettingsProps) {
                     >
                         <SaveIcon className="w-5 h-5" />
                         저장하기
+                    </button>
+
+
+                    {/* Manage Managers Button */}
+                    <button
+                        onClick={() => setShowPromote(true)}
+                        className="w-full py-4 bg-white border-2 border-zinc-100 text-zinc-900 rounded-2xl font-bold text-lg hover:bg-zinc-50 transition-colors"
+                    >
+                        운영진 관리
                     </button>
 
                     <div className="h-10" />

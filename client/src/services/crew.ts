@@ -55,3 +55,11 @@ export const getCrewCalendar = async (crewId: number, date: string, showMySchedu
 export const updateCrew = async (crewId: number, data: CrewUpdateRequest): Promise<void> => {
     await apiClient.patch(`/crews/${crewId}`, data);
 };
+
+export const promoteMember = async (crewId: number, userId: number): Promise<void> => {
+    await apiClient.post(`/crews/${crewId}/managers/${userId}`);
+};
+
+export const demoteManager = async (crewId: number, userId: number): Promise<void> => {
+    await apiClient.delete(`/crews/${crewId}/managers/${userId}`);
+};

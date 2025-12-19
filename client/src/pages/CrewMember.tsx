@@ -34,7 +34,8 @@ interface Applicant {
 
 export default function CrewMember({ onBack }: CrewMemberProps) {
     // State to toggle between ADMIN (Manager view) and MEMBER (General view) for demonstration
-    const [currentUserRole, setCurrentUserRole] = useState<'ADMIN' | 'MEMBER'>('ADMIN');
+    const [currentUserRole] = useState<'ADMIN' | 'MEMBER'>('ADMIN');
+
 
     const [activeTab, setActiveTab] = useState<'members' | 'applicants'>('members');
     const [members, setMembers] = useState<Member[]>([]);
@@ -116,13 +117,15 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
 
                 // Process Applicants
                 if (Array.isArray(apiApplicants)) {
-                    const mappedApplicants: Applicant[] = apiApplicants.map(app => ({
-                        id: app.applicationId.toString(),
-                        name: app.userName,
-                        studentId: app.studentId,
-                        requestDate: app.created_at ? new Date(app.created_at).toLocaleDateString() : 'Unknown',
-                        userId: app.userId
-                    }));
+                    const mappedApplicants: Applicant[] = apiApplicants
+                        .filter(app => app.applicationId != null && app.status === 'PENDING') // Filter out invalid and non-pending applications
+                        .map(app => ({
+                            id: app.applicationId.toString(),
+                            name: app.userName,
+                            studentId: app.studentId,
+                            requestDate: app.created_at ? new Date(app.created_at).toLocaleDateString() : 'Unknown',
+                            userId: app.userId
+                        }));
                     setApplicants(mappedApplicants);
                 }
 
@@ -207,12 +210,12 @@ export default function CrewMember({ onBack }: CrewMemberProps) {
                 <h1 className=" flex-1 text-center text-lg font-bold text-zinc-900">Crew Members</h1>
 
                 {/* Role Toggler for Demo */}
-                <button
+                {/* <button
                     onClick={() => setCurrentUserRole(prev => prev === 'ADMIN' ? 'MEMBER' : 'ADMIN')}
                     className="text-xs px-2 py-1 bg-zinc-100 rounded border border-zinc-200"
                 >
                     {currentUserRole} View
-                </button>
+                </button> */}
             </header>
 
             {/* Tabs (Admin Only) */}
