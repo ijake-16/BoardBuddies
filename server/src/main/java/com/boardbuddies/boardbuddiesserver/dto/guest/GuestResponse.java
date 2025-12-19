@@ -16,17 +16,6 @@ public class GuestResponse {
     private Long id;
     private String name;
     private String phoneNumber;
-    private String school;
     private LocalDateTime createdAt;
-    
-    /**
-     * 등록한 부원 ID
-     */
-    private Long registeredById;
-    
-    /**
-     * 등록한 부원 이름
-     */
-    private String registeredByName;
 }
 
