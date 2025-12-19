@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { getUserInfo, getMyReservations } from '../services/user';
 import { getCrewInfo } from '../services/crew';
 import { UserDetail, CrewDetail, MyReservation } from '../types/api';
-import { Bus, Mountain, UserPlus } from 'lucide-react';
+import { Bus, Mountain, UserPlus, Sun, Cloud, CloudRain, CloudSnow, CloudLightning, Wind } from 'lucide-react';
+import { getWeather, WeatherData } from '../services/weather';
 
 // Icons
 
@@ -71,6 +72,8 @@ export default function Home({
     // Use prop as initial, but can be updated by data
     const [hasCrew, setHasCrew] = useState(initialHasCrew);
     const [isDebugNoCrew] = useState(false);
+    const [weather, setWeather] = useState<WeatherData | null>(null);
+    const [currentDate, setCurrentDate] = useState<string>('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -102,6 +105,21 @@ export default function Home({
             }
         };
         fetchData();
+
+        // Fetch Weather
+        getWeather().then(data => {
+            setWeather(data);
+        }).catch(err => console.error("Weather fetch failed", err));
+
+        // Set Current Date
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const weekday = days[now.getDay()];
+        setCurrentDate(`${year}. ${month}. ${day} ${weekday}`);
+
     }, []);
 
     return (
@@ -301,10 +319,27 @@ export default function Home({
 
                             <div className="z-10 pl-8 py-6">
                                 <div className="font-bold text-lg text-white">휘닉스파크</div>
-                                <div className="text-sm text-white/90">2025. 08. 11 Tue</div>
+                                <div className="text-sm text-white/90">{currentDate}</div>
+                                <div className="text-xs text-white/80 mt-1">{weather?.weatherLabel}</div>
                             </div>
-                            <div className="z-10 pr-8 text-5xl font-light text-white">
-                                33<span className="text-2xl align-top">°</span>
+                            <div className="z-10 pr-8 flex flex-col items-end">
+                                <div className="text-5xl font-light text-white flex items-start">
+                                    {weather ? Math.round(weather.temperature) : '--'}<span className="text-2xl align-top">°</span>
+                                </div>
+                                <div className="text-white mt-1">
+                                    {/* Dynamic Icon based on weather code */}
+                                    {(() => {
+                                        if (!weather) return <Sun className="w-8 h-8" />;
+                                        const code = weather.weatherCode;
+                                        if (code === 0 || code === 1) return <Sun className="w-8 h-8" />;
+                                        if (code === 2 || code === 3) return <Cloud className="w-8 h-8" />;
+                                        if ([45, 48].includes(code)) return <Wind className="w-8 h-8" />;
+                                        if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return <CloudRain className="w-8 h-8" />;
+                                        if ([71, 73, 75, 77, 85, 86].includes(code)) return <CloudSnow className="w-8 h-8" />;
+                                        if ([95, 96, 99].includes(code)) return <CloudLightning className="w-8 h-8" />;
+                                        return <Sun className="w-8 h-8" />;
+                                    })()}
+                                </div>
                             </div>
                         </div>
                     </>
