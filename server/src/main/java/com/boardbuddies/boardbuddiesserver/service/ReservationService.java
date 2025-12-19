@@ -61,11 +61,6 @@ public class ReservationService {
         if (request.getGuestId() != null) {
             guest = guestRepository.findById(request.getGuestId())
                     .orElseThrow(() -> new RuntimeException("게스트를 찾을 수 없습니다."));
-            
-            // 게스트가 해당 부원이 등록한 것인지 확인
-            if (!guest.getRegisteredBy().getId().equals(userId)) {
-                throw new RuntimeException("본인이 등록한 게스트만 예약할 수 있습니다.");
-            }
         }
 
         // 3. 오픈 시각 검증
@@ -213,16 +208,11 @@ public class ReservationService {
         User user = Objects.requireNonNull(userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다.")));
 
-        // 2-1. 게스트 예약 취소인 경우 게스트 조회 및 검증
+        // 2-1. 게스트 예약 취소인 경우 게스트 조회
         Guest guest = null;
         if (request.getGuestId() != null) {
             guest = guestRepository.findById(request.getGuestId())
                     .orElseThrow(() -> new RuntimeException("게스트를 찾을 수 없습니다."));
-            
-            // 게스트가 해당 부원이 등록한 것인지 확인
-            if (!guest.getRegisteredBy().getId().equals(userId)) {
-                throw new RuntimeException("본인이 등록한 게스트만 취소할 수 있습니다.");
-            }
         }
         // guestId가 없으면 일반 예약 취소 (게스트 예약은 취소 불가)
 
@@ -416,6 +406,7 @@ public class ReservationService {
         for (Reservation r : reservations) {
             com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse.ReservationMemberResponseBuilder memberResponseBuilder = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse
                     .builder()
+                    .reservationId(r.getId())
                     .userId(r.getUser().getId())
                     .profileImageUrl(r.getUser().getProfileImageUrl());
             
@@ -439,9 +430,8 @@ public class ReservationService {
                 waitingMemberList.add(memberResponse);
             }
 
-            // 내 예약 확인 (일반 예약 또는 본인이 등록한 게스트 예약)
-            if (r.getUser().getId().equals(userId) || 
-                (r.getGuest() != null && r.getGuest().getRegisteredBy().getId().equals(userId))) {
+            // 내 예약 확인 (일반 예약 또는 본인이 예약한 게스트 예약)
+            if (r.getUser().getId().equals(userId)) {
                 myReservationInfo = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationDayDetailResponse.MyReservationInfo
                         .builder()
                         .reservationId(r.getId())

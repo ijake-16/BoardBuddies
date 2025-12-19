@@ -308,9 +308,8 @@ public class CrewService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        // 권한 확인 (해당 크루의 MANAGER 이상)
-        if (!user.getCrew().equals(crew) ||
-                (user.getRole() != Role.PRESIDENT && user.getRole() != Role.MANAGER)) {
+        // 권한 확인 (해당 크루의 멤버면 조회 가능)
+        if (!user.getCrew().equals(crew)) {
             throw new AccessDeniedException("운영진 목록 조회 권한이 없습니다.");
         }
 
@@ -343,9 +342,8 @@ public class CrewService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        // 권한 확인 (해당 크루의 MANAGER 이상)
-        if (!user.getCrew().equals(crew) ||
-                (user.getRole() != Role.PRESIDENT && user.getRole() != Role.MANAGER)) {
+        // 권한 확인 (해당 크루의 멤버면 조회 가능)
+        if (!user.getCrew().equals(crew)) {
             throw new AccessDeniedException("부원 목록 조회 권한이 없습니다.");
         }
 

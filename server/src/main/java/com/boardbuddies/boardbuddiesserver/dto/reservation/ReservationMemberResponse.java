@@ -7,6 +7,9 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ReservationMemberResponse {
+    @JsonProperty("reservation_id")
+    private Long reservationId;
+
     @JsonProperty("user_id")
     private Long userId;
 

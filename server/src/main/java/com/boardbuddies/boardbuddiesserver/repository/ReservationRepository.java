@@ -79,7 +79,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Query("SELECT r FROM Reservation r " +
                 "LEFT JOIN FETCH r.user " +
                 "LEFT JOIN FETCH r.guest " +
-                "LEFT JOIN FETCH r.guest.registeredBy " +
                 "WHERE r.crew = :crew AND r.date = :date " +
                 "ORDER BY r.createdAt ASC")
         List<Reservation> findByCrewAndDateWithFetch(@Param("crew") Crew crew, @Param("date") LocalDate date);
@@ -96,7 +95,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Query("SELECT r FROM Reservation r " +
                 "LEFT JOIN FETCH r.user " +
                 "LEFT JOIN FETCH r.guest " +
-                "LEFT JOIN FETCH r.guest.registeredBy " +
                 "WHERE r.crew = :crew AND r.date = :date " +
                 "ORDER BY r.createdAt ASC")
         List<Reservation> findAllByCrewAndDateOrderByCreatedAtAscWithFetch(@Param("crew") Crew crew, @Param("date") LocalDate date);

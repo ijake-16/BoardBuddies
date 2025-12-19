@@ -20,10 +20,5 @@ public class GuestCreateRequest {
      * 게스트 전화번호
      */
     private String phoneNumber;
-
-    /**
-     * 게스트 학교/소속
-     */
-    private String school;
 }
 

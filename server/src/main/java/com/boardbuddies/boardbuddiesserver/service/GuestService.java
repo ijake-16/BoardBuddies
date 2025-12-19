@@ -20,8 +20,8 @@ public class GuestService {
     private final UserRepository userRepository;
 
     /**
-     * 게스트 등록
-     * 부원이 게스트 정보를 등록합니다.
+     * 게스트 등록 또는 조회
+     * 이름과 전화번호로 게스트를 조회하고, 없으면 생성합니다.
      */
     @Transactional
     public GuestResponse createGuest(Long userId, GuestCreateRequest request) {
@@ -33,70 +33,68 @@ public class GuestService {
             throw new RuntimeException("크루에 소속된 회원만 게스트를 등록할 수 있습니다.");
         }
 
-        // 2. 게스트 생성
-        Guest guest = Guest.builder()
-                .name(request.getName())
-                .phoneNumber(request.getPhoneNumber())
-                .school(request.getSchool())
-                .registeredBy(user)
-                .build();
+        // 2. 이름과 전화번호로 게스트 조회 (이미 존재하면 반환)
+        Guest guest = guestRepository.findByNameAndPhoneNumber(request.getName(), request.getPhoneNumber())
+                .orElse(null);
 
-        guest = guestRepository.save(guest);
+        // 3. 게스트가 없으면 생성
+        if (guest == null) {
+            guest = Guest.builder()
+                    .name(request.getName())
+                    .phoneNumber(request.getPhoneNumber())
+                    .build();
 
-        // 3. 응답 생성
+            guest = guestRepository.save(guest);
+        }
+
+        // 4. 응답 생성
         return GuestResponse.builder()
                 .id(guest.getId())
                 .name(guest.getName())
                 .phoneNumber(guest.getPhoneNumber())
-                .school(guest.getSchool())
                 .createdAt(guest.getCreatedAt())
-                .registeredById(user.getId())
-                .registeredByName(user.getName())
                 .build();
     }
 
     /**
-     * 게스트 조회 (본인이 등록한 게스트)
+     * 게스트 조회
      */
     @Transactional(readOnly = true)
     public GuestResponse getGuest(Long userId, Long guestId) {
-        User user = userRepository.findById(userId)
+        // 사용자 조회 (권한 검증용)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        Guest guest = guestRepository.findByIdAndRegisteredBy(guestId, user)
+        Guest guest = guestRepository.findById(guestId)
                 .orElseThrow(() -> new RuntimeException("게스트를 찾을 수 없습니다."));
 
         return GuestResponse.builder()
                 .id(guest.getId())
                 .name(guest.getName())
                 .phoneNumber(guest.getPhoneNumber())
-                .school(guest.getSchool())
                 .createdAt(guest.getCreatedAt())
-                .registeredById(guest.getRegisteredBy().getId())
-                .registeredByName(guest.getRegisteredBy().getName())
                 .build();
     }
 
     /**
-     * 본인이 등록한 게스트 목록 조회
+     * 게스트 목록 조회 (이름과 전화번호로 조회)
+     * 모든 게스트를 조회합니다.
      */
     @Transactional(readOnly = true)
     public java.util.List<GuestResponse> getMyGuests(Long userId) {
-        User user = userRepository.findById(userId)
+        // 사용자 조회 (권한 검증용)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // Fetch Join으로 N+1 문제 방지
-        java.util.List<Guest> guests = guestRepository.findAllByRegisteredByOrderByCreatedAtDescWithFetch(user);
+        // 모든 게스트 조회
+        java.util.List<Guest> guests = guestRepository.findAll();
 
         return guests.stream()
                 .map(guest -> GuestResponse.builder()
                         .id(guest.getId())
                         .name(guest.getName())
                         .phoneNumber(guest.getPhoneNumber())
-                        .school(guest.getSchool())
                         .createdAt(guest.getCreatedAt())
-                        .registeredById(guest.getRegisteredBy().getId())
-                        .registeredByName(guest.getRegisteredBy().getName())
                         .build())
                 .toList();
     }

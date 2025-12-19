@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 /**
  * 게스트 엔티티
- * 부원이 등록한 게스트 정보를 저장합니다.
+ * 게스트 정보를 이름과 전화번호로만 저장합니다.
  */
 @Entity
 @Table(name = "guests")
@@ -34,19 +34,6 @@ public class Guest {
      */
     @Column(nullable = false, length = 20)
     private String phoneNumber;
-
-    /**
-     * 게스트 학교/소속
-     */
-    @Column(length = 100)
-    private String school;
-
-    /**
-     * 게스트를 등록한 부원 (User)
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User registeredBy;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
