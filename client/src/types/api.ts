@@ -100,3 +100,13 @@ export interface ReservationResponse {
     reservationId: number;
     status: string;
 }
+
+export interface CrewUpdateRequest {
+    crewName: string;
+    manager_list: number[]; // Array of user_ids
+    crewPIN: number;
+    reservation_day: string;
+    reservation_time: string;
+    dailyCapacity: number;
+    isCapacityLimited: boolean;
+}
