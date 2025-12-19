@@ -4,6 +4,7 @@ import { ChevronLeftIcon } from 'lucide-react';
 import { Calendar } from '../components/Calendar';
 import { createReservation, cancelReservation, getCrewInfo } from '../services/crew';
 import { getMyReservations, getUserInfo } from '../services/user';
+import { registerGuest, GuestDetail } from '../services/guest';
 import { MyReservation } from '../types/api';
 
 
@@ -48,6 +49,8 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
     // Guest State
     const [guestName, setGuestName] = useState('');
     const [guestPhone, setGuestPhone] = useState('');
+    const [guestDetail, setGuestDetail] = useState<GuestDetail | null>(null);
+    const [isGuestModalOpen, setIsGuestModalOpen] = useState(isGuest); // Open modal on mount if isGuest is true
 
     // Existing Reservations (Fetched from API)
     const [myReservations, setMyReservations] = useState<MyReservation[]>([]);
@@ -60,8 +63,14 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
 
     // Crew Details for Reservation Settings
     // Fetch Reservations Helper
+    // Fetch Reservations Helper
     const fetchReservations = async () => {
         try {
+            // In Guest Mode, do NOT fetch user reservations
+            if (isGuest) {
+                setMyReservations([]);
+                return;
+            }
             const data = await getMyReservations();
             setMyReservations(data);
         } catch (error) {
@@ -88,8 +97,10 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
                 setCrew(crewData);
             }
 
-            const reservations = await getMyReservations();
-            setMyReservations(reservations);
+            if (!isGuest) {
+                const reservations = await getMyReservations();
+                setMyReservations(reservations);
+            }
         } catch (error) {
             console.error("Failed to load data:", error);
         }
@@ -128,16 +139,16 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
         thisSaturday.setDate(today.getDate() + daysUntilSaturday);
         thisSaturday.setHours(23, 59, 59, 999);
 
-        // Calculate "Next Saturday" (end of next week range)
-        const nextSaturday = new Date(thisSaturday);
-        nextSaturday.setDate(thisSaturday.getDate() + 7);
-        nextSaturday.setHours(23, 59, 59, 999);
+        // Calculate "Next Sunday" (end of next week range + 1 day)
+        const nextSunday = new Date(thisSaturday);
+        nextSunday.setDate(thisSaturday.getDate() + 8);
+        nextSunday.setHours(23, 59, 59, 999);
 
         // 1. If within [Today, This Saturday], it is OPEN.
         if (targetDate <= thisSaturday) return true;
 
-        // 2. If within [Next Sunday, Next Saturday], check Crew Opening Rule.
-        if (targetDate <= nextSaturday) {
+        // 2. If within [Next Sunday, Next Sunday], check Crew Opening Rule.
+        if (targetDate <= nextSunday) {
             if (!crew) return false; // Not loaded yet? Default closed.
 
             // Parse Reservation Open Settings
@@ -244,10 +255,10 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
             return `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         });
 
-        const guestInfo = isGuest ? { name: guestName, phoneNumber: guestPhone } : undefined;
+        const guestId = isGuest && guestDetail ? guestDetail.id : undefined;
 
         try {
-            await createReservation(crewId, formattedDates, guestInfo);
+            await createReservation(crewId, formattedDates, guestId);
             alert("예약 신청이 완료되었습니다."); // Simple feedback
             setSelectedDays([]); // Clear selection
             // Refresh list so the new reservation appears as "reserved" immediately
@@ -268,37 +279,23 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
                         <ChevronLeftIcon className="w-6 h-6" />
                     </Button>
                 </div>
-                <h1 className="flex-1 text-center text-lg font-bold text-zinc-900">{isGuest ? '게스트 예약하기' : '예약하기'}</h1>
+                <div className="flex-1 flex items-center justify-center relative">
+                    <h1 className="text-center text-lg font-bold text-zinc-900">{isGuest ? '예약하기' : '예약하기'}</h1>
+                    {isGuest && guestDetail && (
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#F3E5D8] px-3 py-1 rounded-[10px]">
+                            <span className="text-xs font-bold text-zinc-800">게스트: {guestDetail.name}</span>
+                        </div>
+                    )}
+                </div>
                 <div className="w-10" />
             </header>
 
             {/* Content */}
             <main className="flex-1 overflow-y-auto px-4 pb-[120px] flex flex-col items-center">
 
-                {isGuest && (
-                    <div className="w-full mb-6 space-y-3">
-                        <div>
-                            <label className="block text-sm font-medium text-zinc-700 mb-1">게스트 이름</label>
-                            <input
-                                type="text"
-                                value={guestName}
-                                onChange={(e) => setGuestName(e.target.value)}
-                                placeholder="이름을 입력하세요"
-                                className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#162660] transition-all"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-zinc-700 mb-1">전화번호</label>
-                            <input
-                                type="tel"
-                                value={guestPhone}
-                                onChange={(e) => setGuestPhone(e.target.value)}
-                                placeholder="010-0000-0000"
-                                className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-[#162660] transition-all"
-                            />
-                        </div>
-                    </div>
-                )}
+                {/* Content Area - Calendar is always visible but blocked by modal if open */}
+
+                {/* INLINE INPUTS REMOVED */}
 
                 <Calendar
                     className="mb-8 p-4"
@@ -409,6 +406,56 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
                                 취소하기
                             </Button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Guest Info Modal */}
+            {isGuestModalOpen && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-6 animate-in fade-in duration-200">
+                    <div className="bg-[#F0F7FF] rounded-[24px] p-6 w-full max-w-[320px] shadow-2xl flex flex-col items-center">
+                        <h3 className="text-xl font-bold text-[#1E3A8A] mb-1">게스트 등록/조회</h3>
+                        <p className="text-[11px] text-zinc-500 mb-6 text-center leading-tight">
+                            게스트로 이용할 사용자의 정보를 입력해주세요.
+                        </p>
+
+                        <div className="w-full space-y-4 mb-6">
+                            <div className="flex items-center gap-3">
+                                <label className="text-sm font-bold text-zinc-900 w-16 shrink-0 text-right">이름</label>
+                                <input
+                                    type="text"
+                                    value={guestName}
+                                    onChange={(e) => setGuestName(e.target.value)}
+                                    className="flex-1 h-10 px-3 rounded-lg border border-transparent bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                                />
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <label className="text-sm font-bold text-zinc-900 w-16 shrink-0 text-right">전화번호</label>
+                                <input
+                                    type="tel"
+                                    value={guestPhone}
+                                    onChange={(e) => setGuestPhone(e.target.value)}
+                                    className="flex-1 h-10 px-3 rounded-lg border border-transparent bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                                />
+                            </div>
+                        </div>
+
+                        <Button
+                            className="w-full bg-[#1E3A8A] hover:bg-[#172554] text-white rounded-xl py-3 text-sm font-bold shadow-md"
+                            disabled={!guestName || !guestPhone}
+                            onClick={async () => {
+                                try {
+                                    const guest = await registerGuest(guestName, guestPhone);
+                                    setGuestDetail(guest);
+                                    setIsGuestModalOpen(false);
+                                } catch (e) {
+                                    console.error("Failed to register guest", e);
+                                    alert("게스트 조회/등록에 실패했습니다.");
+                                }
+                            }}
+                        >
+                            조회하기
+                        </Button>
                     </div>
                 </div>
             )}
