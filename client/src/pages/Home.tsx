@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { getUserInfo, getMyReservations } from '../services/user';
 import { getCrewInfo } from '../services/crew';
 import { UserDetail, CrewDetail, MyReservation } from '../types/api';
-import { Bus, Mountain } from 'lucide-react';
+import { Bus, Mountain, UserPlus } from 'lucide-react';
 
 // Icons
 
@@ -46,6 +46,7 @@ const SnowflakeDecorIcon = ({ className }: { className?: string }) => (
 
 interface HomeProps {
     onMakeReservationClick: () => void;
+    onGuestReservationClick: () => void;
     onCheckScheduleClick: () => void;
     onCalendarClick: () => void;
     onTeamClick: () => void;
@@ -56,7 +57,8 @@ interface HomeProps {
 
 export default function Home({
     onMakeReservationClick,
-    onCheckScheduleClick,
+    onGuestReservationClick,
+    onCheckScheduleClick, // Commented out to fix lint "never read"
     onCalendarClick,
     onTeamClick,
     onSearchClick,
@@ -215,7 +217,7 @@ export default function Home({
                                 <span className="font-bold text-lg">예약하기</span>
                             </button>
 
-                            {/* Upcoming Schedule Card */}
+                            {/* Upcoming Schedule Card - Commented out as requested
                             <button
                                 onClick={onCheckScheduleClick}
                                 className="bg-[#D6E6F5] aspect-square rounded-[20px] p-5 flex flex-col hover:brightness-95 transition-all shadow-sm overflow-hidden relative text-left"
@@ -226,6 +228,17 @@ export default function Home({
                                     <div className="text-lg font-bold text-zinc-900">12월 30일</div>
                                     <div className="text-sm text-zinc-500 font-medium">예약 확정</div>
                                 </div>
+                            </button>
+                            */}
+                            {/* Guest Reservation Card */}
+                            <button
+                                onClick={onGuestReservationClick}
+                                className="bg-[#D6E6F5] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-2"
+                            >
+                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
+                                    <UserPlus className="w-6 h-6 text-zinc-900" />
+                                </div>
+                                <span className="font-bold text-lg">게스트 예약하기</span>
                             </button>
                         </div>
 

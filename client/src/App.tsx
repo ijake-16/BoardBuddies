@@ -13,7 +13,7 @@ import CrewSettings from './pages/CrewSettings';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
-  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending' | 'crew_settings'>('login');
+  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending' | 'crew_settings' | 'guest_reservation'>('login');
   const [hasCrew, setHasCrew] = useState(false);
 
 
@@ -28,6 +28,8 @@ function App() {
           />
         ) : currentView === 'reservation' ? (
           <Reservation onBack={() => setCurrentView('home')} />
+        ) : currentView === 'guest_reservation' ? (
+          <Reservation onBack={() => setCurrentView('home')} isGuest={true} />
         ) : currentView === 'stats' ? (
           <ReservationStats
             onBack={() => setCurrentView('home')}
@@ -61,6 +63,7 @@ function App() {
         ) : (
           <Home
             onMakeReservationClick={() => setCurrentView('reservation')}
+            onGuestReservationClick={() => setCurrentView('guest_reservation')}
             onCheckScheduleClick={() => {
               setCurrentView('my_reservations');
             }}

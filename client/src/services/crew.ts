@@ -1,5 +1,5 @@
 import apiClient from '../lib/axios';
-import { ApiResponse, CrewDetail, CrewMember, CrewApplicant, ReservationDetail, ReservationResponse, CrewCalendarResponse, CrewUpdateRequest, CrewUsageStatistic } from '../types/api';
+import { ApiResponse, CrewDetail, CrewMember, CrewApplicant, ReservationDetail, ReservationResponse, CrewCalendarResponse, CrewUpdateRequest, CrewUsageStatistic, MyCalendarResponse } from '../types/api';
 
 export const getCrewInfo = async (crewId: number): Promise<CrewDetail> => {
     const response = await apiClient.get<ApiResponse<CrewDetail>>(`/crews/${crewId}`);
@@ -35,8 +35,8 @@ export const getReservationDetail = async (crewId: number, date: string): Promis
     return response.data.data;
 };
 
-export const createReservation = async (crewId: number, dates: string[]): Promise<ReservationResponse> => {
-    const response = await apiClient.post<ApiResponse<ReservationResponse>>(`/crews/${crewId}/reservations`, { dates });
+export const createReservation = async (crewId: number, dates: string[], guestInfo?: { name: string, phoneNumber: string }): Promise<ReservationResponse> => {
+    const response = await apiClient.post<ApiResponse<ReservationResponse>>(`/crews/${crewId}/reservations`, { dates, guestInfo });
     return response.data.data;
 };
 
@@ -80,3 +80,17 @@ export const getCrewUsageStatistics = async (
     });
     return response.data.data;
 };
+
+export const applyForTeaching = async (crewId: number, reservationId: number): Promise<void> => {
+    await apiClient.post(`/crews/${crewId}/reservations/${reservationId}/teaching`);
+};
+
+export const withdrawFromTeaching = async (crewId: number, reservationId: number): Promise<void> => {
+    await apiClient.delete(`/crews/${crewId}/reservations/${reservationId}/teaching`);
+};
+
+export const getMyCrewCalendar = async (crewId: number, date: string): Promise<MyCalendarResponse> => {
+    const response = await apiClient.get<ApiResponse<MyCalendarResponse>>(`/crews/${crewId}/calendar/my?date=${date}`);
+    return response.data.data;
+};
+
