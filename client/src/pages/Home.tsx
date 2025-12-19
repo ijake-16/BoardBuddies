@@ -58,7 +58,7 @@ interface HomeProps {
 export default function Home({
     onMakeReservationClick,
     onGuestReservationClick,
-    onCheckScheduleClick, // Commented out to fix lint "never read"
+    // onCheckScheduleClick, // Commented out to fix lint "never read"
     onCalendarClick,
     onTeamClick,
     onSearchClick,
