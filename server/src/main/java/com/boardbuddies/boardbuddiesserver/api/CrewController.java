@@ -520,7 +520,7 @@ public class CrewController {
     // ==================== 운영진 관리 API ====================
 
     /**
-     * 운영진 목록 조회 (MANAGER 이상)
+     * 운영진 목록 조회 (크루 멤버 전체)
      * 
      * GET /api/crews/{crewId}/managers
      * 
@@ -552,7 +552,7 @@ public class CrewController {
     }
 
     /**
-     * 일반 부원 목록 조회 (MANAGER 이상)
+     * 일반 부원 목록 조회 (크루 멤버 전체)
      * 
      * GET /api/crews/{crewId}/members
      * 
