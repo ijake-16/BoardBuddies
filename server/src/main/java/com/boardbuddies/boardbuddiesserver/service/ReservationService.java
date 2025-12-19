@@ -416,6 +416,7 @@ public class ReservationService {
         for (Reservation r : reservations) {
             com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse.ReservationMemberResponseBuilder memberResponseBuilder = com.boardbuddies.boardbuddiesserver.dto.reservation.ReservationMemberResponse
                     .builder()
+                    .reservationId(r.getId())
                     .userId(r.getUser().getId())
                     .profileImageUrl(r.getUser().getProfileImageUrl());
             
