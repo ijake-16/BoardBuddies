@@ -9,10 +9,11 @@ import CrewDetail from './pages/CrewDetail';
 import UserInfoInput from './pages/UserInfoInput';
 import CrewMember from './pages/CrewMember';
 import SearchCrew from './pages/SearchCrew';
+import CrewSettings from './pages/CrewSettings';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
-  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending'>('login');
+  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending' | 'crew_settings'>('login');
   const [hasCrew, setHasCrew] = useState(false);
 
 
@@ -47,7 +48,10 @@ function App() {
               setCurrentView('stats');
             }}
             onMemberClick={() => setCurrentView('crew_member')}
+            onSettingsClick={() => setCurrentView('crew_settings')}
           />
+        ) : currentView === 'crew_settings' ? (
+          <CrewSettings onBack={() => setCurrentView('crew_detail')} />
         ) : currentView === 'crew_member' ? (
           <CrewMember onBack={() => setCurrentView('crew_detail')} />
         ) : currentView === 'search_crew' ? (

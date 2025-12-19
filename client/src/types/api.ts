@@ -51,15 +51,13 @@ export interface CrewMember {
     role: string; // "MEMBER", etc.
 }
 export interface CrewApplicant {
-    id: number; // application_id
-    user: {
-        userId: number;
-        name: string;
-        studentId: string;
-        profileImageUrl: string | null;
-    }
+    applicationId: number;
+    userId: number;
+    userName: string;
+    studentId: string;
+    profileImageUrl?: string | null;
     status: string; // "PENDING", etc.
-    created_at: string;
+    created_at?: string; // Optional since it was missing in the log, but likely exists
 }
 
 
@@ -101,4 +99,21 @@ export interface CrewCalendarResponse {
 export interface ReservationResponse {
     reservationId: number;
     status: string;
+}
+
+export interface CrewUpdateRequest {
+    crewName: string;
+    manager_list: number[]; // Array of user_ids
+    crewPIN: number;
+    reservation_day: string;
+    reservation_time: string;
+    dailyCapacity: number;
+    isCapacityLimited: boolean;
+}
+
+export interface CrewUsageStatistic {
+    user_id: number;
+    name: string;
+    usage_count: number;
+    profile_image_url?: string | null; // Optional
 }

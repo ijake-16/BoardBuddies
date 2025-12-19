@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '../components/Button';
 import { ChevronLeftIcon } from 'lucide-react';
 import { Calendar } from '../components/Calendar';
-import { createReservation, cancelReservation } from '../services/crew';
+import { createReservation, cancelReservation, getCrewInfo } from '../services/crew';
 import { getMyReservations, getUserInfo } from '../services/user';
 import { MyReservation } from '../types/api';
 
@@ -76,8 +76,9 @@ export default function Reservation({ onBack }: ReservationProps) {
                 setCrewId(cId);
 
                 // Fetch full crew info
+                // Fetch full crew info
                 // Dynamically import or use existing import if added
-                const { getCrewInfo } = await import('../services/crew');
+                // const { getCrewInfo } = await import('../services/crew');
                 const crewData = await getCrewInfo(cId);
                 setCrew(crewData);
             }
