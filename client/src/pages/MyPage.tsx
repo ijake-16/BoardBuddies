@@ -157,37 +157,35 @@ export default function MyPage({ onBack, onAccountInfoClick }: MyPageProps) {
 
                     {/* Calendar Dropdown - This Week and Next Week Only */}
                     {showFullCalendar && (
-                        <div className="mt-4 bg-[#F3E5D8] rounded-[20px] p-3 shadow-sm">
-                            <span className="font-bold text-zinc-500 ml-2 text-sm">나의 예약</span>
-                            <div className="bg-white rounded-[20px] p-1">
-                                <Calendar
-                                    month={currentMonthName}
-                                    year={currentYear}
-                                    startDayOfWeek={firstDayOfWeek}
-                                    totalDays={daysInMonth}
-                                    expandable={false}
-                                    hideHeader={true}
-                                    maxWeeks={2}
-                                    startWeekIndex={(() => {
-                                        // Calculate which week contains today
-                                        const todayDay = today.getDate();
-                                        return Math.floor((todayDay + firstDayOfWeek - 1) / 7);
-                                    })()}
-                                    renderDay={(day) => {
-                                        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                        const hasReservation = reservations.some(r => r.date === dateStr && r.status === 'confirmed');
+                        <div className="mt-4 bg-zinc-100 rounded-[20px] p-2 shadow-sm">
+                            <Calendar
+                                month={currentMonthName}
+                                year={currentYear}
+                                startDayOfWeek={firstDayOfWeek}
+                                totalDays={daysInMonth}
+                                expandable={false}
+                                hideHeader={true}
+                                maxWeeks={2}
+                                className="rounded-[20px]"
+                                startWeekIndex={(() => {
+                                    // Calculate which week contains today
+                                    const todayDay = today.getDate();
+                                    return Math.floor((todayDay + firstDayOfWeek - 1) / 7);
+                                })()}
+                                renderDay={(day) => {
+                                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                    const hasReservation = reservations.some(r => r.date === dateStr && r.status === 'confirmed');
 
-                                        return (
-                                            <div className="w-8 h-8 flex flex-col items-center justify-center relative">
-                                                <span className="text-sm font-medium text-zinc-500">{day}</span>
-                                                {hasReservation && (
-                                                    <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-[-4px]" />
-                                                )}
-                                            </div>
-                                        );
-                                    }}
-                                />
-                            </div>
+                                    return (
+                                        <div className="w-8 h-8 flex flex-col items-center justify-center relative">
+                                            <span className="text-sm font-medium text-zinc-500">{day}</span>
+                                            {hasReservation && (
+                                                <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-[-4px]" />
+                                            )}
+                                        </div>
+                                    );
+                                }}
+                            />
                         </div>
                     )}
                 </div>
