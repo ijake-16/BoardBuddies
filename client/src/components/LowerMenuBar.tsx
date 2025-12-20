@@ -142,7 +142,6 @@ export const LowerMenuBar = ({
             variant="ghost"
             size="icon" // Use the new size
             onClick={() => {
-              if (item.id === 'user') return; // Disable Profile Link
               onTabChange?.(item.id);
             }}
             className={cn(

@@ -10,10 +10,12 @@ import UserInfoInput from './pages/UserInfoInput';
 import CrewMember from './pages/CrewMember';
 import SearchCrew from './pages/SearchCrew';
 import CrewSettings from './pages/CrewSettings';
+import MyPage from './pages/MyPage';
+import AccountInfo from './pages/AccountInfo';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
-  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending' | 'crew_settings' | 'guest_reservation'>('login');
+  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending' | 'crew_settings' | 'guest_reservation' | 'my_page' | 'account_info'>('login');
   const [hasCrew, setHasCrew] = useState(false);
 
 
@@ -60,6 +62,13 @@ function App() {
           <SearchCrew onBack={() => setCurrentView('home')} />
         ) : currentView === 'user_info' ? (
           <UserInfoInput onBack={() => setCurrentView('login')} />
+        ) : currentView === 'my_page' ? (
+          <MyPage 
+            onBack={() => setCurrentView('home')} 
+            onAccountInfoClick={() => setCurrentView('account_info')}
+          />
+        ) : currentView === 'account_info' ? (
+          <AccountInfo onBack={() => setCurrentView('my_page')} />
         ) : (
           <Home
             onMakeReservationClick={() => setCurrentView('reservation')}
@@ -78,7 +87,7 @@ function App() {
         )}
 
 
-        {(currentView !== 'login' && currentView !== 'user_info') && (
+        {(currentView !== 'login' && currentView !== 'user_info' && currentView !== 'my_page' && currentView !== 'account_info') && (
           <LowerMenuBar
             activeTab={activeTab}
             onTabChange={(tab) => {
@@ -87,7 +96,7 @@ function App() {
               if (tab === 'calendar') setCurrentView('my_reservations');
               if (tab === 'edit') setCurrentView('reservation');
               if (tab === 'heart') setCurrentView('crew_detail');
-              if (tab === 'user') setCurrentView('user_info');
+              if (tab === 'user') setCurrentView('my_page');
             }}
           />
         )}
