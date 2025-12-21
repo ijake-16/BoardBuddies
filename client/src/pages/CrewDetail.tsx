@@ -91,48 +91,48 @@ export default function CrewDetail({ onBack, onCalendarClick, onMemberClick, onS
             <main className="flex-1 overflow-y-auto px-6 pt-4 pb-[120px] flex flex-col items-center">
 
                 {/* Main Card */}
-                <div className="w-full bg-[#FCD34D] rounded-[30px] p-6 shadow-sm mb-6">
+                <div className="w-full bg-[#FCD34D] dark:bg-[#FCD34D]/60 rounded-[30px] p-6 shadow-sm mb-6">
                     {/* Inner White Card */}
-                    <div className="bg-white rounded-[20px] p-5 flex items-center gap-4 mb-6">
+                    <div className="bg-white dark:bg-zinc-800 rounded-[20px] p-5 flex items-center gap-4 mb-6">
                         {/* Placeholder Icon */}
                         {crewInfo.profile_image_url ? (
                             <img src={crewInfo.profile_image_url} alt={crewInfo.name} className="w-16 h-16 rounded-full object-cover shrink-0" />
                         ) : (
-                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-200 to-blue-200 flex items-center justify-center shrink-0">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-200 to-blue-200 dark:from-pink-600 dark:to-blue-600 flex items-center justify-center shrink-0">
                                 {/* Fallback/Placeholder */}
                             </div>
                         )}
 
                         <div>
-                            <h2 className="text-xl font-bold text-zinc-900">{crewInfo.name}</h2>
-                            <p className="text-sm text-zinc-500 font-medium">{crewInfo.univ}</p>
+                            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{crewInfo.name}</h2>
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">{crewInfo.univ}</p>
                         </div>
                     </div>
 
                     {/* Stats Row */}
                     <div className="flex items-center justify-around px-2">
                         <div className="flex items-center gap-2">
-                            <Crown className="w-5 h-5 text-zinc-800" />
-                            <span className="text-sm font-medium text-zinc-800">{crewInfo.president_name}</span>
+                            <Crown className="w-5 h-5 text-zinc-800 dark:text-white" />
+                            <span className="text-sm font-medium text-zinc-800 dark:text-white">{crewInfo.president_name}</span>
                         </div>
                         <button
                             onClick={onMemberClick}
                             className="flex items-center gap-2 hover:opacity-70 transition-opacity"
                         >
-                            <UserPlusIcon className="w-5 h-5 text-zinc-800" />
-                            <span className="text-sm font-medium text-zinc-800">부원수 : {crewInfo.member_count}명</span>
+                            <UserPlusIcon className="w-5 h-5 text-zinc-800 dark:text-white" />
+                            <span className="text-sm font-medium text-zinc-800 dark:text-white">부원수 : {crewInfo.member_count}명</span>
                         </button>
                     </div>
 
                     {/* Manager Settings Button */}
                     {isManager && (
-                        <div className="mt-6 pt-6 border-t border-black/10 flex justify-center">
+                        <div className="mt-6 pt-6 border-t border-black/10 dark:border-white/20 flex justify-center">
                             <button
                                 onClick={onSettingsClick}
-                                className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-white/80 rounded-full transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-white/20 hover:bg-white/80 dark:hover:bg-white/30 rounded-full transition-colors"
                             >
-                                <SettingsIcon className="w-4 h-4 text-zinc-800" />
-                                <span className="text-sm font-bold text-zinc-800">크루 설정</span>
+                                <SettingsIcon className="w-4 h-4 text-zinc-800 dark:text-white" />
+                                <span className="text-sm font-bold text-zinc-800 dark:text-white">크루 설정</span>
                             </button>
                         </div>
                     )}
@@ -141,10 +141,10 @@ export default function CrewDetail({ onBack, onCalendarClick, onMemberClick, onS
                 {/* Action Row */}
                 <button
                     onClick={onCalendarClick}
-                    className="w-full bg-zinc-100 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 transition-colors mb-4"
+                    className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors mb-4"
                 >
-                    <span className="font-bold text-zinc-600">크루 달력</span>
-                    <div className="flex items-center gap-1 text-zinc-500">
+                    <span className="font-bold text-zinc-600 dark:text-zinc-300">크루 달력</span>
+                    <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400">
                         <span className="text-sm font-medium">확인하기</span>
                         <ChevronRightIcon className="w-5 h-5" />
                     </div>
@@ -152,10 +152,10 @@ export default function CrewDetail({ onBack, onCalendarClick, onMemberClick, onS
 
                 <button
                     onClick={() => setShowStats(true)}
-                    className="w-full bg-zinc-100 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 transition-colors mb-auto"
+                    className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-[20px] p-5 flex items-center justify-between hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors mb-auto"
                 >
-                    <span className="font-bold text-zinc-600">시즌방 사용 기록</span>
-                    <div className="flex items-center gap-1 text-zinc-500">
+                    <span className="font-bold text-zinc-600 dark:text-zinc-300">시즌방 사용 기록</span>
+                    <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-400">
                         <span className="text-sm font-medium">확인하기</span>
                         <ChevronRightIcon className="w-5 h-5" />
                     </div>
@@ -163,7 +163,7 @@ export default function CrewDetail({ onBack, onCalendarClick, onMemberClick, onS
 
                 {/* Footer Text */}
                 <div className="mb-8 text-center">
-                    <p className="text-xs text-zinc-400 font-medium">
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500 font-medium">
                         나의 크루에 가입하고 다양한 정보를 확인하세요!
                     </p>
                 </div>

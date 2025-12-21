@@ -123,11 +123,11 @@ export default function Home({
     }, []);
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F8F9FA] relative">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F8F9FA] dark:bg-zinc-950 relative">
             {/* Header */}
             <header className="px-4 pt-12 pb-4 flex items-center justify-between z-10">
                 <div className="flex items-center gap-2">
-                    <h1 className="text-[20px] font-black italic text-zinc-900 font-['Joti_One']">BoardBuddy</h1>
+                    <h1 className="text-[20px] font-black italic text-zinc-900 dark:text-zinc-100 font-['Joti_One']">BoardBuddy</h1>
                     {/* Shark Image removed due to missing file */}
                 </div>
                 <div className="flex items-center gap-2">
@@ -162,12 +162,12 @@ export default function Home({
                     {!isDebugNoCrew && hasCrew && userInfo?.crew ? (
                         <div className="flex items-end justify-between">
                             <div>
-                                <div className="text-sm text-zinc-500 font-medium mb-1">{crewDetail?.univ || userInfo.school}</div>
+                                <div className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-1">{crewDetail?.univ || userInfo.school}</div>
                                 <div
                                     onClick={onTeamClick}
                                     className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
                                 >
-                                    <h2 className="text-2xl font-bold truncate max-w-[200px]">{userInfo.crew.crewName}</h2>
+                                    <h2 className="text-2xl font-bold truncate max-w-[200px] text-zinc-900 dark:text-zinc-100">{userInfo.crew.crewName}</h2>
                                     <CircleArrowRightIcon className="w-5 h-5 text-[#FCD34D] shrink-0" />
                                 </div>
                             </div>
@@ -178,7 +178,7 @@ export default function Home({
                                     href="https://skibus.purplebus.co.kr/Pp/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-2 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors text-zinc-600 shadow-sm"
+                                    className="p-2 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-zinc-600 dark:text-zinc-400 shadow-sm"
                                     aria-label="Bus Reservation"
                                 >
                                     <Bus className="w-5 h-5" />
@@ -187,7 +187,7 @@ export default function Home({
                                     href="https://phoenixhnr.co.kr/m/static/pyeongchang/snowpark/slope-lift"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-2 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors text-zinc-600 shadow-sm"
+                                    className="p-2 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-zinc-600 dark:text-zinc-400 shadow-sm"
                                     aria-label="Slope Status"
                                 >
                                     <Mountain className="w-5 h-5" />
@@ -200,8 +200,8 @@ export default function Home({
                                 onClick={onSearchClick}
                                 className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity py-2"
                             >
-                                <h2 className="text-2xl font-bold text-zinc-400">탭해서 크루에 가입하세요</h2>
-                                <CircleArrowRightIcon className="w-5 h-5 text-zinc-300" />
+                                <h2 className="text-2xl font-bold text-zinc-400 dark:text-zinc-500">탭해서 크루에 가입하세요</h2>
+                                <CircleArrowRightIcon className="w-5 h-5 text-zinc-300 dark:text-zinc-600" />
                             </div>
                             {/* 
                                 <Button
@@ -227,10 +227,10 @@ export default function Home({
                             {/* Reservation Card */}
                             <button
                                 onClick={onMakeReservationClick}
-                                className="bg-[#FCD34D] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-2"
+                                className="bg-[#FCD34D] dark:bg-[#FCD34D] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-2"
                             >
-                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
-                                    <CheckSquareIcon className="w-6 h-6 text-zinc-900" />
+                                <div className="w-12 h-12 rounded-full bg-white dark:bg-white flex items-center justify-center shadow-sm">
+                                    <CheckSquareIcon className="w-6 h-6 text-zinc-900 dark:text-zinc-900" />
                                 </div>
                                 <span className="font-bold text-lg">예약하기</span>
                             </button>
@@ -251,10 +251,10 @@ export default function Home({
                             {/* Guest Reservation Card */}
                             <button
                                 onClick={onGuestReservationClick}
-                                className="bg-[#D6E6F5] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-2"
+                                className="bg-[#D6E6F5] dark:bg-[#D6E6F5]/30 aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-100 hover:brightness-110 dark:hover:bg-[#D6E6F5]/40 transition-all shadow-sm gap-2"
                             >
-                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
-                                    <UserPlus className="w-6 h-6 text-zinc-900" />
+                                <div className="w-12 h-12 rounded-full bg-white dark:bg-white/20 flex items-center justify-center shadow-sm">
+                                    <UserPlus className="w-6 h-6 text-zinc-900 dark:text-zinc-100" />
                                 </div>
                                 <span className="font-bold text-lg">게스트 예약하기</span>
                             </button>
@@ -264,9 +264,9 @@ export default function Home({
                         <div className="px-4 mb-8">
                             <div
                                 onClick={onCalendarClick}
-                                className="bg-[#F1E4D1] rounded-[20px] p-4 shadow-sm cursor-pointer hover:brightness-95 transition-all"
+                                className="bg-[#F1E4D1] dark:bg-zinc-800 rounded-[20px] p-4 shadow-sm cursor-pointer hover:brightness-95 dark:hover:bg-zinc-700 transition-all"
                             >
-                                <span className="font-bold text-zinc-500 ml-2 text-sm block mb-2">나의 달력</span>
+                                <span className="font-bold text-zinc-500 dark:text-zinc-400 ml-2 text-sm block mb-2">나의 달력</span>
                                 <Calendar
                                     month={(() => {
                                         const today = new Date();
@@ -310,7 +310,7 @@ export default function Home({
                                         const containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 text-sm font-bold rounded-[10px]";
 
                                         // Content (Number or Circle)
-                                        let numberElement = <span className="text-sm font-medium text-zinc-500">{day}</span>;
+                                        let numberElement = <span className="text-sm font-medium text-zinc-500 dark:text-zinc-300">{day}</span>;
 
                                         if (isConfirmed || isPending) {
                                             const bg = isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#93C5FD]'; // 확정: 남색, 대기: 연한 남색

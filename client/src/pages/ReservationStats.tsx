@@ -258,22 +258,22 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
     });
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-zinc-950">
             {/* Header */}
             <header className="px-4 pt-12 pb-4 flex items-center justify-between z-10">
                 <div className="w-20 flex justify-start">
-                    <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-900 hover:bg-transparent">
+                    <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-900 dark:text-zinc-100 hover:bg-transparent">
                         <ChevronLeftIcon className="w-6 h-6" />
                     </Button>
                 </div>
-                <h1 className="flex-1 text-center text-lg font-bold text-zinc-900">
+                <h1 className="flex-1 text-center text-lg font-bold text-zinc-900 dark:text-zinc-100">
                     크루 달력
                 </h1>
                 <div className="w-20 flex justify-end">
                     <Button
                         variant="ghost"
                         onClick={onMyCalendarClick}
-                        className="text-xs text-zinc-400 hover:text-zinc-600 font-medium px-0 gap-0"
+                        className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-400 font-medium px-0 gap-0"
                     >
                         나의 달력 <ChevronRightIcon className="w-4 h-4" />
                     </Button>
@@ -297,12 +297,12 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                     onNextMonth={canGoNext ? handleNextMonth : undefined}
                     headerRight={
                         <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-zinc-500">내 일정</span>
+                            <span className="text-xs font-bold text-zinc-500 dark:text-zinc-400">내 일정</span>
                             <div
                                 onClick={() => setShowMySchedule(!showMySchedule)}
-                                className={`w-10 h-6 rounded-full p-1 relative cursor-pointer transition-colors duration-200 ${showMySchedule ? 'bg-[#4CAF50]' : 'bg-zinc-300'}`}
+                                className={`w-10 h-6 rounded-full p-1 relative cursor-pointer transition-colors duration-200 ${showMySchedule ? 'bg-[#4CAF50]' : 'bg-zinc-300 dark:bg-zinc-700'}`}
                             >
-                                <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 ${showMySchedule ? 'translate-x-4' : 'translate-x-0'}`} />
+                                <div className={`w-4 h-4 bg-white dark:bg-zinc-300 rounded-full shadow-sm transition-transform duration-200 ${showMySchedule ? 'translate-x-4' : 'translate-x-0'}`} />
                             </div>
                         </div>
                     }
@@ -318,11 +318,11 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                         let containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 cursor-pointer text-sm font-bold rounded-[10px] overflow-visible";
 
                         if (isSelected) {
-                            containerClasses += " bg-[#333333] text-white shadow-lg";
+                            containerClasses += " bg-[#333333] dark:bg-zinc-700 text-white shadow-lg";
                         } else if (isToday) {
-                            containerClasses += " bg-[#F4F4F5] text-zinc-900";
+                            containerClasses += " bg-[#F4F4F5] dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100";
                         } else {
-                            containerClasses += " text-zinc-500 hover:bg-zinc-100/50";
+                            containerClasses += " text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50";
                         }
 
                         // Number Element (Circle if reserved)
@@ -352,14 +352,14 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                 {isExpanded ? (
                     <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-300">
                         {/* Expanded User List Card */}
-                        <div className="w-full bg-[#F4F4F5] rounded-[20px] p-6 mb-3">
+                        <div className="w-full bg-[#F4F4F5] dark:bg-zinc-800 rounded-[20px] p-6 mb-3">
                             {/* Card Header */}
                             <div className="flex items-center gap-2 mb-6">
                                 <div className="w-7 h-7 bg-[#1E3A8A] rounded-[8px] flex items-center justify-center shadow-sm">
                                     <Smile className="w-4 h-4 text-white" strokeWidth={2.5} />
                                 </div>
-                                <span className="font-bold text-zinc-900 text-sm">예약 완료</span>
-                                <span className="text-xs text-zinc-400 mt-0.5">{currentMemberCount}명/{crewCapacity}</span>
+                                <span className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">예약 완료</span>
+                                <span className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{currentMemberCount}명/{crewCapacity}</span>
                             </div>
 
                             {/* Users Grid */}
@@ -367,7 +367,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                                 {currentMemberList.length > 0 ? (
                                     currentMemberList.map((member: { user_id: number; name: string; profile_image_url: string | null; teaching: boolean; role: string; phoneNumber?: string; registered_by_name?: string }) => (
                                         <div key={member.user_id} className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-zinc-300 rounded-full shrink-0 overflow-hidden relative">
+                                            <div className="w-10 h-10 bg-zinc-300 dark:bg-zinc-600 rounded-full shrink-0 overflow-hidden relative">
                                                 {member.profile_image_url ? (
                                                     <img src={member.profile_image_url} alt={member.name} className="w-full h-full object-cover" />
                                                 ) : null}
@@ -387,7 +387,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                                                     )}
 
                                                     <span
-                                                        className={`text-sm font-bold text-zinc-700 ${member.role === 'VISITOR' ? 'cursor-pointer hover:underline' : ''}`}
+                                                        className={`text-sm font-bold text-zinc-700 dark:text-zinc-300 ${member.role === 'VISITOR' ? 'cursor-pointer hover:underline' : ''}`}
                                                         onClick={() => {
                                                             if (member.role === 'VISITOR') {
                                                                 setSelectedGuest({
@@ -415,7 +415,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="col-span-2 text-center text-zinc-400 text-sm py-4">
+                                    <div className="col-span-2 text-center text-zinc-400 dark:text-zinc-500 text-sm py-4">
                                         예약자가 없습니다.
                                     </div>
                                 )}
@@ -426,7 +426,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                         <div className="w-full flex justify-end mb-6 pr-2">
                             <button
                                 onClick={onReservationClick}
-                                className="text-xs font-medium text-zinc-500 flex items-center gap-1 hover:text-zinc-800 transition-colors"
+                                className="text-xs font-medium text-zinc-500 dark:text-zinc-400 flex items-center gap-1 hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors"
                             >
                                 예약 변경하러 가기 <ChevronRightIcon className="w-3 h-3" />
                             </button>
@@ -437,7 +437,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                             <Button
                                 variant="outline"
                                 onClick={handleCancelReservation}
-                                className="w-full h-14 bg-white border border-zinc-400 hover:bg-zinc-50 rounded-[20px] text-zinc-500 text-lg font-bold shadow-sm transition-all active:scale-[0.98]"
+                                className="w-full h-14 bg-white dark:bg-zinc-700 border border-zinc-400 dark:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-600 rounded-[20px] text-zinc-500 dark:text-zinc-300 text-lg font-bold shadow-sm transition-all active:scale-[0.98]"
                             >
                                 예약 취소하기
                             </Button>
@@ -452,27 +452,27 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                     </div>
                 ) : (
                     /* Default Legend Section - Simplified for LOW/MEDIUM/HIGH */
-                    <div className="w-full bg-[#F4F4F5] rounded-[20px] p-4 flex items-center justify-between px-2">
+                    <div className="w-full bg-[#F4F4F5] dark:bg-zinc-800 rounded-[20px] p-4 flex items-center justify-between px-2">
                         <div className="flex items-center gap-2">
-                            <span className="font-bold text-xs text-zinc-900 ml-4">혼잡도</span>
+                            <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100 ml-4">혼잡도</span>
                         </div>
 
                         <div className="flex items-center gap-4 mr-2">
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#4CAF50]" />
-                                <span className="text-[10px] font-medium text-zinc-500">
+                                <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
                                     여유
                                 </span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#F6C555]" />
-                                <span className="text-[10px] font-medium text-zinc-500">
+                                <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
                                     보통
                                 </span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-[#FF6B6B]" />
-                                <span className="text-[10px] font-medium text-zinc-500">
+                                <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
                                     혼잡
                                 </span>
                             </div>
@@ -484,18 +484,18 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
             {/* Guest Detail Modal - Overlay for Guest Info */}
             {selectedGuest && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-6 animate-in fade-in duration-200" onClick={() => setSelectedGuest(null)}>
-                    <div className="bg-white rounded-[24px] p-6 w-full max-w-[280px] shadow-2xl flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="text-lg font-bold text-zinc-900 mb-1">{selectedGuest.name}</h3>
-                        <p className="text-xs text-zinc-400 mb-6 font-medium">게스트 정보</p>
+                    <div className="bg-white dark:bg-zinc-800 rounded-[24px] p-6 w-full max-w-[280px] shadow-2xl flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">{selectedGuest.name}</h3>
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500 mb-6 font-medium">게스트 정보</p>
 
                         <div className="w-full space-y-4 mb-6">
                             <div className="flex gap-3 text-sm">
-                                <span className="font-bold text-zinc-500 w-14 shrink-0 text-right">휴대전화</span>
-                                <span className="text-zinc-900 font-medium">{selectedGuest.phoneNumber || '-'}</span>
+                                <span className="font-bold text-zinc-500 dark:text-zinc-400 w-14 shrink-0 text-right">휴대전화</span>
+                                <span className="text-zinc-900 dark:text-zinc-100 font-medium">{selectedGuest.phoneNumber || '-'}</span>
                             </div>
                             <div className="flex gap-3 text-sm">
-                                <span className="font-bold text-zinc-500 w-14 shrink-0 text-right">초대자</span>
-                                <span className="text-zinc-900 font-medium">{selectedGuest.inviter || '-'}</span>
+                                <span className="font-bold text-zinc-500 dark:text-zinc-400 w-14 shrink-0 text-right">초대자</span>
+                                <span className="text-zinc-900 dark:text-zinc-100 font-medium">{selectedGuest.inviter || '-'}</span>
                             </div>
                         </div>
 
