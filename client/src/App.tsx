@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LowerMenuBar } from './components/LowerMenuBar';
 import Home from './pages/Home';
 import Reservation from './pages/Reservation';
@@ -17,6 +17,21 @@ function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
   const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending' | 'crew_settings' | 'guest_reservation' | 'my_page' | 'account_info'>('login');
   const [hasCrew, setHasCrew] = useState(false);
+
+  // Sync activeTab with currentView
+  useEffect(() => {
+    if (currentView === 'home') {
+      setActiveTab('home');
+    } else if (currentView === 'my_reservations') {
+      setActiveTab('calendar');
+    } else if (currentView === 'reservation' || currentView === 'guest_reservation') {
+      setActiveTab('edit');
+    } else if (currentView === 'crew_detail' || currentView === 'crew_settings' || currentView === 'crew_member' || currentView === 'stats') {
+      setActiveTab('heart');
+    } else if (currentView === 'my_page' || currentView === 'account_info') {
+      setActiveTab('user');
+    }
+  }, [currentView]);
 
 
   return (
