@@ -412,30 +412,36 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
 
             {/* Guest Info Modal */}
             {isGuestModalOpen && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-6 animate-in fade-in duration-200">
-                    <div className="bg-[#F0F7FF] rounded-[24px] p-6 w-full max-w-[320px] shadow-2xl flex flex-col items-center">
+                <div 
+                    className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 sm:p-6 animate-in fade-in duration-200"
+                    onClick={onBack}
+                >
+                    <div 
+                        className="bg-[#F0F7FF] rounded-[24px] p-4 sm:p-6 w-full max-w-[280px] min-w-0 shadow-2xl flex flex-col items-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <h3 className="text-xl font-bold text-[#1E3A8A] mb-1">게스트 등록/조회</h3>
                         <p className="text-[11px] text-zinc-500 mb-6 text-center leading-tight">
                             게스트로 이용할 사용자의 정보를 입력해주세요.
                         </p>
 
-                        <div className="w-full space-y-4 mb-6">
-                            <div className="flex items-center gap-3">
-                                <label className="text-sm font-bold text-zinc-900 w-16 shrink-0 text-right">이름</label>
+                        <div className="w-full space-y-4 mb-6 min-w-0">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                                <label className="text-sm font-bold text-zinc-900 w-16 sm:w-20 shrink-0 text-right whitespace-nowrap">이름</label>
                                 <input
                                     type="text"
                                     value={guestName}
                                     onChange={(e) => setGuestName(e.target.value)}
-                                    className="flex-1 h-10 px-3 rounded-lg border border-transparent bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                                    className="w-40 sm:w-48 h-10 px-3 rounded-lg border border-transparent bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
                                 />
                             </div>
-                            <div className="flex items-center gap-3">
-                                <label className="text-sm font-bold text-zinc-900 w-16 shrink-0 text-right">전화번호</label>
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                                <label className="text-sm font-bold text-zinc-900 w-16 sm:w-20 shrink-0 text-right whitespace-nowrap">전화번호</label>
                                 <input
                                     type="tel"
                                     value={guestPhone}
                                     onChange={(e) => setGuestPhone(e.target.value)}
-                                    className="flex-1 h-10 px-3 rounded-lg border border-transparent bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                                    className="w-40 sm:w-48 h-10 px-3 rounded-lg border border-transparent bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
                                 />
                             </div>
                         </div>
@@ -454,7 +460,7 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
                                 }
                             }}
                         >
-                            조회하기
+                            예약하기
                         </Button>
                     </div>
                 </div>

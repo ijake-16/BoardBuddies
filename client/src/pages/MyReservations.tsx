@@ -226,10 +226,10 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                 </div>
             </header>
 
-            <main className="flex-1 overflow-y-auto px-4 pb-[120px] flex flex-col items-center">
+            <main className="flex-1 overflow-y-auto px-4 pb-[140px] flex flex-col items-center">
 
                 <Calendar
-                    className="mb-8"
+                    className="mb-3"
                     month={currentMonthName}
                     year={currentYear}
                     startDayOfWeek={firstDayOfMonth}
@@ -285,7 +285,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                 />
 
                 {/* Legend */}
-                <div className="w-full flex justify-end gap-3 mb-10">
+                <div className="w-full flex justify-end gap-1.5 mb-2">
                     <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full bg-[#1E3A8A]" />
                         <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">확정</span>
@@ -305,7 +305,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                         // Case: Selected Reservation (Confirmed/Pending)
                         if (reservation) {
                             return (
-                                <div className="w-full flex flex-col gap-3">
+                                <div className="w-full flex flex-col gap-3 mb-4">
                                     {isConfirmed && (
                                         <div className="flex items-center justify-end gap-2 px-1">
                                             <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">강습 신청하기</span>
@@ -350,7 +350,7 @@ export default function MyReservations({ onBack, onCrewClick }: MyReservationsPr
                                 </div>
                                 <Button
                                     onClick={handleCreateReservation}
-                                    className="w-full h-14 bg-[#162660] hover:bg-[#1E3A8A] rounded-[20px] text-white text-lg font-bold shadow-md transition-all active:scale-[0.98]"
+                                    className="w-full h-14 bg-[#162660] hover:bg-[#1E3A8A] rounded-[20px] text-white text-lg font-bold shadow-md transition-all active:scale-[0.98] mb-4"
                                 >
                                     예약하기
                                 </Button>

@@ -283,7 +283,7 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
             <main className="flex-1 overflow-y-auto px-4 pb-[120px] flex flex-col items-center">
 
                 <Calendar
-                    className="mb-8"
+                    className="mb-3"
                     month={currentMonthName}
                     year={currentYear}
                     startDayOfWeek={firstDayOfMonth}
