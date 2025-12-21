@@ -18,6 +18,23 @@ function App() {
   const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending' | 'crew_settings' | 'guest_reservation' | 'my_page' | 'account_info'>('login');
   const [hasCrew, setHasCrew] = useState(false);
 
+  // Check for auto-login on app start
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    const autoLogin = localStorage.getItem('autoLogin') === 'true';
+    
+    if (accessToken && autoLogin) {
+      // Auto-login: go directly to home page
+      setCurrentView('home');
+    } else if (!accessToken) {
+      // No token: show login page
+      setCurrentView('login');
+    } else {
+      // Token exists but auto-login is disabled: show login page
+      setCurrentView('login');
+    }
+  }, []);
+
   // Sync activeTab with currentView
   useEffect(() => {
     if (currentView === 'home') {

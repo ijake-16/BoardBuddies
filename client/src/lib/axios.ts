@@ -78,6 +78,7 @@ apiClient.interceptors.response.use(
                 isRefreshing = false;
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
+                localStorage.removeItem('autoLogin');
                 // Redirect to login page
                 if (window.location.pathname !== '/') {
                     window.location.href = '/';
@@ -143,6 +144,7 @@ apiClient.interceptors.response.use(
                         isRefreshing = false;
                         localStorage.removeItem('accessToken');
                         localStorage.removeItem('refreshToken');
+                        localStorage.removeItem('autoLogin');
                         // Redirect to login page
                         if (window.location.pathname !== '/') {
                             window.location.href = '/';
@@ -157,6 +159,7 @@ apiClient.interceptors.response.use(
                 isRefreshing = false;
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
+                localStorage.removeItem('autoLogin');
                 // Redirect to login page
                 if (window.location.pathname !== '/') {
                     window.location.href = '/';
