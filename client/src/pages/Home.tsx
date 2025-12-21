@@ -310,13 +310,13 @@ export default function Home({
                                         const containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 text-sm font-bold rounded-[10px]";
 
                                         // Content (Number or Circle)
-                                        let numberElement = <span className="text-zinc-500">{day}</span>;
+                                        let numberElement = <span className="text-sm font-medium text-zinc-500">{day}</span>;
 
                                         if (isConfirmed || isPending) {
                                             const bg = isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#93C5FD]'; // 확정: 남색, 대기: 연한 남색
                                             const textColor = 'text-white';
                                             numberElement = (
-                                                <div className={`w-7 h-7 -mt-1 rounded-full ${bg} ${textColor} flex items-center justify-center text-xs shadow-sm`}>
+                                                <div className={`w-8 h-8 -mt-1 rounded-full ${bg} ${textColor} flex items-center justify-center text-sm font-medium shadow-sm`}>
                                                     {day}
                                                 </div>
                                             );

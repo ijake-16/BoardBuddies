@@ -315,10 +315,10 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                         const isPending = showMySchedule && pendingDays.includes(day);
 
                         // Base classes
-                        let containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 cursor-pointer text-sm font-bold rounded-[10px]";
+                        let containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 cursor-pointer text-sm font-bold rounded-[10px] overflow-visible";
 
                         if (isSelected) {
-                            containerClasses += " bg-[#333333] text-white shadow-lg scale-105";
+                            containerClasses += " bg-[#333333] text-white shadow-lg";
                         } else if (isToday) {
                             containerClasses += " bg-[#F4F4F5] text-zinc-900";
                         } else {
@@ -326,14 +326,14 @@ export default function ReservationStats({ onBack, onMyCalendarClick, onReservat
                         }
 
                         // Number Element (Circle if reserved)
-                        let numberElement = <span>{day}</span>;
+                        let numberElement = <span className="text-sm font-bold">{day}</span>;
                         if (isConfirmed || isPending) {
                             const bg = isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#9CA3AF]';
                             const textColor = 'text-white';
                             // Note: If selected, container is Black.
                             // If we render a Navy Circle inside a Black Box, it works.
                             numberElement = (
-                                <div className={`w-7 h-7 -mt-1 rounded-full ${bg} ${textColor} flex items-center justify-center text-xs shadow-sm`}>
+                                <div className={`w-8 h-8 -mt-1 rounded-full ${bg} ${textColor} flex items-center justify-center text-sm font-bold shadow-sm`}>
                                     {day}
                                 </div>
                             );
