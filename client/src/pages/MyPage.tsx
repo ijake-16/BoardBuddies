@@ -157,7 +157,7 @@ export default function MyPage({ onBack, onAccountInfoClick }: MyPageProps) {
 
                     {/* Calendar Dropdown - This Week and Next Week Only */}
                     {showFullCalendar && (
-                        <div className="mt-4 bg-zinc-100 rounded-[20px] p-2 shadow-sm">
+                        <div className="w-full mt-0 bg-zinc-100 rounded-[20px] p-4 shadow-sm">
                             <Calendar
                                 month={currentMonthName}
                                 year={currentYear}
@@ -166,6 +166,7 @@ export default function MyPage({ onBack, onAccountInfoClick }: MyPageProps) {
                                 expandable={false}
                                 hideHeader={true}
                                 maxWeeks={2}
+                                compact={true}
                                 className="rounded-[20px]"
                                 startWeekIndex={(() => {
                                     // Calculate which week contains today
@@ -174,14 +175,29 @@ export default function MyPage({ onBack, onAccountInfoClick }: MyPageProps) {
                                 })()}
                                 renderDay={(day) => {
                                     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                    const hasReservation = reservations.some(r => r.date === dateStr && r.status === 'confirmed');
+                                    const reservation = reservations.find(r => r.date === dateStr);
+                                    const isConfirmed = reservation?.status === 'confirmed';
+                                    const isPending = reservation && reservation.status !== 'confirmed';
+
+                                    // Base Container Classes
+                                    const containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 text-sm font-bold rounded-[10px]";
+
+                                    // Content (Number or Circle)
+                                    let numberElement = <span className="text-zinc-500">{day}</span>;
+
+                                    if (isConfirmed || isPending) {
+                                        const bg = isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#93C5FD]'; // 확정: 남색, 대기: 연한 남색
+                                        const textColor = 'text-white';
+                                        numberElement = (
+                                            <div className={`w-7 h-7 -mt-1 rounded-full ${bg} ${textColor} flex items-center justify-center text-xs shadow-sm`}>
+                                                {day}
+                                            </div>
+                                        );
+                                    }
 
                                     return (
-                                        <div className="w-8 h-8 flex flex-col items-center justify-center relative">
-                                            <span className="text-sm font-medium text-zinc-500">{day}</span>
-                                            {hasReservation && (
-                                                <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-[-4px]" />
-                                            )}
+                                        <div className={containerClasses}>
+                                            {numberElement}
                                         </div>
                                     );
                                 }}

@@ -264,46 +264,70 @@ export default function Home({
                         <div className="px-4 mb-8">
                             <div
                                 onClick={onCalendarClick}
-                                className="bg-[#F3E5D8] rounded-[20px] p-3 shadow-sm cursor-pointer hover:brightness-95 transition-all"
+                                className="bg-[#F1E4D1] rounded-[20px] p-4 shadow-sm cursor-pointer hover:brightness-95 transition-all"
                             >
-                                <span className="font-bold text-zinc-500 ml-2 text-sm">나의 예약</span>
-                                <div className="bg-white rounded-[20px] p-1">
-                                    <Calendar
-                                        month="December"
-                                        year={2025}
-                                        startDayOfWeek={1}
-                                        totalDays={31}
-                                        expandable={false}
-                                        hideHeader={true}
-                                        maxWeeks={2}
-                                        startWeekIndex={(() => {
-                                            // Calculate which week contains today (Dec 2025)
-                                            // For dynamic, we should use real date. But for this fixed month:
-                                            // Dec 1st 2025 is Monday (offset 1)
-                                            // Week 0: [null, 1, 2, 3, 4, 5, 6]
-                                            // Week 1: [7, 8, 9, 10, 11, 12, 13]
-                                            // ...
-                                            const today = new Date().getDate(); // Assuming we are in Dec 2025 context or mocking it
-                                            // Real logic:
-                                            // (today + startDayOfWeek - 1) / 7
-                                            const startDayOfWeek = 1;
-                                            return Math.floor((today + startDayOfWeek - 1) / 7);
-                                        })()}
-                                        renderDay={(day) => {
-                                            const dateStr = `2025-12-${String(day).padStart(2, '0')}`;
-                                            const hasReservation = myReservations.some(r => r.date === dateStr && r.status === 'confirmed');
+                                <span className="font-bold text-zinc-500 ml-2 text-sm block mb-2">나의 달력</span>
+                                <Calendar
+                                    month={(() => {
+                                        const today = new Date();
+                                        const monthNames = [
+                                            "January", "February", "March", "April", "May", "June",
+                                            "July", "August", "September", "October", "November", "December"
+                                        ];
+                                        return monthNames[today.getMonth()];
+                                    })()}
+                                    year={new Date().getFullYear()}
+                                    startDayOfWeek={(() => {
+                                        const today = new Date();
+                                        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+                                        return firstDayOfMonth;
+                                    })()}
+                                    totalDays={(() => {
+                                        const today = new Date();
+                                        return new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                                    })()}
+                                    expandable={false}
+                                    hideHeader={true}
+                                    maxWeeks={2}
+                                    compact={true}
+                                    className="rounded-[20px] bg-transparent"
+                                    startWeekIndex={(() => {
+                                        const today = new Date();
+                                        const todayDay = today.getDate();
+                                        const firstDayOfWeek = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+                                        return Math.floor((todayDay + firstDayOfWeek - 1) / 7);
+                                    })()}
+                                    renderDay={(day) => {
+                                        const today = new Date();
+                                        const currentYear = today.getFullYear();
+                                        const currentMonth = today.getMonth();
+                                        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                        const reservation = myReservations.find(r => r.date === dateStr);
+                                        const isConfirmed = reservation?.status === 'confirmed';
+                                        const isPending = reservation && reservation.status !== 'confirmed';
 
-                                            return (
-                                                <div className="w-8 h-8 flex flex-col items-center justify-center relative">
-                                                    <span className="text-sm font-medium text-zinc-500">{day}</span>
-                                                    {hasReservation && (
-                                                        <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-[-4px]" />
-                                                    )}
+                                        // Base Container Classes
+                                        const containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 text-sm font-bold rounded-[10px]";
+
+                                        // Content (Number or Circle)
+                                        let numberElement = <span className="text-zinc-500">{day}</span>;
+
+                                        if (isConfirmed || isPending) {
+                                            const bg = isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#93C5FD]'; // 확정: 남색, 대기: 연한 남색
+                                            const textColor = 'text-white';
+                                            numberElement = (
+                                                <div className={`w-7 h-7 -mt-1 rounded-full ${bg} ${textColor} flex items-center justify-center text-xs shadow-sm`}>
+                                                    {day}
                                                 </div>
                                             );
-                                        }}
-                                    />
-                                </div>
+                                        }
+                                        return (
+                                            <div className={containerClasses}>
+                                                {numberElement}
+                                            </div>
+                                        );
+                                    }}
+                                />
                             </div>
                         </div>
 
