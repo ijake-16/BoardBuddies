@@ -1,4 +1,4 @@
-import { Button } from '../components/Button';
+
 import { Calendar } from '../components/Calendar';
 import { useState, useEffect } from 'react';
 import { getUserInfo, getMyReservations } from '../services/user';
@@ -9,18 +9,7 @@ import { getWeather, WeatherData } from '../services/weather';
 
 // Icons
 
-const BellIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-    </svg>
-);
 
-const SettingsIcon = ({ className }: { className?: string }) => (
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-        <path fillRule="evenodd" clipRule="evenodd" d="M13 2.16675C14.6141 2.16675 15.9809 3.2258 16.4434 4.68696C17.8036 3.98079 19.519 4.19839 20.6603 5.33976C21.8017 6.48113 22.0193 8.19646 21.3131 9.55667C22.7743 10.0192 23.8333 11.3859 23.8333 13.0001C23.8333 14.6142 22.7743 15.981 21.3131 16.4435C22.0193 17.8037 21.8017 19.519 20.6603 20.6604C19.519 21.8018 17.8036 22.0194 16.4434 21.3132C15.9809 22.7744 14.6141 23.8334 13 23.8334C11.3859 23.8334 10.0191 22.7744 9.55660 21.3132C8.19638 22.0194 6.48105 21.8018 5.33968 20.6604C4.19831 19.519 3.98071 17.8037 4.68688 16.4435C3.22573 15.981 2.16667 14.6142 2.16667 13.0001C2.16667 11.3859 3.22573 10.0192 4.68688 9.55667C3.98071 8.19646 4.19831 6.48113 5.33968 5.33976C6.48105 4.19839 8.19638 3.98079 9.55660 4.68696C10.0191 3.2258 11.3859 2.16675 13 2.16675ZM13 4.57416C12.3352 4.57416 11.7963 5.11307 11.7963 5.77786V6.18882C11.7963 6.69897 11.4747 7.15371 10.9937 7.32372C10.7934 7.39451 10.5972 7.4759 10.4058 7.56749C9.94539 7.78784 9.39603 7.69381 9.03508 7.33286L8.74427 7.04205C8.27419 6.57198 7.51205 6.57198 7.04198 7.04205C6.57190 7.51213 6.57190 8.27427 7.04198 8.74435L7.33279 9.03516C7.69373 9.39610 7.78777 9.94546 7.56742 10.4059C7.47582 10.5973 7.39443 10.7935 7.32364 10.9938C7.15364 11.4748 6.69889 11.7964 6.18874 11.7964H5.77778C5.11300 11.7964 4.57408 12.3353 4.57408 13.0001C4.57408 13.6649 5.11300 14.2038 5.77778 14.2038H6.18874C6.69889 14.2038 7.15364 14.5254 7.32364 15.0064C7.39443 15.2067 7.47582 15.4029 7.56742 15.5943C7.78777 16.0547 7.69373 16.6041 7.33279 16.965L7.04198 17.2558C6.57190 17.7259 6.57190 18.4880 7.04198 18.9581C7.51205 19.4282 8.27419 19.4282 8.74427 18.9581L9.03508 18.6673C9.39603 18.3064 9.94539 18.2123 10.4058 18.4327C10.5972 18.5243 10.7934 18.6057 10.9937 18.6764C11.4747 18.8465 11.7963 19.3012 11.7963 19.8113V20.2223C11.7963 20.8871 12.3352 21.4260 13 21.4260C13.6648 21.4260 14.2037 20.8871 14.2037 20.2223V19.8113C14.2037 19.3012 14.5253 18.8465 15.0063 18.6764C15.2066 18.6057 15.4028 18.5243 15.5942 18.4327C16.0546 18.2123 16.6040 18.3064 16.9649 18.6673L17.2557 18.9581C17.7258 19.4282 18.4880 19.4282 18.9580 18.9581C19.4281 18.4880 19.4281 17.7259 18.9580 17.2558L18.6672 16.965C18.3063 16.6041 18.2122 16.0547 18.4326 15.5943C18.5242 15.4029 18.6056 15.2067 18.6764 15.0064C18.8464 14.5254 19.3011 14.2038 19.8113 14.2038H20.2222C20.8870 14.2038 21.4259 13.6649 21.4259 13.0001C21.4259 12.3353 20.8870 11.7964 20.2222 11.7964H19.8113C19.3011 11.7964 18.8464 11.4748 18.6764 10.9938C18.6056 10.7935 18.5242 10.5973 18.4326 10.4059C18.2122 9.94546 18.3063 9.39610 18.6672 9.03516L18.9580 8.74435C19.4281 8.27427 19.4281 7.51213 18.9580 7.04205C18.4880 6.57198 17.7258 6.57198 17.2557 7.04205L16.9649 7.33286C16.6040 7.69381 16.0546 7.78784 15.5942 7.56749C15.4028 7.47590 15.2066 7.39451 15.0063 7.32372C14.5253 7.15371 14.2037 6.69897 14.2037 6.18882V5.77786C14.2037 5.11307 13.6648 4.57416 13 4.57416ZM13 10.5927C14.3296 10.5927 15.4074 11.6705 15.4074 13.0001C15.4074 14.3297 14.3296 15.4075 13 15.4075C11.6704 15.4075 10.5926 14.3297 10.5926 13.0001C10.5926 11.6705 11.6704 10.5927 13 10.5927Z" fill="#333333" />
-    </svg>
-);
 
 const CircleArrowRightIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -123,11 +112,11 @@ export default function Home({
     }, []);
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F8F9FA] relative">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#F8F9FA] dark:bg-zinc-950 relative">
             {/* Header */}
             <header className="px-4 pt-12 pb-4 flex items-center justify-between z-10">
                 <div className="flex items-center gap-2">
-                    <h1 className="text-[20px] font-black italic text-zinc-900 font-['Joti_One']">BoardBuddy</h1>
+                    <h1 className="text-[20px] font-black italic text-zinc-900 dark:text-zinc-100 font-['Joti_One']">BoardBuddy</h1>
                     {/* Shark Image removed due to missing file */}
                 </div>
                 <div className="flex items-center gap-2">
@@ -145,12 +134,12 @@ export default function Home({
                             {isDebugNoCrew ? 'Show My Crew' : 'Simulate No Crew'}
                         </button>
                         */}
-                    <Button variant="ghost" size="icon" onClick={onSearchClick} className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
+                    {/* <Button variant="ghost" size="icon" onClick={onSearchClick} className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <BellIcon className="w-[24px] h-[24px]" />
                     </Button>
                     <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <SettingsIcon className="w-[24px] h-[24px]" />
-                    </Button>
+                    </Button> */}
                 </div>
             </header>
 
@@ -162,12 +151,12 @@ export default function Home({
                     {!isDebugNoCrew && hasCrew && userInfo?.crew ? (
                         <div className="flex items-end justify-between">
                             <div>
-                                <div className="text-sm text-zinc-500 font-medium mb-1">{crewDetail?.univ || userInfo.school}</div>
+                                <div className="text-sm text-zinc-500 dark:text-zinc-400 font-medium mb-1">{crewDetail?.univ || userInfo.school}</div>
                                 <div
                                     onClick={onTeamClick}
                                     className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
                                 >
-                                    <h2 className="text-2xl font-bold truncate max-w-[200px]">{userInfo.crew.crewName}</h2>
+                                    <h2 className="text-2xl font-bold truncate max-w-[200px] text-zinc-900 dark:text-zinc-100">{userInfo.crew.crewName}</h2>
                                     <CircleArrowRightIcon className="w-5 h-5 text-[#FCD34D] shrink-0" />
                                 </div>
                             </div>
@@ -178,7 +167,7 @@ export default function Home({
                                     href="https://skibus.purplebus.co.kr/Pp/"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-2 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors text-zinc-600 shadow-sm"
+                                    className="p-2 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-zinc-600 dark:text-zinc-400 shadow-sm"
                                     aria-label="Bus Reservation"
                                 >
                                     <Bus className="w-5 h-5" />
@@ -187,7 +176,7 @@ export default function Home({
                                     href="https://phoenixhnr.co.kr/m/static/pyeongchang/snowpark/slope-lift"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-2 rounded-full border border-zinc-200 bg-white hover:bg-zinc-50 transition-colors text-zinc-600 shadow-sm"
+                                    className="p-2 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-zinc-600 dark:text-zinc-400 shadow-sm"
                                     aria-label="Slope Status"
                                 >
                                     <Mountain className="w-5 h-5" />
@@ -200,8 +189,8 @@ export default function Home({
                                 onClick={onSearchClick}
                                 className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity py-2"
                             >
-                                <h2 className="text-2xl font-bold text-zinc-400">탭해서 크루에 가입하세요</h2>
-                                <CircleArrowRightIcon className="w-5 h-5 text-zinc-300" />
+                                <h2 className="text-2xl font-bold text-zinc-400 dark:text-zinc-500">탭해서 크루에 가입하세요</h2>
+                                <CircleArrowRightIcon className="w-5 h-5 text-zinc-300 dark:text-zinc-600" />
                             </div>
                             {/* 
                                 <Button
@@ -227,10 +216,10 @@ export default function Home({
                             {/* Reservation Card */}
                             <button
                                 onClick={onMakeReservationClick}
-                                className="bg-[#FCD34D] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-2"
+                                className="bg-[#FCD34D] dark:bg-[#FCD34D] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-2"
                             >
-                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
-                                    <CheckSquareIcon className="w-6 h-6 text-zinc-900" />
+                                <div className="w-12 h-12 rounded-full bg-white dark:bg-white flex items-center justify-center shadow-sm">
+                                    <CheckSquareIcon className="w-6 h-6 text-zinc-900 dark:text-zinc-900" />
                                 </div>
                                 <span className="font-bold text-lg">예약하기</span>
                             </button>
@@ -251,10 +240,10 @@ export default function Home({
                             {/* Guest Reservation Card */}
                             <button
                                 onClick={onGuestReservationClick}
-                                className="bg-[#D6E6F5] aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 hover:brightness-110 transition-all shadow-sm gap-2"
+                                className="bg-[#D6E6F5] dark:bg-[#D6E6F5]/30 aspect-square rounded-[20px] p-5 flex flex-col items-center justify-center text-zinc-900 dark:text-zinc-100 hover:brightness-110 dark:hover:bg-[#D6E6F5]/40 transition-all shadow-sm gap-2"
                             >
-                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm">
-                                    <UserPlus className="w-6 h-6 text-zinc-900" />
+                                <div className="w-12 h-12 rounded-full bg-white dark:bg-white/20 flex items-center justify-center shadow-sm">
+                                    <UserPlus className="w-6 h-6 text-zinc-900 dark:text-zinc-100" />
                                 </div>
                                 <span className="font-bold text-lg">게스트 예약하기</span>
                             </button>
@@ -264,46 +253,70 @@ export default function Home({
                         <div className="px-4 mb-8">
                             <div
                                 onClick={onCalendarClick}
-                                className="bg-[#F3E5D8] rounded-[20px] p-3 shadow-sm cursor-pointer hover:brightness-95 transition-all"
+                                className="bg-[#F1E4D1] dark:bg-zinc-800 rounded-[20px] p-4 shadow-sm cursor-pointer hover:brightness-95 dark:hover:bg-zinc-700 transition-all"
                             >
-                                <span className="font-bold text-zinc-500 ml-2 text-sm">나의 예약</span>
-                                <div className="bg-white rounded-[20px] p-1">
-                                    <Calendar
-                                        month="December"
-                                        year={2025}
-                                        startDayOfWeek={1}
-                                        totalDays={31}
-                                        expandable={false}
-                                        hideHeader={true}
-                                        maxWeeks={2}
-                                        startWeekIndex={(() => {
-                                            // Calculate which week contains today (Dec 2025)
-                                            // For dynamic, we should use real date. But for this fixed month:
-                                            // Dec 1st 2025 is Monday (offset 1)
-                                            // Week 0: [null, 1, 2, 3, 4, 5, 6]
-                                            // Week 1: [7, 8, 9, 10, 11, 12, 13]
-                                            // ...
-                                            const today = new Date().getDate(); // Assuming we are in Dec 2025 context or mocking it
-                                            // Real logic:
-                                            // (today + startDayOfWeek - 1) / 7
-                                            const startDayOfWeek = 1;
-                                            return Math.floor((today + startDayOfWeek - 1) / 7);
-                                        })()}
-                                        renderDay={(day) => {
-                                            const dateStr = `2025-12-${String(day).padStart(2, '0')}`;
-                                            const hasReservation = myReservations.some(r => r.date === dateStr && r.status === 'confirmed');
+                                <span className="font-bold text-zinc-500 dark:text-zinc-400 ml-2 text-sm block mb-2">나의 달력</span>
+                                <Calendar
+                                    month={(() => {
+                                        const today = new Date();
+                                        const monthNames = [
+                                            "January", "February", "March", "April", "May", "June",
+                                            "July", "August", "September", "October", "November", "December"
+                                        ];
+                                        return monthNames[today.getMonth()];
+                                    })()}
+                                    year={new Date().getFullYear()}
+                                    startDayOfWeek={(() => {
+                                        const today = new Date();
+                                        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+                                        return firstDayOfMonth;
+                                    })()}
+                                    totalDays={(() => {
+                                        const today = new Date();
+                                        return new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                                    })()}
+                                    expandable={false}
+                                    hideHeader={true}
+                                    maxWeeks={2}
+                                    compact={true}
+                                    className="rounded-[20px] bg-transparent"
+                                    startWeekIndex={(() => {
+                                        const today = new Date();
+                                        const todayDay = today.getDate();
+                                        const firstDayOfWeek = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+                                        return Math.floor((todayDay + firstDayOfWeek - 1) / 7);
+                                    })()}
+                                    renderDay={(day) => {
+                                        const today = new Date();
+                                        const currentYear = today.getFullYear();
+                                        const currentMonth = today.getMonth();
+                                        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                        const reservation = myReservations.find(r => r.date === dateStr);
+                                        const isConfirmed = reservation?.status === 'confirmed';
+                                        const isPending = reservation && reservation.status !== 'confirmed';
 
-                                            return (
-                                                <div className="w-8 h-8 flex flex-col items-center justify-center relative">
-                                                    <span className="text-sm font-medium text-zinc-500">{day}</span>
-                                                    {hasReservation && (
-                                                        <div className="w-2 h-2 rounded-full bg-[#1E3A8A] absolute bottom-[-4px]" />
-                                                    )}
+                                        // Base Container Classes
+                                        const containerClasses = "w-full h-full flex flex-col items-center justify-start pt-1.5 transition-all duration-200 text-sm font-bold rounded-[10px]";
+
+                                        // Content (Number or Circle)
+                                        let numberElement = <span className="text-sm font-medium text-zinc-500 dark:text-zinc-300">{day}</span>;
+
+                                        if (isConfirmed || isPending) {
+                                            const bg = isConfirmed ? 'bg-[#1E3A8A]' : 'bg-[#93C5FD]'; // 확정: 남색, 대기: 연한 남색
+                                            const textColor = 'text-white';
+                                            numberElement = (
+                                                <div className={`w-8 h-8 -mt-1 rounded-full ${bg} ${textColor} flex items-center justify-center text-sm font-medium shadow-sm`}>
+                                                    {day}
                                                 </div>
                                             );
-                                        }}
-                                    />
-                                </div>
+                                        }
+                                        return (
+                                            <div className={containerClasses}>
+                                                {numberElement}
+                                            </div>
+                                        );
+                                    }}
+                                />
                             </div>
                         </div>
 

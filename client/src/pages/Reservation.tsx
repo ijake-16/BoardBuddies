@@ -271,19 +271,19 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
     };
 
     return (
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-white relative">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-zinc-950 relative">
             {/* Header */}
             <header className="px-4 pt-12 pb-4 flex items-center justify-between z-10">
                 <div className="w-10 flex justify-start">
-                    <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 hover:text-zinc-900">
+                    <Button variant="ghost" onClick={onBack} className="-ml-2 gap-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
                         <ChevronLeftIcon className="w-6 h-6" />
                     </Button>
                 </div>
                 <div className="flex-1 flex items-center justify-center relative">
-                    <h1 className="text-center text-lg font-bold text-zinc-900">{isGuest ? '예약하기' : '예약하기'}</h1>
+                    <h1 className="text-center text-lg font-bold text-zinc-900 dark:text-zinc-100">{isGuest ? '예약하기' : '예약하기'}</h1>
                     {isGuest && guestDetail && (
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#F3E5D8] px-3 py-1 rounded-[10px]">
-                            <span className="text-xs font-bold text-zinc-800">게스트: {guestDetail.name}</span>
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#F3E5D8] dark:bg-zinc-800 px-3 py-1 rounded-[10px]">
+                            <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">게스트: {guestDetail.name}</span>
                         </div>
                     )}
                 </div>
@@ -344,10 +344,10 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
                                 buttonClasses += " bg-[#F6C555] text-black shadow-sm font-bold scale-110";
                             } else if (isToday) {
                                 // Today State (Available)
-                                buttonClasses += " bg-zinc-900 text-white font-bold";
+                                buttonClasses += " bg-zinc-900 dark:bg-zinc-700 text-white font-bold";
                             } else {
                                 // Normal Available State
-                                buttonClasses += " text-zinc-900 hover:bg-zinc-100 font-semibold";
+                                buttonClasses += " text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-semibold";
                             }
                         } else {
                             // Unavailable Style (Grey)
@@ -412,30 +412,36 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
 
             {/* Guest Info Modal */}
             {isGuestModalOpen && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-6 animate-in fade-in duration-200">
-                    <div className="bg-[#F0F7FF] rounded-[24px] p-6 w-full max-w-[320px] shadow-2xl flex flex-col items-center">
+                <div 
+                    className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4 sm:p-6 animate-in fade-in duration-200"
+                    onClick={onBack}
+                >
+                    <div 
+                        className="bg-[#F0F7FF] rounded-[24px] p-4 sm:p-6 w-full max-w-[280px] min-w-0 shadow-2xl flex flex-col items-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <h3 className="text-xl font-bold text-[#1E3A8A] mb-1">게스트 등록/조회</h3>
                         <p className="text-[11px] text-zinc-500 mb-6 text-center leading-tight">
                             게스트로 이용할 사용자의 정보를 입력해주세요.
                         </p>
 
-                        <div className="w-full space-y-4 mb-6">
-                            <div className="flex items-center gap-3">
-                                <label className="text-sm font-bold text-zinc-900 w-16 shrink-0 text-right">이름</label>
+                        <div className="w-full space-y-4 mb-6 min-w-0">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                                <label className="text-sm font-bold text-zinc-900 w-16 sm:w-20 shrink-0 text-right whitespace-nowrap">이름</label>
                                 <input
                                     type="text"
                                     value={guestName}
                                     onChange={(e) => setGuestName(e.target.value)}
-                                    className="flex-1 h-10 px-3 rounded-lg border border-transparent bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                                    className="w-40 sm:w-48 h-10 px-3 rounded-lg border border-transparent bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
                                 />
                             </div>
-                            <div className="flex items-center gap-3">
-                                <label className="text-sm font-bold text-zinc-900 w-16 shrink-0 text-right">전화번호</label>
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                                <label className="text-sm font-bold text-zinc-900 w-16 sm:w-20 shrink-0 text-right whitespace-nowrap">전화번호</label>
                                 <input
                                     type="tel"
                                     value={guestPhone}
                                     onChange={(e) => setGuestPhone(e.target.value)}
-                                    className="flex-1 h-10 px-3 rounded-lg border border-transparent bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                                    className="w-40 sm:w-48 h-10 px-3 rounded-lg border border-transparent bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
                                 />
                             </div>
                         </div>
@@ -454,7 +460,7 @@ export default function Reservation({ onBack, isGuest = false }: ReservationProp
                                 }
                             }}
                         >
-                            조회하기
+                            예약하기
                         </Button>
                     </div>
                 </div>

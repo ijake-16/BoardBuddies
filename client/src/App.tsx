@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LowerMenuBar } from './components/LowerMenuBar';
 import Home from './pages/Home';
 import Reservation from './pages/Reservation';
@@ -10,11 +10,45 @@ import UserInfoInput from './pages/UserInfoInput';
 import CrewMember from './pages/CrewMember';
 import SearchCrew from './pages/SearchCrew';
 import CrewSettings from './pages/CrewSettings';
+import MyPage from './pages/MyPage';
+import AccountInfo from './pages/AccountInfo';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'calendar' | 'edit' | 'heart' | 'user'>('home');
-  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending' | 'crew_settings' | 'guest_reservation'>('login');
+  const [currentView, setCurrentView] = useState<'login' | 'home' | 'reservation' | 'stats' | 'my_reservations' | 'crew_detail' | 'search_crew' | 'user_info' | 'crew_member' | 'create_crew' | 'access_pending' | 'crew_settings' | 'guest_reservation' | 'my_page' | 'account_info'>('login');
   const [hasCrew, setHasCrew] = useState(false);
+
+  // Check for auto-login on app start
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    const autoLogin = localStorage.getItem('autoLogin') === 'true';
+    
+    if (accessToken && autoLogin) {
+      // Auto-login: go directly to home page
+      setCurrentView('home');
+    } else if (!accessToken) {
+      // No token: show login page
+      setCurrentView('login');
+    } else {
+      // Token exists but auto-login is disabled: show login page
+      setCurrentView('login');
+    }
+  }, []);
+
+  // Sync activeTab with currentView
+  useEffect(() => {
+    if (currentView === 'home') {
+      setActiveTab('home');
+    } else if (currentView === 'my_reservations') {
+      setActiveTab('calendar');
+    } else if (currentView === 'reservation' || currentView === 'guest_reservation') {
+      setActiveTab('edit');
+    } else if (currentView === 'crew_detail' || currentView === 'crew_settings' || currentView === 'crew_member' || currentView === 'stats') {
+      setActiveTab('heart');
+    } else if (currentView === 'my_page' || currentView === 'account_info') {
+      setActiveTab('user');
+    }
+  }, [currentView]);
 
 
   return (
@@ -60,6 +94,13 @@ function App() {
           <SearchCrew onBack={() => setCurrentView('home')} />
         ) : currentView === 'user_info' ? (
           <UserInfoInput onBack={() => setCurrentView('login')} />
+        ) : currentView === 'my_page' ? (
+          <MyPage 
+            onBack={() => setCurrentView('home')} 
+            onAccountInfoClick={() => setCurrentView('account_info')}
+          />
+        ) : currentView === 'account_info' ? (
+          <AccountInfo onBack={() => setCurrentView('my_page')} />
         ) : (
           <Home
             onMakeReservationClick={() => setCurrentView('reservation')}
@@ -78,7 +119,7 @@ function App() {
         )}
 
 
-        {(currentView !== 'login' && currentView !== 'user_info') && (
+        {(currentView !== 'login' && currentView !== 'user_info' && currentView !== 'my_page' && currentView !== 'account_info') && (
           <LowerMenuBar
             activeTab={activeTab}
             onTabChange={(tab) => {
@@ -87,7 +128,7 @@ function App() {
               if (tab === 'calendar') setCurrentView('my_reservations');
               if (tab === 'edit') setCurrentView('reservation');
               if (tab === 'heart') setCurrentView('crew_detail');
-              if (tab === 'user') setCurrentView('user_info');
+              if (tab === 'user') setCurrentView('my_page');
             }}
           />
         )}

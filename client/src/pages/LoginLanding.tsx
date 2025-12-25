@@ -1,5 +1,6 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { CheckIcon } from 'lucide-react';
 import kakaoLogin from '../assets/login/kakao.png';
 // import naver1 from '../assets/login/naver1.png';
 // import naver2 from '../assets/login/naver2.png';
@@ -12,6 +13,7 @@ interface LoginLandingProps {
 }
 
 export default function LoginLanding({ onLogin, onSignupNeeded, /* onDebugUserInfo */ }: LoginLandingProps) {
+    const [autoLogin, setAutoLogin] = useState(localStorage.getItem('autoLogin') === 'true');
     useEffect(() => {
         if (window.Kakao && !window.Kakao.isInitialized()) {
             const kakaoKey = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY;
@@ -48,11 +50,23 @@ export default function LoginLanding({ onLogin, onSignupNeeded, /* onDebugUserIn
                         if (data.message && data.message.includes("추가 정보를 입력해주세요")) {
                             // New User: Temporary token for signup
                             localStorage.setItem('tempAccessToken', data.data.tempAccessToken);
+                            // Save auto-login preference
+                            if (autoLogin) {
+                                localStorage.setItem('autoLogin', 'true');
+                            } else {
+                                localStorage.removeItem('autoLogin');
+                            }
                             onSignupNeeded();
                         } else {
                             // Existing User: Login success
                             localStorage.setItem('accessToken', data.data.accessToken);
                             localStorage.setItem('refreshToken', data.data.refreshToken);
+                            // Save auto-login preference
+                            if (autoLogin) {
+                                localStorage.setItem('autoLogin', 'true');
+                            } else {
+                                localStorage.removeItem('autoLogin');
+                            }
                             onLogin();
                         }
                     } else {
@@ -110,6 +124,24 @@ export default function LoginLanding({ onLogin, onSignupNeeded, /* onDebugUserIn
                     >
                         <img src={kakaoLogin} alt="Kakao Login" className="w-full h-auto" />
                     </button>
+
+                    {/* Auto-login checkbox */}
+                    <div className="flex items-center justify-center pt-2">
+                        <label className="flex items-center gap-3 cursor-pointer">
+                            <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${autoLogin ? 'bg-blue-600' : 'bg-zinc-300'}`}>
+                                <CheckIcon className="w-3 h-3 text-white" />
+                            </div>
+                            <input
+                                type="checkbox"
+                                className="hidden"
+                                checked={autoLogin}
+                                onChange={(e) => setAutoLogin(e.target.checked)}
+                            />
+                            <span className="text-zinc-800 text-sm dark:text-zinc-200">
+                                자동 로그인
+                            </span>
+                        </label>
+                    </div>
 
                     {/* Naver Login (Disabled)
                     <button

@@ -16,6 +16,7 @@ interface CalendarProps {
     maxWeeks?: number;
     startWeekIndex?: number;
     isCollapsed?: boolean;
+    compact?: boolean; // For compact spacing (14px row spacing)
     onPrevMonth?: () => void;
     onNextMonth?: () => void;
 }
@@ -37,6 +38,7 @@ export const Calendar = ({
     headerTop,
     className,
     isCollapsed,
+    compact = false,
     onPrevMonth,
     onNextMonth,
 }: CalendarProps & { headerRight?: React.ReactNode, headerTop?: React.ReactNode, className?: string }) => {
@@ -111,7 +113,7 @@ export const Calendar = ({
     };
 
     return (
-        <div className={`flex flex-col w-full bg-[#F4F4F5] rounded-[20px] p-2 ${className || ''}`}>
+        <div className={`flex flex-col w-full ${compact ? 'bg-transparent' : 'bg-[#F4F4F5] dark:bg-zinc-900'} rounded-[20px] ${compact ? '' : 'p-4'} ${className || ''}`}>
             {/* Optional Header Top Content */}
             {headerTop && (
                 <div className="mb-4 w-full">
@@ -122,7 +124,7 @@ export const Calendar = ({
             {/* Top Control Row */}
             {!hideHeader && (
                 <div className="flex justify-between items-center mb-4 px-1">
-                    <div className="bg-white px-5 py-1 rounded-full shadow-sm text-base font-bold text-zinc-900">
+                    <div className="bg-white dark:bg-zinc-800 px-5 py-1 rounded-full shadow-sm text-base font-bold text-zinc-900 dark:text-zinc-100">
                         {year}
                     </div>
                     {headerRight}
@@ -131,23 +133,23 @@ export const Calendar = ({
 
             {/* Month Header Bar */}
             {!hideHeader && (
-                <div className="w-full bg-white rounded-2xl py-1 shadow-sm mb-4 flex items-center px-4">
+                <div className="w-full bg-white dark:bg-zinc-800 rounded-2xl py-1 shadow-sm mb-4 flex items-center px-4">
                     <Button
                         variant="ghost"
                         size="small"
-                        className="text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="text-zinc-900 dark:text-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed"
                         onClick={onPrevMonth}
                         disabled={!onPrevMonth}
                     >
                         <ChevronLeftIcon className="w-5 h-5" />
                     </Button>
-                    <h2 className="flex-1 text-center text-base font-bold text-zinc-900">
+                    <h2 className="flex-1 text-center text-base font-bold text-zinc-900 dark:text-zinc-100">
                         {month}
                     </h2>
                     <Button
                         variant="ghost"
                         size="small"
-                        className="text-zinc-900 disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="text-zinc-900 dark:text-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed"
                         onClick={onNextMonth}
                         disabled={!onNextMonth}
                     >
@@ -157,13 +159,13 @@ export const Calendar = ({
             )}
 
             {/* Calendar Card */}
-            <div className="w-full bg-white rounded-[30px] p-6 shadow-sm">
-                <div className="flex flex-col h-full">
+            <div className="w-full bg-white dark:bg-zinc-800 rounded-[20px] p-4 shadow-sm overflow-visible">
+                <div className="flex flex-col h-full overflow-visible">
 
                     {/* Calendar Grid Header */}
-                    <div className="grid grid-cols-7 gap-x-2 pb-4 border-b border-zinc-100">
+                    <div className={`w-full grid grid-cols-7 gap-x-2 border-b border-zinc-100 dark:border-zinc-700 ${compact ? 'pb-[10px]' : 'pb-3'}`}>
                         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                            <div key={day} className="text-center text-zinc-400 text-sm font-bold">
+                            <div key={day} className="text-center text-zinc-400 dark:text-zinc-500 text-sm font-bold">
                                 {day}
                             </div>
                         ))}
@@ -183,9 +185,10 @@ export const Calendar = ({
                                 <div
                                     key={weekIndex}
                                     className={`
-                                        grid grid-cols-7 gap-x-2 transition-all duration-500 ease-in-out overflow-hidden
-                                        ${isHidden ? 'max-h-0 opacity-0 py-0' : 'min-h-[80px] opacity-100 py-1'}
-                                        ${!isLastWeek && !isHidden ? 'border-b border-zinc-100' : ''}
+                                        grid grid-cols-7 gap-x-2 transition-all duration-500 ease-in-out
+                                        ${isHidden ? 'max-h-0 opacity-0 py-0 overflow-hidden' : 'overflow-visible'}
+                                        ${isHidden ? '' : compact ? 'min-h-[56px] opacity-100 py-[12px]' : 'min-h-[68px] opacity-100 py-1'}
+                                        ${!isLastWeek && !isHidden ? 'border-b border-zinc-100 dark:border-zinc-700' : ''}
                                     `}
                                 >
                                     {week.map((day, dayIndex) => {
@@ -198,7 +201,7 @@ export const Calendar = ({
 
                                         if (renderDay) {
                                             return (
-                                                <div key={day} className="flex flex-col items-center justify-start h-full pt-1" onClick={() => handleDayClick(day, weekIndex)}>
+                                                <div key={day} className="flex flex-col items-center justify-start h-full" onClick={() => handleDayClick(day, weekIndex)}>
                                                     {renderDay(day)}
                                                 </div>
                                             )
@@ -230,7 +233,7 @@ export const Calendar = ({
                     {/* Back to Month Button (Bottom) - Only show if expandable is true */}
                     {expandable && (
                         <div className={`mt-auto flex justify-center transition-opacity duration-300 ${viewMode === 'week' ? 'opacity-100' : 'opacity-0 pointer-events-none h-0'}`}>
-                            <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-400 hover:text-zinc-600 text-xs">
+                            <Button variant="ghost" size="small" onClick={handleBackToMonth} className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-400 text-xs">
                                 Back to Month
                             </Button>
                         </div>
