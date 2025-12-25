@@ -145,12 +145,12 @@ export default function Home({
                             {isDebugNoCrew ? 'Show My Crew' : 'Simulate No Crew'}
                         </button>
                         */}
-                    <Button variant="ghost" size="icon" onClick={onSearchClick} className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
+                    {/* <Button variant="ghost" size="icon" onClick={onSearchClick} className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <BellIcon className="w-[24px] h-[24px]" />
                     </Button>
                     <Button variant="ghost" size="icon" className="text-zinc-900 dark:text-zinc-100 cursor-pointer">
                         <SettingsIcon className="w-[24px] h-[24px]" />
-                    </Button>
+                    </Button> */}
                 </div>
             </header>
 
